@@ -68,6 +68,10 @@ public partial class App : Application
             {
                 new Controls.Gallery.ControlsGalleryWindow().Activate();
             }
+            else if (_options.Page is { } page && Enum.TryParse<ShellPage>(page, ignoreCase: true, out var shellPage))
+            {
+                GetService<IShellService>().ShowMainWindow(shellPage);
+            }
             else if (_options.Flyout)
             {
                 GetService<IShellService>().ToggleFlyout();
