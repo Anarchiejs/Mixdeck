@@ -32,7 +32,7 @@ public sealed class ActionDispatcher(IMixer mixer, IProfileService profiles, ISe
                     var activeIndex = list.ToList().FindIndex(p => p.Id == profiles.Active?.Id);
                     var nextIndex = activeIndex < 0 ? 0 : (activeIndex + (binding.Action == HotkeyAction.NextProfile ? 1 : -1) + list.Count) % list.Count;
                     await automation.ApplyManualProfileAsync(list[nextIndex].Id);
-                    if (config.ShowOsd && profiles.Active is { } active) osd.Show(string.Format(CultureInfo.CurrentCulture, text.Get("Core_Profile"), active.Name), active.Icon);
+                    if (config.ShowOsd && profiles.Active is { } active) osd.Show(string.Format(text.Culture, text.Get("Core_Profile"), active.Name), active.Icon);
                     break;
                 case HotkeyAction.ApplyProfile:
                     if (binding.ProfileId is not { } id || !profiles.Profiles.Any(p => p.Id == id))
@@ -42,7 +42,7 @@ public sealed class ActionDispatcher(IMixer mixer, IProfileService profiles, ISe
                     }
                     await automation.ApplyManualProfileAsync(id);
                     if (config.ShowOsd && profiles.Active is { } applied && applied.Id == id)
-                        osd.Show(string.Format(CultureInfo.CurrentCulture, text.Get("Core_Profile"), applied.Name), applied.Icon);
+                        osd.Show(string.Format(text.Culture, text.Get("Core_Profile"), applied.Name), applied.Icon);
                     break;
                 case HotkeyAction.VolumeUp:
                 case HotkeyAction.VolumeDown:
@@ -50,7 +50,7 @@ public sealed class ActionDispatcher(IMixer mixer, IProfileService profiles, ISe
                     if (bus is null || !float.IsFinite(binding.StepDb)) return;
                     var gain = mixer.Layout.ClampGain(bus.Gain + (binding.Action == HotkeyAction.VolumeUp ? 1 : -1) * Math.Abs(binding.StepDb));
                     mixer.SetFloat(VmParam.BusGain(bus.Index), gain);
-                    if (config.ShowOsd) osd.Show(string.Format(CultureInfo.CurrentCulture, text.Get("Core_Gain"), bus.Name, gain.ToString("0.0", CultureInfo.CurrentCulture).Replace("-", "−")), "\uE767");
+                    if (config.ShowOsd) osd.Show(string.Format(text.Culture, text.Get("Core_Gain"), bus.Name, gain.ToString("0.0", text.Culture).Replace("-", "−")), "\uE767");
                     break;
                 case HotkeyAction.OpenFlyout: FlyoutRequested?.Invoke(this, EventArgs.Empty); break;
             }
