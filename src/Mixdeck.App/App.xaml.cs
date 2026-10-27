@@ -9,6 +9,7 @@ using Mixdeck.Core.Automation;
 using Mixdeck.Core.Settings;
 using Mixdeck.Platform.Power;
 using Mixdeck.Platform.SingleInstance;
+using Mixdeck.Platform.Taskbar;
 using Serilog;
 
 namespace Mixdeck.App;
@@ -105,6 +106,7 @@ public partial class App : Application
         await GetService<IProfileService>().LoadAsync();
 
         GetService<TrayIconService>().Create();
+        _ = KeepTrayIconVisibleAsync(settings);
         GetService<AutomationCoordinator>().Start();
 
         var actions = GetService<ActionDispatcher>();
@@ -130,8 +132,16 @@ public partial class App : Application
         SyncAutoStart(autoStart, settings);
 
         var store = GetService<ISettingsStore>();
+        var showTrayIcon = settings.AlwaysShowTrayIcon;
         store.Changed += (_, updated) => ui.Post(() =>
         {
+            if (updated.AlwaysShowTrayIcon != showTrayIcon)
+            {
+                // Choix explicite dans Réglages : on l'applique dans les deux sens.
+                showTrayIcon = updated.AlwaysShowTrayIcon;
+                GetService<TrayIconPromoter>().SetVisible(showTrayIcon);
+            }
+
             theme.SetMode(updated.Theme);
             ApplyHotkeys(hotkeys, updated);
             SyncAutoStart(autoStart, updated);
@@ -144,6 +154,31 @@ public partial class App : Application
         _instance.ActivationRequested += (_, _) => ui.Post(() => shell.ShowMainWindow());
 
         GetService<ShellService>().ExitRequested += (_, _) => Shutdown();
+    }
+
+    /// <summary>
+    /// Sort l'icône de la zone cachée (flèche ^) une seule fois : si l'utilisateur l'y range ensuite, on respecte son choix.
+    /// Windows ne crée la fiche de l'icône qu'après sa première apparition, d'où l'attente.
+    /// </summary>
+    private async Task KeepTrayIconVisibleAsync(AppSettings settings)
+    {
+        if (!settings.AlwaysShowTrayIcon || settings.TrayIconPromoted)
+        {
+            return;
+        }
+
+        try
+        {
+            var result = await GetService<TrayIconPromoter>().SetVisibleWhenReadyAsync(true, TimeSpan.FromSeconds(20));
+            if (result is TrayPromotionResult.Changed or TrayPromotionResult.Unchanged)
+            {
+                await GetService<ISettingsStore>().UpdateAsync(s => s with { TrayIconPromoted = true });
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger?.LogWarning(ex, "Impossible de rendre l'icône visible");
+        }
     }
 
     private void ApplyHotkeys(IHotkeyService hotkeys, AppSettings settings)

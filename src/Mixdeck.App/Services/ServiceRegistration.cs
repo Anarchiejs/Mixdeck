@@ -54,6 +54,7 @@ internal static class ServiceRegistration
         services.AddSingleton<IForegroundWatcher, ForegroundWatcher>();
         services.AddSingleton<IAutoStart, AutoStart>();
         services.AddSingleton<ITaskbarLocator, TaskbarLocator>();
+        services.AddSingleton<TrayIconPromoter>();
         services.AddSingleton<SystemEventsWatcher>();
 
         // Interface
