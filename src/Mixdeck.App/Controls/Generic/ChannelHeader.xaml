@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:local="using:Mixdeck.App.Controls">
+  <Style TargetType="local:ChannelHeader">
+    <Setter Property="UseSystemFocusVisuals" Value="True" />
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="local:ChannelHeader">
+          <Grid ColumnSpacing="8" Background="Transparent" MinHeight="32">
+            <Grid.ColumnDefinitions>
+              <ColumnDefinition Width="Auto" />
+              <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <FontIcon FontFamily="{StaticResource MixdeckIconFont}" Glyph="{TemplateBinding Icon}" FontSize="18" />
+            <TextBlock x:Name="PART_Label" Grid.Column="1" VerticalAlignment="Center" Text="{TemplateBinding ChannelName}" TextTrimming="CharacterEllipsis" />
+            <TextBox x:Name="PART_Editor" Grid.Column="1" Visibility="Collapsed" AutomationProperties.Name="Nom du canal" />
+          </Grid>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </Style>
+</ResourceDictionary>
