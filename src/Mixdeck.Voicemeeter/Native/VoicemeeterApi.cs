@@ -40,6 +40,45 @@ public sealed partial class VoicemeeterApi : IVoicemeeterApi
     public int SetParameterString(string name, string value) => SetStringNative(name, value);
     public int SetParameters(string script) => ScriptNative(script);
     public int GetLevel(int type, int channel, out float value) => LevelNative(type, channel, out value);
+    public int InputGetDeviceNumber() => InputNumberNative();
+    public int OutputGetDeviceNumber() => OutputNumberNative();
+    public int InputGetDeviceDesc(int index, out int type, out string name, out string hardwareId) =>
+        GetDeviceDesc(true, index, out type, out name, out hardwareId);
+    public int OutputGetDeviceDesc(int index, out int type, out string name, out string hardwareId) =>
+        GetDeviceDesc(false, index, out type, out name, out hardwareId);
+
+    private static unsafe int GetDeviceDesc(bool input, int index, out int type, out string name, out string hardwareId)
+    {
+        char* nameBuffer = stackalloc char[256];
+        char* idBuffer = stackalloc char[256];
+        new Span<char>(nameBuffer, 256).Clear();
+        new Span<char>(idBuffer, 256).Clear();
+        var result = input ? InputDescNative(index, out type, nameBuffer, idBuffer)
+            : OutputDescNative(index, out type, nameBuffer, idBuffer);
+        name = result == 0 ? BoundedString(nameBuffer) : string.Empty;
+        hardwareId = result == 0 ? BoundedString(idBuffer) : string.Empty;
+        return result;
+    }
+
+    private static unsafe string BoundedString(char* buffer)
+    {
+        var length = 0;
+        while (length < 256 && buffer[length] != '\0') length++;
+        return new string(buffer, 0, length);
+    }
+
+    [LibraryImport(Library, EntryPoint = "VBVMR_Input_GetDeviceNumber")]
+    [UnmanagedCallConv(CallConvs = [typeof(CallConvStdcall)])]
+    private static partial int InputNumberNative();
+    [LibraryImport(Library, EntryPoint = "VBVMR_Output_GetDeviceNumber")]
+    [UnmanagedCallConv(CallConvs = [typeof(CallConvStdcall)])]
+    private static partial int OutputNumberNative();
+    [LibraryImport(Library, EntryPoint = "VBVMR_Input_GetDeviceDescW", StringMarshalling = StringMarshalling.Utf16)]
+    [UnmanagedCallConv(CallConvs = [typeof(CallConvStdcall)])]
+    private static unsafe partial int InputDescNative(int index, out int type, char* name, char* hardwareId);
+    [LibraryImport(Library, EntryPoint = "VBVMR_Output_GetDeviceDescW", StringMarshalling = StringMarshalling.Utf16)]
+    [UnmanagedCallConv(CallConvs = [typeof(CallConvStdcall)])]
+    private static unsafe partial int OutputDescNative(int index, out int type, char* name, char* hardwareId);
 
     [LibraryImport(Library, EntryPoint = "VBVMR_Login")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvStdcall)])]

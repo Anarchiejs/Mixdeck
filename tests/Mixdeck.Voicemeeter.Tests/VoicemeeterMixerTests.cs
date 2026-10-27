@@ -358,6 +358,10 @@ public sealed class VoicemeeterMixerTests
         internal string? FailStringRead { get; set; }
         internal Action? Written { get; init; }
         internal bool ChannelLevels { get; init; }
+        public int InputGetDeviceNumber() => Inner.InputGetDeviceNumber();
+        public int OutputGetDeviceNumber() => Inner.OutputGetDeviceNumber();
+        public int InputGetDeviceDesc(int index, out int type, out string name, out string hardwareId) => Inner.InputGetDeviceDesc(index, out type, out name, out hardwareId);
+        public int OutputGetDeviceDesc(int index, out int type, out string name, out string hardwareId) => Inner.OutputGetDeviceDesc(index, out type, out name, out hardwareId);
         public int Login() => LoginOverride ?? Inner.Login();
         public int Logout() => Inner.Logout();
         public int RunVoicemeeter(int type) => Inner.RunVoicemeeter(type);
