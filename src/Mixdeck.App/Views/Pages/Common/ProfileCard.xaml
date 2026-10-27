@@ -1,0 +1,40 @@
+<UserControl
+    x:Class="Mixdeck.App.Views.Pages.Common.ProfileCard"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    IsEnabled="{x:Bind ViewModel.IsIdle, Mode=OneWay}">
+    <Border Style="{StaticResource MixdeckCardStyle}" Padding="16">
+        <Grid ColumnSpacing="16" RowSpacing="12">
+            <Grid.ColumnDefinitions><ColumnDefinition Width="48" /><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+            <Border Width="48" Height="48" CornerRadius="12" Background="{ThemeResource SubtleFillColorSecondaryBrush}" VerticalAlignment="Top">
+                <FontIcon Glyph="{x:Bind Item.Icon, Mode=OneWay}" FontSize="24" />
+            </Border>
+            <StackPanel Grid.Column="1" Spacing="8" VerticalAlignment="Center">
+                <Grid ColumnSpacing="8">
+                    <Grid.ColumnDefinitions><ColumnDefinition Width="8" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
+                    <Grid Width="8" Height="8">
+                        <Ellipse x:Name="AccentDot" Fill="{ThemeResource AccentFillColorDefaultBrush}" />
+                        <Ellipse x:Name="ColorDot" Visibility="Collapsed" />
+                    </Grid>
+                    <TextBlock Grid.Column="1" Text="{x:Bind Item.Name, Mode=OneWay}" TextTrimming="CharacterEllipsis"
+                        Style="{StaticResource BodyStrongTextBlockStyle}" Visibility="{x:Bind IsNotRenaming}" ToolTipService.ToolTip="{x:Bind Item.Name, Mode=OneWay}" />
+                    <TextBox x:Name="NameEditor" Grid.Column="1" Visibility="Collapsed" MaxLength="100"
+                        AutomationProperties.Name="Nouveau nom du profil" KeyDown="OnNameKeyDown" LostFocus="OnNameLostFocus" />
+                </Grid>
+                <TextBlock Text="{x:Bind CreatedText}" Style="{StaticResource CaptionTextBlockStyle}"
+                    Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                <Border HorizontalAlignment="Left" CornerRadius="4" Padding="8,2" Visibility="{x:Bind Item.IsActive, Mode=OneWay}"
+                    Background="{ThemeResource AccentFillColorDefaultBrush}">
+                    <TextBlock Text="Actif" FontSize="12" Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}" />
+                </Border>
+            </StackPanel>
+            <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                <Button Content="Appliquer" Command="{x:Bind ViewModel.ApplyCommand, Mode=OneWay}" CommandParameter="{x:Bind Item, Mode=OneWay}" />
+                <Button x:Name="MoreButton" Click="OnMoreClick" AutomationProperties.Name="Actions du profil"
+                    ToolTipService.ToolTip="Actions du profil" Style="{StaticResource SubtleButtonStyle}">
+                    <FontIcon Glyph="&#xE712;" FontSize="16" />
+                </Button>
+            </StackPanel>
+        </Grid>
+    </Border>
+</UserControl>

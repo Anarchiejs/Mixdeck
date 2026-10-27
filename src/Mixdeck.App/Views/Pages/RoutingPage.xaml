@@ -1,12 +1,36 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Gabarit de départ : le lot L7 remplace ce contenu. -->
 <Page
     x:Class="Mixdeck.App.Views.Pages.RoutingPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
-    <ScrollViewer>
-        <StackPanel Padding="{StaticResource MixdeckPagePadding}" Spacing="16">
+    <Page.Resources>
+        <DataTemplate x:Key="MatrixHighlight">
+            <Border CornerRadius="8" Background="{ThemeResource SubtleFillColorSecondaryBrush}" Opacity="0" IsHitTestVisible="False" />
+        </DataTemplate>
+        <DataTemplate x:Key="VirtualColumn">
+            <Border CornerRadius="8" Background="{ThemeResource SubtleFillColorTertiaryBrush}" IsHitTestVisible="False" />
+        </DataTemplate>
+        <DataTemplate x:Key="ColumnKind">
+            <TextBlock FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" HorizontalAlignment="Center" />
+        </DataTemplate>
+    </Page.Resources>
+    <ScrollViewer HorizontalScrollMode="Disabled" VerticalScrollBarVisibility="Auto">
+        <StackPanel Padding="{StaticResource MixdeckPagePadding}" Spacing="24">
             <TextBlock Style="{StaticResource TitleTextBlockStyle}" Text="Routage" />
+            <TextBlock Text="Choisis les sorties qui reçoivent chaque entrée. Une entrée peut alimenter plusieurs sorties."
+                Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" Margin="0,-16,0,0" />
+            <InfoBar IsOpen="{x:Bind IsDisconnected}" IsClosable="False" Severity="Informational"
+                     Title="{x:Bind ViewModel.Mixer.ConnectionTitle, Mode=OneWay}" Message="Les niveaux et les routes seront synchronisés à la reconnexion." />
+            <Border Style="{StaticResource MixdeckCardStyle}" Padding="16">
+                <ScrollViewer HorizontalScrollMode="Enabled" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled" HorizontalContentAlignment="Stretch">
+                    <Grid x:Name="Matrix" ColumnSpacing="8" RowSpacing="8" MinWidth="600" Padding="4" />
+                </ScrollViewer>
+            </Border>
+            <StackPanel Spacing="8">
+                <TextBlock Text="A = sorties physiques, B = sorties virtuelles" Style="{StaticResource BodyStrongTextBlockStyle}" TextWrapping="Wrap" />
+                <TextBlock Text="Utilise les flèches pour te déplacer dans la grille et Espace pour activer ou désactiver une route."
+                    Style="{StaticResource CaptionTextBlockStyle}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" />
+            </StackPanel>
         </StackPanel>
     </ScrollViewer>
 </Page>
