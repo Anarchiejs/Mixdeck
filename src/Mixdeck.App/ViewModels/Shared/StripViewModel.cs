@@ -5,18 +5,18 @@ using Mixdeck.Core.Model;
 
 namespace Mixdeck.App.ViewModels.Shared;
 
-/// <summary>Une tranche d'entrée : Strip[0..2] physiques, Strip[3..4] virtuelles (VAIO, AUX).</summary>
+/// <summary>Une tranche d'entrée physique ou virtuelle de la disposition connectée.</summary>
 public sealed partial class StripViewModel : ChannelViewModel
 {
-    public StripViewModel(IMixer mixer, int index)
-        : base(mixer, index)
+    public StripViewModel(IMixer mixer, int index, MixerLayout? layout = null)
+        : base(mixer, index, layout)
     {
         Routes = new ObservableCollection<RouteViewModel>(
-            Enumerable.Range(0, BananaLayout.BusCount).Select(bus => new RouteViewModel(mixer, index, bus)));
+            Enumerable.Range(0, Layout.BusCount).Select(bus => new RouteViewModel(mixer, index, bus, Layout)));
         ApplyCustomization(null, null, true);
     }
 
-    public bool IsVirtual => BananaLayout.IsVirtualStrip(Index);
+    public bool IsVirtual => Layout.IsVirtualStrip(Index);
 
     public bool HasEq => IsVirtual;
 
@@ -45,7 +45,7 @@ public sealed partial class StripViewModel : ChannelViewModel
 
     protected override string MuteParameter => VmParam.StripMute(Index);
 
-    protected override string DefaultName => BananaLayout.DefaultStripLabels[Index];
+    protected override string DefaultName => Layout.DefaultStripLabels[Index];
 
     // Micro pour les entrées physiques, prise pour les entrées virtuelles.
     protected override string DefaultIcon => IsVirtual ? "" : "";
@@ -81,7 +81,7 @@ public sealed partial class StripViewModel : ChannelViewModel
             IsMuted = state.Mute;
             IsSolo = state.Solo;
             PanX = Math.Round(state.PanX, 2);
-            if (state.EqGains.Count >= BananaLayout.VirtualStripEqBands)
+            if (state.EqGains.Count >= MixerLayout.VirtualStripEqBands)
             {
                 EqLow = state.EqGains[0];
                 EqMid = state.EqGains[1];
@@ -108,11 +108,13 @@ public sealed partial class StripViewModel : ChannelViewModel
 public sealed partial class RouteViewModel : ObservableObject
 {
     private readonly IMixer _mixer;
+    private readonly MixerLayout _layout;
     private bool _syncing;
 
-    public RouteViewModel(IMixer mixer, int strip, int bus)
+    public RouteViewModel(IMixer mixer, int strip, int bus, MixerLayout? layout = null)
     {
         _mixer = mixer;
+        _layout = layout ?? mixer.Layout;
         StripIndex = strip;
         BusIndex = bus;
     }
@@ -121,9 +123,9 @@ public sealed partial class RouteViewModel : ObservableObject
 
     public int BusIndex { get; }
 
-    public string BusName => BananaLayout.BusNames[BusIndex];
+    public string BusName => _layout.BusNames[BusIndex];
 
-    public bool IsVirtualBus => BananaLayout.IsVirtualBus(BusIndex);
+    public bool IsVirtualBus => _layout.IsVirtualBus(BusIndex);
 
     [ObservableProperty]
     public partial bool IsOn { get; set; }
@@ -132,7 +134,7 @@ public sealed partial class RouteViewModel : ObservableObject
     {
         if (!_syncing)
         {
-            _mixer.SetFloat(VmParam.StripRoute(StripIndex, BusIndex), VmParam.FromBool(value));
+            _mixer.SetFloat(VmParam.StripRoute(StripIndex, BusIndex, _layout), VmParam.FromBool(value));
         }
     }
 

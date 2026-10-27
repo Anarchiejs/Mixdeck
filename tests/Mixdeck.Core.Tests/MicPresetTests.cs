@@ -1,5 +1,6 @@
 using System.Globalization;
 using Mixdeck.Core.Audio;
+using Mixdeck.Core.Model;
 using Mixdeck.Core.Settings;
 
 namespace Mixdeck.Core.Tests;
@@ -59,5 +60,29 @@ public sealed class MicPresetTests
     {
         Action act = () => MicPresets.CreateScript(0, (MicPreset)99);
         act.Should().Throw<ArgumentOutOfRangeException>();
+    }
+
+    [Fact]
+    public void PotatoPresetsReachTheFifthPhysicalInput()
+    {
+        MicPresets.CreateScript(4, MicPreset.Voice, MixerLayout.Potato).Should().Be(
+            "Strip[4].Gate=2;Strip[4].Comp=3;Strip[4].Color_x=0.15;Strip[4].Color_y=0;");
+        Action virtualInput = () => MicPresets.CreateScript(5, MicPreset.Voice, MixerLayout.Potato);
+        virtualInput.Should().Throw<ArgumentOutOfRangeException>();
+    }
+
+    [Fact]
+    public void StandardPresetsOnlyWriteSupportedParametersOnPhysicalInputs()
+    {
+        foreach (var preset in MicPresets.All)
+        {
+            var commands = MicPresets.CreateScript(1, preset.Preset, MixerLayout.Standard)
+                .Split(';', StringSplitOptions.RemoveEmptyEntries);
+            commands.Select(c => c.Split('=')[0]).Should().Equal("Strip[1].Color_x", "Strip[1].Color_y");
+            commands.Select(c => float.Parse(c.Split('=')[1], CultureInfo.InvariantCulture))
+                .Should().Equal(preset.ColorX, preset.ColorY);
+        }
+        Action virtualInput = () => MicPresets.CreateScript(2, MicPreset.Voice, MixerLayout.Standard);
+        virtualInput.Should().Throw<ArgumentOutOfRangeException>();
     }
 }

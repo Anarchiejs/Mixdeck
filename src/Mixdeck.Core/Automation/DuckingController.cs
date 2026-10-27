@@ -13,6 +13,7 @@ public sealed class DuckingController(IMixer mixer, ISettingsStore settings, Tim
     private readonly List<float> pendingWrites = [];
     private IDisposable? levels;
     private DuckingSettings config = new();
+    private MixerLayout? configuredLayout;
     private bool started, disposed, reconnect, ducked;
     private int suspensions;
     private int? target;
@@ -41,8 +42,8 @@ public sealed class DuckingController(IMixer mixer, ISettingsStore settings, Tim
         }
     }
 
-    private bool Enabled => config.Enabled && config.SourceStrip is >= 0 and < BananaLayout.StripCount &&
-        config.TargetStrip is >= 0 and < BananaLayout.StripCount && config.SourceStrip != config.TargetStrip &&
+    private bool Enabled => config.Enabled && config.SourceStrip >= 0 && config.SourceStrip < mixer.Layout.StripCount &&
+        config.TargetStrip >= 0 && config.TargetStrip < mixer.Layout.StripCount && config.SourceStrip != config.TargetStrip &&
         float.IsFinite(config.ThresholdDb) && float.IsFinite(config.AmountDb) && config.AmountDb <= 0;
 
     private void Guard(Action action)
@@ -53,8 +54,19 @@ public sealed class DuckingController(IMixer mixer, ISettingsStore settings, Tim
 
     private void Configure()
     {
-        if (config == settings.Current.Ducking) return;
-        Restore();
+        var layout = mixer.Layout;
+        if (config == settings.Current.Ducking && configuredLayout == layout) return;
+        if (configuredLayout is not null && configuredLayout != layout)
+        {
+            // Les index peuvent désigner d'autres entrées après un changement de version.
+            // Ne jamais restaurer la base de l'ancien moteur sur le nouveau.
+            target = null;
+            pendingWrites.Clear();
+            belowSince = null;
+            reconnect = false;
+        }
+        else Restore();
+        configuredLayout = layout;
         config = settings.Current.Ducking;
         if (Enabled) levels ??= mixer.RequestLevels();
         else { levels?.Dispose(); levels = null; }
@@ -70,6 +82,7 @@ public sealed class DuckingController(IMixer mixer, ISettingsStore settings, Tim
         {
             if (disposed) return;
             if (state != MixerConnectionState.Connected) reconnect = true;
+            else Guard(Configure);
             lastFrame = null;
         }
     }
@@ -81,6 +94,7 @@ public sealed class DuckingController(IMixer mixer, ISettingsStore settings, Tim
             if (disposed || mixer.State != MixerConnectionState.Connected) return;
             Guard(() =>
             {
+                Configure();
                 if (reconnect) { Restore(snapshot); reconnect = false; }
                 else Observe(snapshot);
             });
@@ -97,7 +111,7 @@ public sealed class DuckingController(IMixer mixer, ISettingsStore settings, Tim
         var acknowledgement = pendingWrites.FindIndex(value => Math.Abs(value - observed) < 0.01f);
         if (acknowledgement >= 0) { pendingWrites.RemoveRange(0, acknowledgement + 1); return; }
         pendingWrites.Clear();
-        baseline = current = BananaLayout.ClampGain(observed);
+        baseline = current = mixer.Layout.ClampGain(observed);
         BeginRamp(ducked, time.GetTimestamp());
     }
 
@@ -112,6 +126,8 @@ public sealed class DuckingController(IMixer mixer, ISettingsStore settings, Tim
 
     private void Tick(LevelFrame frame)
     {
+        Configure();
+        if (frame.Layout != mixer.Layout) return;
         if (reconnect) { Restore(); reconnect = false; }
         if (!Enabled || suspensions > 0 || frame.Strips.Count <= config.SourceStrip) return;
         var now = time.GetTimestamp();
@@ -147,21 +163,21 @@ public sealed class DuckingController(IMixer mixer, ISettingsStore settings, Tim
                 BeginRamp(false, now);
         }
         var fraction = rampMilliseconds <= 0 ? 1 : Math.Clamp(time.GetElapsedTime(rampStart, now).TotalMilliseconds / rampMilliseconds, 0, 1);
-        Write(BananaLayout.ClampGain(rampFrom + (rampTo - rampFrom) * (float)fraction));
+        Write(mixer.Layout.ClampGain(rampFrom + (rampTo - rampFrom) * (float)fraction));
     }
 
     private void BeginRamp(bool attenuate, long now)
     {
         ducked = attenuate;
         rampFrom = current;
-        rampTo = BananaLayout.ClampGain(baseline + (attenuate ? config.AmountDb : 0));
+        rampTo = mixer.Layout.ClampGain(baseline + (attenuate ? config.AmountDb : 0));
         rampStart = now;
         rampMilliseconds = Math.Max(0, attenuate ? config.AttackMilliseconds : config.ReleaseMilliseconds);
     }
 
     private void Write(float gain)
     {
-        if (target is not { } index || Math.Abs(gain - current) < 0.1f) return;
+        if (target is not { } index || index < 0 || index >= mixer.Layout.StripCount || Math.Abs(gain - current) < 0.1f) return;
         // Enregistrer avant l'appel : certains moteurs publient leur état de façon synchrone.
         current = gain;
         pendingWrites.Add(gain);

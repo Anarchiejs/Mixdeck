@@ -12,6 +12,7 @@
     <PackageReference Include="Microsoft.Extensions.TimeProvider.Testing" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\..\src\Mixdeck.App\AppOptions.cs" Link="AppOptions.cs" />
     <ProjectReference Include="..\..\src\Mixdeck.Core\Mixdeck.Core.csproj" />
   </ItemGroup>
   <ItemGroup>

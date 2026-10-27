@@ -51,6 +51,7 @@ public sealed class ProfileService(IMixer mixer, ISettingsStore settings, Mixdec
     {
         var snapshot = mixer.Snapshot;
         var profile = new Profile { Id = Profile.NewId(), Name = name, CreatedAt = timeProvider.GetUtcNow(),
+            VoicemeeterType = snapshot.Layout.VoicemeeterType,
             Strips = snapshot.Strips.Select(s => new StripProfile(s.Index, s.Gain, s.Mute, s.Routes.ToArray(), s.PanX)).ToArray(),
             Buses = snapshot.Buses.Select(b => new BusProfile(b.Index, b.Gain, b.Mute)).ToArray() };
         await SaveAsync(profile, cancellationToken);
@@ -93,6 +94,15 @@ public sealed class ProfileService(IMixer mixer, ISettingsStore settings, Mixdec
     {
         cancellationToken.ThrowIfCancellationRequested();
         var profile = Find(profileId);
+        var sourceLayout = MixerLayout.ForType(profile.VoicemeeterType);
+        var layout = mixer.Layout;
+        var strips = profile.Strips.Select(s => s with { Index = FindStrip(layout, sourceLayout, s.Index) })
+            .Where(s => s.Index >= 0).ToArray();
+        var buses = profile.Buses.Select(b => (Bus: b, Index: FindBus(layout, sourceLayout.BusNames[b.Index])))
+            .Where(b => b.Index >= 0).ToArray();
+        if (sourceLayout != layout)
+            logger.LogInformation("Profil {Profile} : adaptation du type {Source} au type {Target}, canaux et routes absents ignorés",
+                profile.Name, sourceLayout.VoicemeeterType, layout.VoicemeeterType);
         using var source = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
         MixerSnapshot snapshot;
         lock (fadeLock)
@@ -118,34 +128,41 @@ public sealed class ProfileService(IMixer mixer, ISettingsStore settings, Mixdec
                 lock (fadeLock)
                 {
                     source.Token.ThrowIfCancellationRequested();
+                    // Une reconnexion pendant le fondu invalide les index déjà préparés.
+                    if (mixer.Layout != layout) return;
                     var script = new MixerScript();
                     var fraction = duration <= TimeSpan.Zero ? 1f : (float)(Math.Min(step * 16d, duration.TotalMilliseconds) / duration.TotalMilliseconds);
                     if (step == 0 || duration <= TimeSpan.Zero)
                     {
-                        foreach (var s in profile.Strips)
+                        foreach (var s in strips)
                         {
-                            for (var bus = 0; bus < s.Routes.Count; bus++) script.Set(VmParam.StripRoute(s.Index, bus), s.Routes[bus]);
+                            for (var bus = 0; bus < s.Routes.Count; bus++)
+                            {
+                                var targetBus = FindBus(layout, sourceLayout.BusNames[bus]);
+                                if (targetBus >= 0) script.Set(VmParam.StripRoute(s.Index, targetBus, layout), s.Routes[bus]);
+                            }
                             script.Set(VmParam.StripPanX(s.Index), s.PanX);
                             if (!s.Mute) script.Set(VmParam.StripMute(s.Index), false);
                         }
-                        foreach (var b in profile.Buses) if (!b.Mute) script.Set(VmParam.BusMute(b.Index), false);
+                        foreach (var b in buses) if (!b.Bus.Mute) script.Set(VmParam.BusMute(b.Index), false);
                     }
-                    foreach (var s in profile.Strips)
+                    foreach (var s in strips)
                     {
                         var start = snapshot.Strips.FirstOrDefault(x => x.Index == s.Index)?.Gain ?? 0;
                         script.Set(VmParam.StripGain(s.Index), step == steps ? s.Gain : start + (s.Gain - start) * fraction);
                     }
-                    foreach (var b in profile.Buses)
+                    foreach (var b in buses)
                     {
                         var start = snapshot.Buses.FirstOrDefault(x => x.Index == b.Index)?.Gain ?? 0;
-                        script.Set(VmParam.BusGain(b.Index), step == steps ? b.Gain : start + (b.Gain - start) * fraction);
+                        script.Set(VmParam.BusGain(b.Index), step == steps ? b.Bus.Gain : start + (b.Bus.Gain - start) * fraction);
                     }
                     if (step == steps)
                     {
-                        foreach (var s in profile.Strips) if (s.Mute) script.Set(VmParam.StripMute(s.Index), true);
-                        foreach (var b in profile.Buses) if (b.Mute) script.Set(VmParam.BusMute(b.Index), true);
+                        foreach (var s in strips) if (s.Mute) script.Set(VmParam.StripMute(s.Index), true);
+                        foreach (var b in buses) if (b.Bus.Mute) script.Set(VmParam.BusMute(b.Index), true);
                     }
-                    mixer.ApplyScript(script.ToString());
+                    var commands = script.ToString();
+                    if (commands.Length > 0) mixer.ApplyScript(commands);
                 }
             }
         }
@@ -169,11 +186,28 @@ public sealed class ProfileService(IMixer mixer, ISettingsStore settings, Mixdec
         await SaveAsync(profile, cancellationToken);
         return profile;
     }
-    private static float Gain(float gain) => float.IsFinite(gain) ? BananaLayout.ClampGain(gain) : BananaLayout.MinGainDb;
-    private static Profile Sanitize(Profile p) => p with
+    private static int FindBus(MixerLayout layout, string name)
     {
-        Strips = (p.Strips ?? []).Where(s => s.Index is >= 0 and < BananaLayout.StripCount).DistinctBy(s => s.Index)
-            .Select(s => s with { Gain = Gain(s.Gain), Routes = Enumerable.Range(0, BananaLayout.BusCount).Select(i => i < (s.Routes?.Count ?? 0) && s.Routes![i]).ToArray(), PanX = float.IsFinite(s.PanX) ? Math.Clamp(s.PanX, -1, 1) : 0 }).ToArray(),
-        Buses = (p.Buses ?? []).Where(b => b.Index is >= 0 and < BananaLayout.BusCount).DistinctBy(b => b.Index).Select(b => b with { Gain = Gain(b.Gain) }).ToArray()
-    };
+        for (var i = 0; i < layout.BusCount; i++) if (layout.BusNames[i] == name) return i;
+        return -1;
+    }
+    private static int FindStrip(MixerLayout target, MixerLayout source, int index)
+    {
+        // Les entrées virtuelles suivent les physiques : leur index change entre éditions.
+        if (!source.IsVirtualStrip(index)) return index < target.PhysicalStripCount ? index : -1;
+        var mapped = target.PhysicalStripCount + index - source.PhysicalStripCount;
+        return mapped < target.StripCount ? mapped : -1;
+    }
+    private static float Gain(float gain) => float.IsFinite(gain) ? MixerLayout.Banana.ClampGain(gain) : MixerLayout.MinGainDb;
+    private static Profile Sanitize(Profile p)
+    {
+        var layout = p.VoicemeeterType is >= 1 and <= 3 ? MixerLayout.ForType(p.VoicemeeterType) : MixerLayout.Banana;
+        return p with
+        {
+            VoicemeeterType = layout.VoicemeeterType,
+            Strips = (p.Strips ?? []).Where(s => s.Index >= 0 && s.Index < layout.StripCount).DistinctBy(s => s.Index)
+                .Select(s => s with { Gain = Gain(s.Gain), Routes = Enumerable.Range(0, layout.BusCount).Select(i => i < (s.Routes?.Count ?? 0) && s.Routes![i]).ToArray(), PanX = float.IsFinite(s.PanX) ? Math.Clamp(s.PanX, -1, 1) : 0 }).ToArray(),
+            Buses = (p.Buses ?? []).Where(b => b.Index >= 0 && b.Index < layout.BusCount).DistinctBy(b => b.Index).Select(b => b with { Gain = Gain(b.Gain) }).ToArray()
+        };
+    }
 }

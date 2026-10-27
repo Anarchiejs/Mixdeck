@@ -31,11 +31,17 @@ public sealed partial class SettingsPage : Page
         if (listening) return;
         listening = true;
         App.GetService<ISettingsStore>().Changed += OnSettingsChanged;
+        ViewModel.Mixer.PropertyChanged += OnMixerChanged;
     }
     private void OnUnloaded(object sender, RoutedEventArgs e)
     {
         listening = false;
         App.GetService<ISettingsStore>().Changed -= OnSettingsChanged;
+        ViewModel.Mixer.PropertyChanged -= OnMixerChanged;
+    }
+    private void OnMixerChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName == nameof(MixerViewModel.Layout)) ViewModel.Refresh();
     }
     private void OnSettingsChanged(object? sender, AppSettings settings) => DispatcherQueue.TryEnqueue(ViewModel.RefreshHotkeyWarnings);
     private async void OnWindowsAccent(object sender, RoutedEventArgs e) => await ViewModel.SetAccentAsync(null);

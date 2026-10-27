@@ -108,7 +108,8 @@ public sealed class StartupAndProfileHotkeyTests
         await coordinator.ApplyStartupProfileAsync().WaitAsync(TimeSpan.FromSeconds(5));
         await coordinator.ApplyStartupProfileAsync();
         Assert.Equal("startup", rig.Profiles.Active?.Id);
-        Assert.Single(rig.Mixer.Scripts);
+        // Ce profil vide change le profil actif sans envoyer de script vide à l'API Remote.
+        Assert.Empty(rig.Mixer.Scripts);
         Assert.Equal("manual", rig.Settings.Current.LastProfileId);
     }
 

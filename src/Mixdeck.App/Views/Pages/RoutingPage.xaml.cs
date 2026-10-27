@@ -24,33 +24,46 @@ public sealed partial class RoutingPage : Page
 
     public RoutingPageViewModel ViewModel { get; }
     public bool IsDisconnected => !ViewModel.Mixer.IsConnected;
-    private readonly RouteButton[,] _buttons = new RouteButton[5, 5];
-    private readonly Border[] _rows = new Border[5];
-    private readonly Border[] _columns = new Border[5];
+    private RouteButton[,] _buttons = new RouteButton[0, 0];
+    private Border[] _rows = [];
+    private Border[] _columns = [];
+    private readonly List<ChannelViewModel> _trackedChannels = [];
+    private bool _listening;
 
     private void BuildMatrix()
     {
+        Matrix.Children.Clear();
+        Matrix.ColumnDefinitions.Clear();
+        Matrix.RowDefinitions.Clear();
+        var stripCount = ViewModel.Mixer.Strips.Count;
+        var busCount = ViewModel.Mixer.Buses.Count;
+        _buttons = new RouteButton[stripCount, busCount];
+        _rows = new Border[stripCount];
+        _columns = new Border[busCount];
         Matrix.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(168) });
         Matrix.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
-        for (var i = 0; i < 5; i++)
+        for (var i = 0; i < busCount; i++)
         {
             Matrix.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(80, GridUnitType.Star), MinWidth = 76 });
-            Matrix.RowDefinitions.Add(new RowDefinition { Height = new GridLength(64) });
             if (ViewModel.Mixer.Buses[i].IsVirtual)
             {
                 var backdrop = (Border)((DataTemplate)Resources["VirtualColumn"]).LoadContent();
-                Grid.SetColumn(backdrop, i + 1); Grid.SetRowSpan(backdrop, 6);
+                Grid.SetColumn(backdrop, i + 1); Grid.SetRowSpan(backdrop, stripCount + 1);
                 Matrix.Children.Add(backdrop);
             }
             var column = (Border)((DataTemplate)Resources["MatrixHighlight"]).LoadContent();
-            Grid.SetColumn(column, i + 1); Grid.SetRowSpan(column, 6);
+            Grid.SetColumn(column, i + 1); Grid.SetRowSpan(column, stripCount + 1);
             Matrix.Children.Add(column); _columns[i] = column;
+        }
+        for (var i = 0; i < stripCount; i++)
+        {
+            Matrix.RowDefinitions.Add(new RowDefinition { Height = new GridLength(64) });
             var row = (Border)((DataTemplate)Resources["MatrixHighlight"]).LoadContent();
-            Grid.SetRow(row, i + 1); Grid.SetColumnSpan(row, 6);
+            Grid.SetRow(row, i + 1); Grid.SetColumnSpan(row, busCount + 1);
             Matrix.Children.Add(row); _rows[i] = row;
         }
         Put(new TextBlock { Text = "Entrées / Sorties", Style = (Style)Application.Current.Resources["BodyStrongTextBlockStyle"], VerticalAlignment = VerticalAlignment.Center }, 0, 0);
-        for (var bus = 0; bus < 5; bus++)
+        for (var bus = 0; bus < busCount; bus++)
         {
             var output = ViewModel.Mixer.Buses[bus];
             var header = new StackPanel { Spacing = 4, Margin = new Thickness(4, 12, 4, 12), HorizontalAlignment = HorizontalAlignment.Center };
@@ -61,14 +74,14 @@ public sealed partial class RoutingPage : Page
             header.Children.Add(kind);
             Put(header, 0, bus + 1);
         }
-        for (var strip = 0; strip < 5; strip++)
+        for (var strip = 0; strip < stripCount; strip++)
         {
             var input = ViewModel.Mixer.Strips[strip];
             var label = new StackPanel { Orientation = Orientation.Horizontal, Spacing = 12, VerticalAlignment = VerticalAlignment.Center };
             label.Children.Add(new FontIcon { Glyph = input.Icon, FontSize = 20, Tag = input });
             label.Children.Add(new TextBlock { Text = input.DisplayName, Tag = input, MaxWidth = 128, TextTrimming = TextTrimming.CharacterEllipsis, VerticalAlignment = VerticalAlignment.Center });
             Put(label, strip + 1, 0);
-            for (var bus = 0; bus < 5; bus++)
+            for (var bus = 0; bus < busCount; bus++)
             {
                 var route = input.Routes[bus];
                 var cell = new RoutingCell { Route = route, VerticalAlignment = VerticalAlignment.Center };
@@ -82,15 +95,18 @@ public sealed partial class RoutingPage : Page
                 Put(cell, strip + 1, bus + 1); _buttons[strip, bus] = button;
             }
         }
-        ActualThemeChanged += (_, _) => HighlightFocused();
     }
 
     private void Put(FrameworkElement child, int row, int column) { Grid.SetRow(child, row); Grid.SetColumn(child, column); Matrix.Children.Add(child); }
 
     private void OnLoaded(object sender, RoutedEventArgs e)
     {
+        if (_listening) return;
+        _listening = true;
         ViewModel.Mixer.PropertyChanged += OnMixerChanged;
-        foreach (var channel in ViewModel.Mixer.Strips.Cast<ChannelViewModel>().Concat(ViewModel.Mixer.Buses)) channel.PropertyChanged += OnChannelChanged;
+        ActualThemeChanged += OnThemeChanged;
+        TrackChannels();
+        BuildMatrix();
         RefreshLabels();
         Bindings.Update();
         HighlightFocused();
@@ -98,10 +114,36 @@ public sealed partial class RoutingPage : Page
 
     private void OnUnloaded(object sender, RoutedEventArgs e)
     {
+        _listening = false;
         ViewModel.Mixer.PropertyChanged -= OnMixerChanged;
-        foreach (var channel in ViewModel.Mixer.Strips.Cast<ChannelViewModel>().Concat(ViewModel.Mixer.Buses)) channel.PropertyChanged -= OnChannelChanged;
+        ActualThemeChanged -= OnThemeChanged;
+        UntrackChannels();
     }
-    private void OnMixerChanged(object? sender, PropertyChangedEventArgs e) { if (e.PropertyName == nameof(MixerViewModel.IsConnected)) Bindings.Update(); }
+    private void OnThemeChanged(FrameworkElement sender, object args) => HighlightFocused();
+    private void UntrackChannels()
+    {
+        foreach (var channel in _trackedChannels) channel.PropertyChanged -= OnChannelChanged;
+        _trackedChannels.Clear();
+    }
+    private void TrackChannels()
+    {
+        UntrackChannels();
+        foreach (var channel in ViewModel.Mixer.Strips.Cast<ChannelViewModel>().Concat(ViewModel.Mixer.Buses))
+        {
+            channel.PropertyChanged += OnChannelChanged;
+            _trackedChannels.Add(channel);
+        }
+    }
+    private void OnMixerChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName == nameof(MixerViewModel.Layout))
+        {
+            TrackChannels();
+            BuildMatrix();
+            RefreshLabels();
+        }
+        if (e.PropertyName is nameof(MixerViewModel.Layout) or nameof(MixerViewModel.IsConnected)) Bindings.Update();
+    }
     private void OnChannelChanged(object? sender, PropertyChangedEventArgs e) { if (e.PropertyName is nameof(ChannelViewModel.DisplayName) or nameof(ChannelViewModel.Icon)) RefreshLabels(); }
     private void RefreshLabels()
     {
@@ -130,11 +172,8 @@ public sealed partial class RoutingPage : Page
 
     private void Highlight(int row, int column)
     {
-        for (var i = 0; i < 5; i++)
-        {
-            _rows[i].Opacity = i == row ? 1 : 0;
-            _columns[i].Opacity = i == column ? 1 : 0;
-        }
+        for (var i = 0; i < _rows.Length; i++) _rows[i].Opacity = i == row ? 1 : 0;
+        for (var i = 0; i < _columns.Length; i++) _columns[i].Opacity = i == column ? 1 : 0;
     }
     private void HighlightFocused()
     {
@@ -148,11 +187,11 @@ public sealed partial class RoutingPage : Page
         switch (e.Key)
         {
             case VirtualKey.Left: column = Math.Max(0, column - 1); break;
-            case VirtualKey.Right: column = Math.Min(4, column + 1); break;
+            case VirtualKey.Right: column = Math.Min(_columns.Length - 1, column + 1); break;
             case VirtualKey.Up: row = Math.Max(0, row - 1); break;
-            case VirtualKey.Down: row = Math.Min(4, row + 1); break;
+            case VirtualKey.Down: row = Math.Min(_rows.Length - 1, row + 1); break;
             case VirtualKey.Home: column = 0; break;
-            case VirtualKey.End: column = 4; break;
+            case VirtualKey.End: column = _columns.Length - 1; break;
             default: return;
         }
         _buttons[row, column].Focus(FocusState.Keyboard);

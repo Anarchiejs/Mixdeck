@@ -17,16 +17,27 @@ public class SimulatedVoicemeeterApi : IVoicemeeterApi
     private bool _loggedIn;
     private bool _running = true;
     private bool _dirty = true;
+    private MixerLayout _layout = MixerLayout.Banana;
+    private int _mixerType = 2;
     private int _levelCount, _floatCount, _stringCount, _dirtyCount, _loginCount, _logoutCount;
 
-    public SimulatedVoicemeeterApi(int? seed = null)
+    public SimulatedVoicemeeterApi(int? seed = null, MixerLayout? layout = null)
     {
         _random = seed.HasValue ? new Random(seed.Value) : new Random();
+        _mixerType = (layout ?? MixerLayout.Banana).VoicemeeterType;
+        InitializeLayout(layout ?? MixerLayout.Banana);
+    }
+
+    private void InitializeLayout(MixerLayout layout)
+    {
+        _layout = layout;
+        _floats.Clear();
+        _strings.Clear();
         string[] labels = ["Micro", "Discord", "Jeu", "Musique", "Navigateur"];
-        for (var i = 0; i < BananaLayout.StripCount; i++)
+        for (var i = 0; i < layout.StripCount; i++)
         {
-            _strings[VmParam.StripLabel(i)] = labels[i];
-            if (i < BananaLayout.PhysicalStripCount)
+            _strings[VmParam.StripLabel(i)] = i < labels.Length ? labels[i] : layout.DefaultStripLabels[i];
+            if (i < layout.PhysicalStripCount)
             {
                 _strings[VmParam.StripDeviceName(i)] = i == 0 ? "Microphone (USB Audio)" : "";
                 _floats[VmParam.StripGate(i)] = 0;
@@ -38,25 +49,37 @@ public class SimulatedVoicemeeterApi : IVoicemeeterApi
             _floats[VmParam.StripMute(i)] = 0;
             _floats[VmParam.StripSolo(i)] = 0;
             _floats[VmParam.StripPanX(i)] = 0;
-            for (var bus = 0; bus < BananaLayout.BusCount; bus++)
-                _floats[VmParam.StripRoute(i, bus)] = bus is 0 or 3 ? 1 : 0;
-            if (BananaLayout.IsVirtualStrip(i))
+            for (var bus = 0; bus < layout.BusCount; bus++)
+                _floats[VmParam.StripRoute(i, bus, layout)] = bus == 0 || bus == layout.PhysicalBusCount ? 1 : 0;
+            if (layout.IsVirtualStrip(i))
                 for (var band = 0; band < 3; band++) _floats[VmParam.StripEqGain(i, band)] = 0;
         }
-        for (var i = 0; i < BananaLayout.BusCount; i++)
+        for (var i = 0; i < layout.BusCount; i++)
         {
-            _strings[VmParam.BusLabel(i)] = BananaLayout.BusNames[i];
-            if (i < BananaLayout.PhysicalBusCount)
+            _strings[VmParam.BusLabel(i)] = layout.BusNames[i];
+            if (i < layout.PhysicalBusCount)
                 _strings[VmParam.BusDeviceName(i)] = i == 0 ? "Casque (Realtek Audio)" : "";
             _floats[VmParam.BusGain(i)] = 0;
             _floats[VmParam.BusMute(i)] = 0;
             _floats[VmParam.BusMono(i)] = 0;
-            _floats[VmParam.BusEqOn(i)] = 0;
+            if (layout.VoicemeeterType != 1) _floats[VmParam.BusEqOn(i)] = 0;
         }
     }
 
     public bool IsInstalled { get; set; } = true;
-    public int MixerType { get; set; } = 2;
+    public int MixerType
+    {
+        get { lock (_gate) return _mixerType; }
+        set
+        {
+            lock (_gate)
+            {
+                _mixerType = value;
+                if (value is >= 1 and <= 3) InitializeLayout(MixerLayout.ForType(value));
+                _dirty = true;
+            }
+        }
+    }
     public int Version { get; set; } = 0x02010808;
     public int TypeReadResult { get; set; }
     public int Run64Result { get; set; }
@@ -102,7 +125,7 @@ public class SimulatedVoicemeeterApi : IVoicemeeterApi
         {
             Record(nameof(RunVoicemeeter), type: type);
             if (!IsInstalled) throw new DllNotFoundException();
-            var result = type == 5 ? Run64Result : Run32Result;
+            var result = type is >= 4 and <= 6 ? Run64Result : Run32Result;
             if (result == 0) { _running = true; _dirty = true; }
             return result;
         }
@@ -216,8 +239,9 @@ public class SimulatedVoicemeeterApi : IVoicemeeterApi
             _levelCount++;
             value = 0;
             if (!Available) return -2;
-            if (type is < 0 or > 3 || channel < 0 || channel >= (type == 3 ? 40 : 22)) return -1;
-            var index = type == 3 ? channel / 8 : channel < 6 ? channel / 2 : 3 + (channel - 6) / 8;
+            if (type is < 0 or > 3 || channel < 0 || channel >= (type == 3 ? _layout.OutputLevelChannels : _layout.InputLevelChannels)) return -1;
+            var index = type == 3 ? channel / 8 : channel < _layout.PhysicalStripCount * 2
+                ? channel / 2 : _layout.PhysicalStripCount + (channel - _layout.PhysicalStripCount * 2) / 8;
             var gain = _floats[type == 3 ? VmParam.BusGain(index) : VmParam.StripGain(index)];
             var mute = _floats[type == 3 ? VmParam.BusMute(index) : VmParam.StripMute(index)] != 0;
             var envelope = (float)(0.3 + 0.2 * Math.Sin(_levelCount / 240.0 + channel * 0.7) + _random.NextDouble() * 0.025);
