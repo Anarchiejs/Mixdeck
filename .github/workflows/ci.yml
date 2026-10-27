@@ -26,6 +26,13 @@ jobs:
       - name: Tester
         run: dotnet test Mixdeck.slnx -c Release -nologo --logger "console;verbosity=minimal" --logger trx --results-directory TestResults
 
+      # Tests d'interface (FlaUI) : le runner Windows a une session de bureau. Ne bloquent pas la CI tant qu'ils
+      # n'ont pas fait leurs preuves sur GitHub.
+      - name: Tester l'interface
+        continue-on-error: true
+        env:
+          MIXDECK_UI_TESTS: "1"
+        run: dotnet test tests/Mixdeck.UiTests -c Release -nologo --no-build --logger "console;verbosity=normal" --logger "trx;LogFileName=ui.trx" --results-directory TestResults
       - name: Publier les résultats de tests
         if: ${{ !cancelled() }}
         uses: actions/upload-artifact@v4
