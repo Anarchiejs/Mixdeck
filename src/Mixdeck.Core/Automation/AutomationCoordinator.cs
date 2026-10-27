@@ -7,7 +7,7 @@ using Mixdeck.Core.Settings;
 namespace Mixdeck.Core.Automation;
 public sealed class AutomationCoordinator(IProcessWatcher processes, IForegroundWatcher foreground,
     IProfileService profiles, IMixer mixer, ISettingsStore settings, IOsdService osd,
-    ILogger<AutomationCoordinator> logger) : IDisposable
+    ILogger<AutomationCoordinator> logger, DuckingController? ducking = null) : IDisposable
 {
     private readonly Channel<Func<Task>> queue = Channel.CreateUnbounded<Func<Task>>(new UnboundedChannelOptions { SingleReader = true });
     private readonly RuleEngine engine = new();
@@ -15,6 +15,8 @@ public sealed class AutomationCoordinator(IProcessWatcher processes, IForeground
     private readonly object lifecycle = new();
     private Task? worker;
     private bool disposed;
+    private bool startupAttempted;
+    private readonly TaskCompletionSource startup = new(TaskCreationOptions.RunContinuationsAsynchronously);
     // Voicemeeter ignore les écritures hors connexion : les décisions prises pendant ce temps sont rejouées à la reconnexion.
     // Ces champs ne sont lus et écrits que depuis la file.
     private string? pendingProfile;
@@ -33,12 +35,13 @@ public sealed class AutomationCoordinator(IProcessWatcher processes, IForeground
             foreground.ForegroundProcessChanged += ForegroundChanged;
             settings.Changed += SettingsChanged;
             mixer.StateChanged += MixerStateChanged;
-            Enqueue(() =>
+            queue.Writer.TryWrite(async () =>
             {
                 engine.SetRules(settings.Current.Rules);
                 engine.SetBaselineProfile(settings.Current.LastProfileId);
                 engine.SetBaselineMicMuted(mixer.Snapshot.Strips.FirstOrDefault(s => s.Index == settings.Current.MicStripIndex)?.Mute ?? false);
                 engine.Initialize(processes.GetRunningProcessNames(), foreground.Current);
+                await ApplyStartupWhenConnectedAsync();
                 Apply(engine.Evaluate());
             });
             processes.Start();
@@ -70,7 +73,42 @@ public sealed class AutomationCoordinator(IProcessWatcher processes, IForeground
     });
     private void MixerStateChanged(object? sender, MixerConnectionState state)
     {
-        if (state == MixerConnectionState.Connected) Enqueue(Reconcile);
+        if (state == MixerConnectionState.Connected) queue.Writer.TryWrite(async () =>
+        {
+            await ApplyStartupWhenConnectedAsync();
+            Reconcile();
+        });
+    }
+    /// <summary>Attend la première connexion et l'application unique du profil de démarrage, sans bloquer l'interface.</summary>
+    public Task ApplyStartupProfileAsync()
+    {
+        Start();
+        return startup.Task;
+    }
+    private async Task ApplyStartupWhenConnectedAsync()
+    {
+        if (startupAttempted) return;
+        var id = settings.Current.StartupProfileId;
+        if (id is not null && mixer.State != MixerConnectionState.Connected) return;
+        startupAttempted = true;
+        try
+        {
+            if (id is not null)
+            {
+                await ApplyProfileWithDuckingAsync(id);
+                if (settings.Current.ShowOsd && profiles.Active is { } active)
+                    osd.Show("Profil : " + active.Name, active.Icon);
+            }
+        }
+        catch (OperationCanceledException) when (lifetime.IsCancellationRequested) { }
+        catch (Exception ex) { logger.LogError(ex, "Impossible d'appliquer le profil de démarrage {ProfileId}", id); }
+        finally { startup.TrySetResult(); }
+    }
+    private async Task ApplyProfileWithDuckingAsync(string id)
+    {
+        // Le jeton couvre le fondu entier ; les fondus concurrents gardent chacun leur jeton.
+        using var suspension = ducking?.SuspendForProfile();
+        await profiles.ApplyAsync(id, cancellationToken: lifetime.Token);
     }
     private void Reconcile()
     {
@@ -94,7 +132,7 @@ public sealed class AutomationCoordinator(IProcessWatcher processes, IForeground
         if (decision.ProfileId is { } id)
         {
             (pendingProfile, pendingProfileCause) = (null, null);
-            fade = profiles.ApplyAsync(id, cancellationToken: lifetime.Token);
+            fade = ApplyProfileWithDuckingAsync(id);
         }
         if (decision.MicMuted is { } muted)
         {
@@ -138,7 +176,7 @@ public sealed class AutomationCoordinator(IProcessWatcher processes, IForeground
             try
             {
                 lifetime.Token.ThrowIfCancellationRequested();
-                var fade = profiles.ApplyAsync(profileId, cancellationToken: lifetime.Token);
+                var fade = ApplyProfileWithDuckingAsync(profileId);
                 if (fade.IsFaulted) await fade;
                 (pendingProfile, pendingProfileCause) = mixer.State == MixerConnectionState.Connected ? (null, null) : (profileId, (Rule?)null);
                 engine.SetBaselineProfile(profileId);
@@ -163,6 +201,7 @@ public sealed class AutomationCoordinator(IProcessWatcher processes, IForeground
             mixer.StateChanged -= MixerStateChanged;
             queue.Writer.TryComplete();
             lifetime.Cancel();
+            startup.TrySetCanceled(lifetime.Token);
         }
     }
 }
