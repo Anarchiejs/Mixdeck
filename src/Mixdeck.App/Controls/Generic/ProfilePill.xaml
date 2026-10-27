@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:local="using:Mixdeck.App.Controls">
+  <Style TargetType="local:ProfilePill">
+    <Setter Property="Background" Value="{ThemeResource CardBackgroundFillColorDefaultBrush}" />
+    <Setter Property="Foreground" Value="{ThemeResource TextFillColorPrimaryBrush}" />
+    <Setter Property="BorderBrush" Value="{ThemeResource CardStrokeColorDefaultBrush}" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="Padding" Value="12,4" />
+    <Setter Property="CornerRadius" Value="{StaticResource MixdeckCardCornerRadius}" />
+    <Setter Property="UseSystemFocusVisuals" Value="True" />
+    <Setter Property="MinHeight" Value="32" />
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="local:ProfilePill">
+          <Grid>
+            <VisualStateManager.VisualStateGroups>
+              <VisualStateGroup x:Name="CommonStates">
+                <VisualState x:Name="Normal" />
+                <VisualState x:Name="PointerOver">
+                  <VisualState.Setters>
+                    <Setter Target="Surface.Opacity" Value="0.85" />
+                    <Setter Target="Surface.BorderBrush" Value="{ThemeResource TextFillColorSecondaryBrush}" />
+                  </VisualState.Setters>
+                </VisualState>
+                <VisualState x:Name="Pressed">
+                  <VisualState.Setters>
+                    <Setter Target="Surface.Opacity" Value="0.65" />
+                  </VisualState.Setters>
+                </VisualState>
+                <VisualState x:Name="Disabled">
+                  <VisualState.Setters>
+                    <Setter Target="Surface.Opacity" Value="0.35" />
+                  </VisualState.Setters>
+                </VisualState>
+                <VisualState x:Name="Checked">
+                  <VisualState.Setters>
+                    <Setter Target="Surface.Background" Value="{ThemeResource AccentFillColorDefaultBrush}" />
+                    <Setter Target="Presenter.Foreground" Value="{ThemeResource TextOnAccentFillColorPrimaryBrush}" />
+                  </VisualState.Setters>
+                </VisualState>
+                <VisualState x:Name="CheckedPointerOver">
+                  <VisualState.Setters>
+                    <Setter Target="Surface.Background" Value="{ThemeResource AccentFillColorDefaultBrush}" />
+                    <Setter Target="Presenter.Foreground" Value="{ThemeResource TextOnAccentFillColorPrimaryBrush}" />
+                    <Setter Target="Surface.Opacity" Value="0.85" />
+                    <Setter Target="Surface.BorderBrush" Value="{ThemeResource TextFillColorSecondaryBrush}" />
+                  </VisualState.Setters>
+                </VisualState>
+                <VisualState x:Name="CheckedPressed">
+                  <VisualState.Setters>
+                    <Setter Target="Surface.Background" Value="{ThemeResource AccentFillColorDefaultBrush}" />
+                    <Setter Target="Presenter.Foreground" Value="{ThemeResource TextOnAccentFillColorPrimaryBrush}" />
+                    <Setter Target="Surface.Opacity" Value="0.65" />
+                  </VisualState.Setters>
+                </VisualState>
+                <VisualState x:Name="CheckedDisabled">
+                  <VisualState.Setters>
+                    <Setter Target="Surface.Background" Value="{ThemeResource AccentFillColorDefaultBrush}" />
+                    <Setter Target="Presenter.Foreground" Value="{ThemeResource TextOnAccentFillColorPrimaryBrush}" />
+                    <Setter Target="Surface.Opacity" Value="0.35" />
+                  </VisualState.Setters>
+                </VisualState>
+                <VisualState x:Name="Indeterminate" />
+                <VisualState x:Name="IndeterminatePointerOver">
+                  <VisualState.Setters>
+                    <Setter Target="Surface.Opacity" Value="0.85" />
+                    <Setter Target="Surface.BorderBrush" Value="{ThemeResource TextFillColorSecondaryBrush}" />
+                  </VisualState.Setters>
+                </VisualState>
+                <VisualState x:Name="IndeterminatePressed">
+                  <VisualState.Setters>
+                    <Setter Target="Surface.Opacity" Value="0.65" />
+                  </VisualState.Setters>
+                </VisualState>
+                <VisualState x:Name="IndeterminateDisabled">
+                  <VisualState.Setters>
+                    <Setter Target="Surface.Opacity" Value="0.35" />
+                  </VisualState.Setters>
+                </VisualState>
+              </VisualStateGroup>
+              <VisualStateGroup x:Name="FocusStates">
+                <VisualState x:Name="Unfocused" />
+                <VisualState x:Name="Focused" />
+                <VisualState x:Name="PointerFocused" />
+              </VisualStateGroup>
+              <VisualStateGroup x:Name="ProfileStates">
+                <VisualState x:Name="InactiveProfile" />
+                <VisualState x:Name="ActiveProfile">
+                  <VisualState.Setters>
+                    <Setter Target="Surface.BorderBrush" Value="{ThemeResource AccentFillColorDefaultBrush}" />
+                    <Setter Target="Surface.BorderThickness" Value="2" />
+                  </VisualState.Setters>
+                </VisualState>
+              </VisualStateGroup>
+            </VisualStateManager.VisualStateGroups>
+            <Border x:Name="Surface" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="{TemplateBinding CornerRadius}" Padding="{TemplateBinding Padding}">
+              <Grid>
+                <ContentPresenter x:Name="Presenter">
+                  <StackPanel Orientation="Horizontal" Spacing="8">
+                    <Border x:Name="PART_Color" Width="6" Height="6" CornerRadius="3" />
+                    <FontIcon FontFamily="{StaticResource MixdeckIconFont}" FontSize="14" Glyph="{TemplateBinding Icon}" />
+                    <TextBlock VerticalAlignment="Center" Text="{TemplateBinding ProfileName}" />
+                  </StackPanel>
+                </ContentPresenter>
+              </Grid>
+            </Border>
+          </Grid>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </Style>
+</ResourceDictionary>

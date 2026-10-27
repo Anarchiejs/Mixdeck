@@ -1,0 +1,45 @@
+<Window x:Class="Mixdeck.App.Controls.Gallery.ControlsGalleryWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:local="using:Mixdeck.App.Controls" Title="Mixdeck — Galerie des contrôles">
+    <Window.SystemBackdrop><MicaBackdrop /></Window.SystemBackdrop>
+    <Grid x:Name="Root" Padding="24" RowSpacing="16">
+        <Grid.Resources><ResourceDictionary><ResourceDictionary.MergedDictionaries>
+            <ResourceDictionary Source="ms-appx:///Controls/Controls.xaml"/>
+        </ResourceDictionary.MergedDictionaries></ResourceDictionary></Grid.Resources>
+        <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="*"/></Grid.RowDefinitions>
+        <StackPanel Orientation="Horizontal" Spacing="24">
+            <TextBlock Text="Galerie Mixdeck" Style="{StaticResource TitleTextBlockStyle}"/>
+            <ToggleSwitch Header="Thème sombre" Toggled="ThemeChanged"/>
+            <ToggleSwitch Header="Animation" IsOn="True" Toggled="AnimationChanged"/>
+        </StackPanel>
+        <ScrollViewer Grid.Row="1">
+            <StackPanel Spacing="20">
+                <local:ChannelHeader ChannelName="Microphone — F2 pour renommer" NameCommitted="NameCommitted"/>
+                <TextBlock x:Name="CommittedName" Text="Double-clic ou F2 ; Entrée valide, Échap annule."/>
+                <local:ProfilePillList x:Name="Profiles" ItemInvoked="ProfileInvoked"/>
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                    <local:ProfilePill ProfileName="Pastille autonome" Icon="&#xE7FC;" Color="#C586C0" IsActive="True"/>
+                    <local:RouteButton Bus="A1" IsChecked="True"/><local:RouteButton Bus="A2"/><local:RouteButton Bus="A3"/>
+                    <local:RouteButton Bus="B1" IsChecked="True"/><local:RouteButton Bus="B2"/>
+                    <local:RouteButton Bus="A1" IsEnabled="False"/>
+                    <local:MuteToggle/><local:MuteToggle IsChecked="True"/>
+                    <local:MuteToggle GlyphOn="&#xE720;" GlyphOff="&#xF781;" IsChecked="True"/>
+                </StackPanel>
+                <ToggleButton Style="{StaticResource MicButtonStyle}" AutomationProperties.Name="Couper le microphone">
+                    <StackPanel Orientation="Horizontal" Spacing="12"><FontIcon Glyph="&#xE720;"/><StackPanel>
+                        <TextBlock Text="Microphone"/><TextBlock Text="Cliquer pour couper ou rétablir le son" FontSize="12"/>
+                    </StackPanel></StackPanel>
+                </ToggleButton>
+                <local:Fader x:Name="HorizontalFader" Orientation="Horizontal" AutomationProperties.Name="Gain horizontal"/>
+                <local:VuMeter x:Name="HorizontalMeter" Height="40" Orientation="Horizontal" ShowScale="True" AutomationProperties.Name="Niveau stéréo horizontal"/>
+                <StackPanel Orientation="Horizontal" Spacing="24" Height="240">
+                    <local:Fader Orientation="Vertical" Width="48" AutomationProperties.Name="Gain vertical"/>
+                    <local:Fader Orientation="Vertical" Width="48" IsMuted="True" Value="-6" AutomationProperties.Name="Gain coupé"/>
+                    <local:VuMeter x:Name="VerticalMeter" Width="60" ShowScale="True" AutomationProperties.Name="Niveau stéréo vertical"/>
+                    <local:VuMeter x:Name="MonoMeter" Width="16" IsStereo="False" IsMuted="True" AutomationProperties.Name="Niveau mono coupé"/>
+                </StackPanel>
+                <TextBlock Text="Molette : 0,5 dB ; Maj : 0,1 dB ; double-clic : 0 dB. Les contrôles suivent les thèmes et le contraste Windows." TextWrapping="Wrap"/>
+            </StackPanel>
+        </ScrollViewer>
+    </Grid>
+</Window>
