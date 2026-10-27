@@ -66,6 +66,10 @@ public partial class App : Application
             _host = builder.Build();
             _logger = GetService<ILogger<App>>();
             _logger.LogInformation("Démarrage de Mixdeck {Version} (démo : {Demo})", GetService<IUpdateService>().CurrentVersion, _options.Demo);
+            if (_options.AfterCrash)
+            {
+                _logger.LogWarning("Redémarré après un plantage (voir logs\\crash-*.txt)");
+            }
 
             await StartServicesAsync(settings);
 
