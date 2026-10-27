@@ -1,0 +1,72 @@
+<UserControl
+    x:Class="Mixdeck.App.Views.Pages.Common.ChannelCard"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:controls="using:Mixdeck.App.Controls"
+    xmlns:shared="using:Mixdeck.App.ViewModels.Shared">
+    <Border x:Name="Card" Style="{StaticResource MixdeckCardStyle}" Padding="12" Width="136">
+        <StackPanel Spacing="12">
+            <Grid>
+                <Button HorizontalAlignment="Left" Click="OnIconClick" Style="{StaticResource SubtleButtonStyle}"
+                        AutomationProperties.Name="Changer l’icône du canal" ToolTipService.ToolTip="Changer l’icône">
+                    <FontIcon Glyph="{x:Bind Model.Icon, Mode=OneWay}" FontSize="20" />
+                </Button>
+                <Button HorizontalAlignment="Right" Click="OnMenuClick" Style="{StaticResource SubtleButtonStyle}"
+                        AutomationProperties.Name="Options du canal" ToolTipService.ToolTip="Options du canal">
+                    <FontIcon Glyph="&#xE712;" FontSize="16" />
+                </Button>
+            </Grid>
+            <controls:ChannelHeader x:Name="Header" ChannelName="{x:Bind Model.DisplayName, Mode=OneWay}"
+                Icon="" NameCommitted="OnNameCommitted" ToolTipService.ToolTip="F2 ou double-clic pour renommer" />
+            <TextBlock Text="{x:Bind KindText}" Style="{StaticResource CaptionTextBlockStyle}"
+                       Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+            <Grid Height="192" ColumnSpacing="4">
+                <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="48" /></Grid.ColumnDefinitions>
+                <controls:VuMeter LeftDb="{x:Bind Model.LeftDb, Mode=OneWay}" RightDb="{x:Bind Model.RightDb, Mode=OneWay}"
+                    LeftPeakDb="{x:Bind Model.LeftPeakDb, Mode=OneWay}" RightPeakDb="{x:Bind Model.RightPeakDb, Mode=OneWay}"
+                    IsMuted="{x:Bind Model.IsMuted, Mode=OneWay}" IsClipped="{x:Bind Model.IsClipped, Mode=OneWay}"
+                    ShowScale="True" IsStereo="True" AutomationProperties.Name="Niveau stéréo du canal" />
+                <controls:Fader Grid.Column="1" Orientation="Vertical" HorizontalAlignment="Center"
+                    Value="{x:Bind Model.Gain, Mode=TwoWay}" IsMuted="{x:Bind Model.IsMuted, Mode=OneWay}"
+                    AutomationProperties.Name="Gain du canal" ToolTipService.ToolTip="Double-clic pour revenir à 0 dB" />
+            </Grid>
+            <TextBlock Text="{x:Bind shared:Converters.Db(Model.Gain), Mode=OneWay}" HorizontalAlignment="Center"
+                       Style="{StaticResource BodyStrongTextBlockStyle}" />
+            <controls:MuteToggle IsChecked="{x:Bind Model.IsMuted, Mode=TwoWay}" HorizontalAlignment="Stretch"
+                AutomationProperties.Name="{x:Bind shared:Converters.MuteLabel(Model.IsMuted), Mode=OneWay}" ToolTipService.ToolTip="Couper ou rétablir le son" />
+            <StackPanel Spacing="8" Visibility="{x:Bind IsStrip}">
+                <ToggleButton Content="Solo" IsChecked="{x:Bind Strip.IsSolo, Mode=TwoWay}" HorizontalAlignment="Stretch" />
+                <TextBlock Text="Panoramique" Style="{StaticResource CaptionTextBlockStyle}" />
+                <Slider Minimum="-0.5" Maximum="0.5" StepFrequency="0.01" SmallChange="0.01" LargeChange="0.1"
+                    Value="{x:Bind Strip.PanX, Mode=TwoWay}" DoubleTapped="OnPanDoubleTapped" IsThumbToolTipEnabled="False"
+                    AutomationProperties.Name="Panoramique gauche-droite" ToolTipService.ToolTip="Double-clic pour centrer" />
+                <Grid><TextBlock Text="G" Style="{StaticResource CaptionTextBlockStyle}" /><TextBlock Text="D" HorizontalAlignment="Right" Style="{StaticResource CaptionTextBlockStyle}" /></Grid>
+                <TextBlock Text="Envoyer vers" Style="{StaticResource CaptionTextBlockStyle}" />
+                <ItemsRepeater ItemsSource="{x:Bind Strip.Routes, Mode=OneWay}">
+                    <ItemsRepeater.Layout><UniformGridLayout MinItemWidth="32" MinItemHeight="32" MaximumRowsOrColumns="3" MinColumnSpacing="4" MinRowSpacing="4" /></ItemsRepeater.Layout>
+                    <ItemsRepeater.ItemTemplate>
+                        <DataTemplate x:DataType="shared:RouteViewModel">
+                            <controls:RouteButton Bus="{x:Bind BusName}" IsChecked="{x:Bind IsOn, Mode=TwoWay}" MinWidth="32" Padding="4" />
+                        </DataTemplate>
+                    </ItemsRepeater.ItemTemplate>
+                </ItemsRepeater>
+                <StackPanel Spacing="4" Visibility="{x:Bind HasEq}">
+                    <TextBlock Text="Égaliseur" Style="{StaticResource BodyStrongTextBlockStyle}" Margin="0,8,0,4" />
+                    <TextBlock Text="Graves" Style="{StaticResource CaptionTextBlockStyle}" />
+                    <Slider Minimum="-12" Maximum="12" StepFrequency="0.5" Value="{x:Bind Strip.EqLow, Mode=TwoWay}" IsThumbToolTipEnabled="False" AutomationProperties.Name="Graves" />
+                    <TextBlock Text="{x:Bind shared:Converters.Db(Strip.EqLow), Mode=OneWay}" Style="{StaticResource CaptionTextBlockStyle}" />
+                    <TextBlock Text="Médiums" Style="{StaticResource CaptionTextBlockStyle}" />
+                    <Slider Minimum="-12" Maximum="12" StepFrequency="0.5" Value="{x:Bind Strip.EqMid, Mode=TwoWay}" IsThumbToolTipEnabled="False" AutomationProperties.Name="Médiums" />
+                    <TextBlock Text="{x:Bind shared:Converters.Db(Strip.EqMid), Mode=OneWay}" Style="{StaticResource CaptionTextBlockStyle}" />
+                    <TextBlock Text="Aigus" Style="{StaticResource CaptionTextBlockStyle}" />
+                    <Slider Minimum="-12" Maximum="12" StepFrequency="0.5" Value="{x:Bind Strip.EqHigh, Mode=TwoWay}" IsThumbToolTipEnabled="False" AutomationProperties.Name="Aigus" />
+                    <TextBlock Text="{x:Bind shared:Converters.Db(Strip.EqHigh), Mode=OneWay}" Style="{StaticResource CaptionTextBlockStyle}" />
+                </StackPanel>
+            </StackPanel>
+            <StackPanel Spacing="8" Visibility="{x:Bind IsBus}">
+                <ToggleButton Content="Mono" IsChecked="{x:Bind Bus.IsMono, Mode=TwoWay}" HorizontalAlignment="Stretch" />
+                <ToggleButton Content="EQ activé" IsChecked="{x:Bind Bus.EqOn, Mode=TwoWay}" HorizontalAlignment="Stretch" />
+            </StackPanel>
+        </StackPanel>
+    </Border>
+</UserControl>

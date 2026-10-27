@@ -1,0 +1,9 @@
+<UserControl
+    x:Class="Mixdeck.App.Views.Pages.Common.RoutingCell"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:controls="using:Mixdeck.App.Controls">
+    <controls:RouteButton x:Name="Cell" Bus="{x:Bind Route.BusName, Mode=OneWay}"
+        Tag="{x:Bind Route, Mode=OneWay}" IsChecked="{x:Bind Route.IsOn, Mode=TwoWay}"
+        MinWidth="40" MinHeight="40" HorizontalAlignment="Stretch" Margin="4" />
+</UserControl>
