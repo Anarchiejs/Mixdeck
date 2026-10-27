@@ -1,4 +1,5 @@
-﻿using System.Collections.ObjectModel;
+using Mixdeck.App.Localization;
+using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Mixdeck.App.ViewModels.Shared;
@@ -36,7 +37,7 @@ public sealed partial class RulesPageViewModel(ISettingsStore settings, MixerVie
         {
             Rules[i].CanMoveUp = i > 0;
             Rules[i].CanMoveDown = i < Rules.Count - 1;
-            Rules[i].Position = $"Priorité {i + 1}";
+            Rules[i].Position = Strings.Format("CS_Priority", i + 1);
         }
         OnPropertyChanged(nameof(IsEmpty));
         OnPropertyChanged(nameof(HasRules));
@@ -138,11 +139,11 @@ public sealed partial class RuleCardViewModel : ObservableObject
     public Rule Rule { get; private set; }
     public string Name => Rule.Name;
     public string ProcessName => Rule.ProcessName;
-    public string TriggerText => Rule.Trigger == RuleTrigger.ProcessForeground ? "est au premier plan" : "démarre";
+    public string TriggerText => Rule.Trigger == RuleTrigger.ProcessForeground ? Strings.Get("CS_061") : Strings.Get("CS_140");
     public string ActionText => Rule.Action == RuleActionKind.SwitchProfile
-        ? "profil « " + (owner.Mixer.Profiles.FirstOrDefault(p => p.Id == Rule.ProfileId)?.Name ?? "Profil introuvable") + " »"
-        : Rule.MicMuted == true ? "micro coupé" : "micro activé";
-    public string Sentence => $"Quand {ProcessName} {TriggerText} → {ActionText}";
+        ? Strings.Format("CS_RuleProfile", owner.Mixer.Profiles.FirstOrDefault(p => p.Id == Rule.ProfileId)?.Name ?? Strings.Get("CS_065"))
+        : Rule.MicMuted == true ? Strings.Get("Core_MicMuted") : Strings.Get("Core_MicOn");
+    public string Sentence => Strings.Format("CS_RuleSentence", ProcessName, TriggerText, ActionText);
 
     [ObservableProperty]
     public partial bool Enabled { get; set; }

@@ -37,7 +37,7 @@ public static class Program
         // Une seule instance : une deuxième ouverture réveille la première (console au premier plan) et s'arrête.
         var instance = new SingleInstanceGuard();
         // Relance après plantage : l'instance qui meurt tient encore le verrou quelques instants.
-        for (var attempt = 0; options.AfterCrash && !instance.IsFirstInstance && attempt < 20; attempt++)
+        for (var attempt = 0; (options.AfterCrash || args.Contains("--restart", StringComparer.OrdinalIgnoreCase)) && !instance.IsFirstInstance && attempt < 20; attempt++)
         {
             instance.Dispose();
             Thread.Sleep(500);

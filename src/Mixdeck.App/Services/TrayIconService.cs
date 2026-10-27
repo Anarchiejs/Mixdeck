@@ -1,3 +1,4 @@
+using Mixdeck.App.Localization;
 using System.ComponentModel;
 using System.Globalization;
 using CommunityToolkit.Mvvm.Input;
@@ -46,13 +47,13 @@ public sealed class TrayIconService : IDisposable
         var menu = new MenuFlyout();
         menu.Items.Add(new MenuFlyoutItem
         {
-            Text = "Ouvrir le panneau",
+            Text = Strings.Get("CS_012"),
             Command = new RelayCommand(_shell.ToggleFlyout),
             Icon = new FontIcon { Glyph = "" },
         });
         menu.Items.Add(new MenuFlyoutItem
         {
-            Text = "Console",
+            Text = Strings.Get("CS_013"),
             Command = new RelayCommand(() => _shell.ShowMainWindow(ShellPage.Mixer)),
             Icon = new FontIcon { Glyph = "" },
         });
@@ -60,13 +61,13 @@ public sealed class TrayIconService : IDisposable
         menu.Items.Add(new MenuFlyoutSeparator());
         menu.Items.Add(new MenuFlyoutItem
         {
-            Text = "Réglages",
+            Text = Strings.Get("CS_014"),
             Command = new RelayCommand(() => _shell.ShowMainWindow(ShellPage.Settings)),
             Icon = new FontIcon { Glyph = "" },
         });
         menu.Items.Add(new MenuFlyoutItem
         {
-            Text = "Quitter Mixdeck",
+            Text = Strings.Get("CS_015"),
             Command = new RelayCommand(_shell.Exit),
             Icon = new FontIcon { Glyph = "" },
         });
@@ -114,15 +115,15 @@ public sealed class TrayIconService : IDisposable
 
         var muted = _mixer.IsMicMuted;
         _icon.Icon = muted ? _mutedIcon : _normalIcon;
-        _micItem.Text = !_mixer.HasMic ? "Micro non configuré" : muted ? "Activer le micro" : "Couper le micro";
+        _micItem.Text = !_mixer.HasMic ? Strings.Get("CS_016") : muted ? Strings.Get("CS_017") : Strings.Get("CS_018");
         _micItem.IsEnabled = _mixer.CanToggleMic;
 
         var status = !_mixer.IsConnected
             ? _mixer.ConnectionTitle
-            : !_mixer.HasMic ? "Micro non configuré" : muted ? "Micro coupé" : "Micro activé";
-        var gain = _mixer.Buses[0].Gain.ToString("0.##", CultureInfo.GetCultureInfo("fr-FR")).Replace("-", "−");
+            : !_mixer.HasMic ? Strings.Get("CS_016") : muted ? Strings.Get("Core_MicMuted") : Strings.Get("Core_MicOn");
+        var gain = _mixer.Buses[0].Gain.ToString("0.##", Strings.Culture).Replace("-", "−");
         var volume = _mixer.IsConnected ? $" · A1 {gain} dB" : string.Empty;
-        var profile = _mixer.ActiveProfile is { } p ? $"\nProfil {p.Name.Replace('\r', ' ').Replace('\n', ' ')}" : string.Empty;
+        var profile = _mixer.ActiveProfile is { } p ? "\n" + Strings.Format("Core_Profile", p.Name.Replace('\r', ' ').Replace('\n', ' ')) : string.Empty;
         var tooltip = $"Mixdeck · {status}{volume}{profile}";
         // La taille native est exprimée en caractères UTF-16 ; ne pas couper une paire de substitution.
         if (tooltip.Length > 127)

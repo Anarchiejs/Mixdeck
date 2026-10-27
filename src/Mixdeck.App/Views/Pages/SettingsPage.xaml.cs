@@ -1,4 +1,5 @@
-﻿using Microsoft.UI;
+using Mixdeck.App.Localization;
+using Microsoft.UI;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Mixdeck.App.Services;
@@ -53,7 +54,7 @@ public sealed partial class SettingsPage : Page
         {
             var picker = new ColorPicker
             {
-                Language = "fr-FR",
+                Language = Strings.Language,
                 Color = ThemeService.TryParseColor(ViewModel.AccentColor, out var color) ? color : Colors.DodgerBlue,
                 IsAlphaEnabled = false,
                 IsAlphaSliderVisible = false,
@@ -62,18 +63,18 @@ public sealed partial class SettingsPage : Page
                 MinWidth = 280,
                 MaxWidth = 400,
             };
-            var error = new InfoBar { Severity = InfoBarSeverity.Error, IsClosable = false, Title = "Enregistrement impossible", Message = "Vérifiez l’accès au dossier de données et réessayez." };
+            var error = new InfoBar { Severity = InfoBarSeverity.Error, IsClosable = false, Title = Strings.Get("Settings_CannotSave"), Message = Strings.Get("Settings_CheckData") };
             var content = new StackPanel { Spacing = 12 };
             content.Children.Add(error);
             content.Children.Add(picker);
             var dialog = new ContentDialog
             {
                 XamlRoot = XamlRoot,
-                Language = "fr-FR",
-                Title = "Couleur d’accent",
+                Language = Strings.Language,
+                Title = Strings.Get("Settings_AccentTitle"),
                 Content = new ScrollViewer { Content = content, HorizontalScrollMode = ScrollMode.Disabled },
-                PrimaryButtonText = "Enregistrer",
-                CloseButtonText = "Annuler",
+                PrimaryButtonText = Strings.Get("Settings_Save"),
+                CloseButtonText = Strings.Get("Settings_Cancel"),
                 DefaultButton = ContentDialogButton.Primary,
             };
             dialog.PrimaryButtonClick += async (_, args) =>
@@ -89,7 +90,7 @@ public sealed partial class SettingsPage : Page
             };
             await dialog.ShowAsync();
         }
-        catch (Exception) { ViewModel.ReportError("Impossible d’ouvrir le choix de la couleur d’accent."); }
+        catch (Exception) { ViewModel.ReportError(Strings.Get("Settings_AccentError")); }
         finally { dialogOpen = false; }
     }
 
@@ -105,11 +106,11 @@ public sealed partial class SettingsPage : Page
             var dialog = new ContentDialog
             {
                 XamlRoot = XamlRoot,
-                Language = "fr-FR",
+                Language = Strings.Language,
                 Title = row.Name,
                 Content = recorder,
-                PrimaryButtonText = "Enregistrer",
-                CloseButtonText = "Annuler",
+                PrimaryButtonText = Strings.Get("Settings_Save"),
+                CloseButtonText = Strings.Get("Settings_Cancel"),
                 DefaultButton = ContentDialogButton.None,
                 IsPrimaryButtonEnabled = false,
             };
@@ -120,7 +121,7 @@ public sealed partial class SettingsPage : Page
                 try
                 {
                     args.Cancel = recorder.Value is null || !await ViewModel.SaveHotkeyAsync(row, recorder.Value);
-                    if (args.Cancel) recorder.ShowError("Le raccourci n’a pas été enregistré. Vérifiez l’accès au dossier de données et réessayez.");
+                    if (args.Cancel) recorder.ShowError(Strings.Get("Settings_HotkeySaveError"));
                 }
                 finally { deferral.Complete(); }
             };
@@ -129,14 +130,14 @@ public sealed partial class SettingsPage : Page
                 ViewModel.SuspendHotkeys();
                 await dialog.ShowAsync();
             }
-            catch (Exception) { ViewModel.ReportError("Impossible d’ouvrir l’enregistreur de raccourcis."); }
+            catch (Exception) { ViewModel.ReportError(Strings.Get("Settings_HotkeyOpenError")); }
             finally
             {
                 try { ViewModel.RestoreHotkeys(); }
-                catch (Exception) { ViewModel.ReportError("Impossible de réactiver les raccourcis. Relancez Mixdeck."); }
+                catch (Exception) { ViewModel.ReportError(Strings.Get("Settings_HotkeyRestoreError")); }
             }
         }
-        catch (Exception) { ViewModel.ReportError("Impossible d’ouvrir l’enregistreur de raccourcis."); }
+        catch (Exception) { ViewModel.ReportError(Strings.Get("Settings_HotkeyOpenError")); }
         finally { dialogOpen = false; }
     }
     private async void OnClearHotkey(object sender, RoutedEventArgs e)

@@ -1,3 +1,4 @@
+using Mixdeck.App.Localization;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Mixdeck.App.ViewModels.AppVolume;
@@ -27,7 +28,7 @@ public sealed partial class AppVolumeRow : UserControl
         {
             var (endpoints, current) = await Task.Run(() => (router.GetRenderEndpoints(), router.GetEndpoint(pid)));
             var menu = new MenuFlyout();
-            menu.Items.Add(Choice(router, pid, null, "Sortie par défaut de Windows", current is null));
+            menu.Items.Add(Choice(router, pid, null, Strings.Get("CS_082"), current is null));
             menu.Items.Add(new MenuFlyoutSeparator());
             foreach (var endpoint in endpoints.OrderBy(x => x.Name, StringComparer.CurrentCultureIgnoreCase))
             {

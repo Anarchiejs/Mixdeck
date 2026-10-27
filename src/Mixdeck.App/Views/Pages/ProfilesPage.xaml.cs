@@ -1,3 +1,4 @@
+using Mixdeck.App.Localization;
 using System.Collections.Specialized;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
@@ -29,7 +30,7 @@ public sealed partial class ProfilesPage : Page
 
     private async void OnCreateClick(object sender, RoutedEventArgs e) => await ViewModel.RunAsync(async () =>
     {
-        var name = await PageDialogs.AskNameAsync(this, "Nouveau profil", "Créer");
+        var name = await PageDialogs.AskNameAsync(this, Strings.Get("CS_088"), Strings.Get("CS_089"));
         if (name is not null) await ViewModel.CaptureAsync(name);
     });
 

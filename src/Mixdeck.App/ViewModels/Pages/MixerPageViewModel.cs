@@ -1,3 +1,4 @@
+using Mixdeck.App.Localization;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Mixdeck.App.ViewModels.Shared;
@@ -19,14 +20,14 @@ public sealed partial class MixerPageViewModel(MixerViewModel mixer) : Observabl
     private async Task ApplyProfileAsync(ProfileItemViewModel? profile)
     {
         try { await Mixer.ApplyProfileCommand.ExecuteAsync(profile); }
-        catch (Exception) { ShowError("Impossible d’appliquer ce profil. Réessayez après avoir vérifié la connexion et l’accès aux fichiers."); }
+        catch (Exception) { ShowError(Strings.Get("CS_054")); }
     }
 
     [RelayCommand]
     private async Task LaunchVoicemeeterAsync()
     {
         try { await Mixer.LaunchVoicemeeterCommand.ExecuteAsync(null); }
-        catch (Exception) { ShowError("Impossible de lancer Voicemeeter. Vérifiez son installation, puis réessayez."); }
+        catch (Exception) { ShowError(Strings.Get("CS_055")); }
     }
 
     private void ShowError(string message)

@@ -1,3 +1,4 @@
+using Mixdeck.App.Localization;
 using System.ComponentModel;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Automation;
@@ -62,7 +63,7 @@ public sealed partial class RoutingPage : Page
             Grid.SetRow(row, i + 1); Grid.SetColumnSpan(row, busCount + 1);
             Matrix.Children.Add(row); _rows[i] = row;
         }
-        Put(new TextBlock { Text = "Entrées / Sorties", Style = (Style)Application.Current.Resources["BodyStrongTextBlockStyle"], VerticalAlignment = VerticalAlignment.Center }, 0, 0);
+        Put(new TextBlock { Text = Strings.Get("CS_090"), Style = (Style)Application.Current.Resources["BodyStrongTextBlockStyle"], VerticalAlignment = VerticalAlignment.Center }, 0, 0);
         for (var bus = 0; bus < busCount; bus++)
         {
             var output = ViewModel.Mixer.Buses[bus];
@@ -70,7 +71,7 @@ public sealed partial class RoutingPage : Page
             header.Children.Add(new TextBlock { Text = output.BusName, Style = (Style)Application.Current.Resources["BodyStrongTextBlockStyle"], HorizontalAlignment = HorizontalAlignment.Center });
             header.Children.Add(new TextBlock { Tag = output, Text = output.DisplayName, MaxWidth = 100, TextTrimming = TextTrimming.CharacterEllipsis, FontSize = 12, HorizontalAlignment = HorizontalAlignment.Center, Visibility = CustomNameVisibility(output) });
             var kind = (TextBlock)((DataTemplate)Resources["ColumnKind"]).LoadContent();
-            kind.Text = output.IsVirtual ? "Virtuelle" : "Physique";
+            kind.Text = output.IsVirtual ? Strings.Get("CS_091") : Strings.Get("CS_092");
             header.Children.Add(kind);
             Put(header, 0, bus + 1);
         }
@@ -167,7 +168,7 @@ public sealed partial class RoutingPage : Page
     {
         var bus = ViewModel.Mixer.Buses[route.BusIndex];
         var target = bus.DisplayName == route.BusName ? route.BusName : $"{route.BusName}, {bus.DisplayName}";
-        AutomationProperties.SetName(button, $"{ViewModel.Mixer.Strips[route.StripIndex].DisplayName} vers {target}");
+        AutomationProperties.SetName(button, Strings.Format("CS_RouteName", ViewModel.Mixer.Strips[route.StripIndex].DisplayName, target));
     }
 
     private void Highlight(int row, int column)

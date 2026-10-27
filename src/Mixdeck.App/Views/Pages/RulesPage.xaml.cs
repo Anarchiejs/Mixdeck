@@ -1,4 +1,5 @@
-﻿using Microsoft.UI.Xaml;
+using Mixdeck.App.Localization;
+using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Mixdeck.App.ViewModels.Pages;
 using Mixdeck.App.Views.Pages.Settings;
@@ -37,11 +38,11 @@ public sealed partial class RulesPage : Page
             var dialog = new ContentDialog
             {
                 XamlRoot = XamlRoot,
-                Language = "fr-FR",
-                Title = item is null ? "Créer une règle" : "Modifier la règle",
+                Language = Strings.Language,
+                Title = item is null ? Strings.Get("CS_093") : Strings.Get("CS_094"),
                 Content = editor,
-                PrimaryButtonText = "Enregistrer",
-                CloseButtonText = "Annuler",
+                PrimaryButtonText = Strings.Get("CS_095"),
+                CloseButtonText = Strings.Get("CS_086"),
                 DefaultButton = ContentDialogButton.Primary,
                 IsPrimaryButtonEnabled = editorModel.CanSave,
             };
@@ -85,11 +86,11 @@ public sealed partial class RulesPage : Page
             var dialog = new ContentDialog
             {
                 XamlRoot = XamlRoot,
-                Language = "fr-FR",
-                Title = "Supprimer cette règle ?",
-                Content = new TextBlock { Text = $"La règle « {item.Name} » sera supprimée. Cette action est définitive.", TextWrapping = TextWrapping.Wrap },
-                PrimaryButtonText = "Supprimer",
-                CloseButtonText = "Annuler",
+                Language = Strings.Language,
+                Title = Strings.Get("CS_096"),
+                Content = new TextBlock { Text = Strings.Format("CS_DeleteRule", item.Name), TextWrapping = TextWrapping.Wrap },
+                PrimaryButtonText = Strings.Get("CS_097"),
+                CloseButtonText = Strings.Get("CS_086"),
                 DefaultButton = ContentDialogButton.Close,
             };
             if (await dialog.ShowAsync() == ContentDialogResult.Primary) await ViewModel.DeleteAsync(item);

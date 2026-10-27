@@ -1,3 +1,4 @@
+using Mixdeck.App.Localization;
 using Microsoft.Graphics.Canvas;
 using Microsoft.Graphics.Canvas.Brushes;
 using Microsoft.Graphics.Canvas.Text;
@@ -29,7 +30,7 @@ public sealed class VuMeter : Control
     {
         DefaultStyleKey = typeof(VuMeter);
         ControlResources.Load(this);
-        AutomationProperties.SetName(this, "Niveau audio");
+        AutomationProperties.SetName(this, Strings.Get("CS_006"));
         // AccessibilitySettings.HighContrastChanged n'existe pas pour une appli de bureau WinUI (0x80070490) :
         // le passage en contraste élevé change le thème des ressources et déclenche ActualThemeChanged.
         Loaded += (_, _) => AttachCanvas();
@@ -150,7 +151,7 @@ public sealed class VuMeter : Control
         protected override AutomationControlType GetAutomationControlTypeCore() => AutomationControlType.ProgressBar;
         protected override object GetPatternCore(PatternInterface pattern) => pattern == PatternInterface.Value ? this : base.GetPatternCore(pattern);
         public bool IsReadOnly => true;
-        public string Value => owner.IsStereo ? $"Gauche {ControlResources.Db(owner.LeftDb)}, droite {ControlResources.Db(owner.RightDb)}" : ControlResources.Db(owner.LeftDb);
-        public void SetValue(string value) => throw new InvalidOperationException("Le niveau est en lecture seule.");
+        public string Value => owner.IsStereo ? Strings.Format("CS_StereoLevel", ControlResources.Db(owner.LeftDb), ControlResources.Db(owner.RightDb)) : ControlResources.Db(owner.LeftDb);
+        public void SetValue(string value) => throw new InvalidOperationException(Strings.Get("CS_007"));
     }
 }

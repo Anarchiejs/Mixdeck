@@ -38,9 +38,9 @@
         <controls:MuteToggle Grid.Column="2" VerticalAlignment="Center"
                              IsChecked="{x:Bind Session.IsMuted, Mode=TwoWay}"
                              AutomationProperties.Name="{x:Bind Session.MuteLabel, Mode=OneWay}" />
-        <Button Grid.Column="3" VerticalAlignment="Center" Padding="4" Click="OnRouteClick"
+        <Button x:Uid="AppVolumeRow001" Grid.Column="3" VerticalAlignment="Center" Padding="4" Click="OnRouteClick"
                 Visibility="{x:Bind local:AppVolumeList.ToVisibility(Session.CanRoute), Mode=OneWay}"
-                AutomationProperties.Name="Envoyer vers…" ToolTipService.ToolTip="Envoyer vers…">
+                 >
             <FontIcon FontFamily="{StaticResource MixdeckIconFont}" Glyph="&#xE712;" FontSize="16" />
         </Button>
     </Grid>

@@ -1,3 +1,4 @@
+using Mixdeck.App.Localization;
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using Mixdeck.Core.Abstractions;
@@ -20,7 +21,7 @@ public sealed partial class StripViewModel : ChannelViewModel
 
     public bool HasEq => IsVirtual;
 
-    public string KindText => IsVirtual ? "Entrée virtuelle" : "Entrée physique";
+    public string KindText => IsVirtual ? Strings.Get("CS_080") : Strings.Get("CS_081");
 
     /// <summary>Routage vers A1, A2, A3, B1, B2.</summary>
     public ObservableCollection<RouteViewModel> Routes { get; }
@@ -45,7 +46,7 @@ public sealed partial class StripViewModel : ChannelViewModel
 
     protected override string MuteParameter => VmParam.StripMute(Index);
 
-    protected override string DefaultName => Layout.DefaultStripLabels[Index];
+    protected override string DefaultName => IsVirtual ? Layout.DefaultStripLabels[Index] : Strings.Format("Core_InputName", Index + 1);
 
     // Micro pour les entrées physiques, prise pour les entrées virtuelles.
     protected override string DefaultIcon => IsVirtual ? "" : "";
