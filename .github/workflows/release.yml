@@ -1,0 +1,91 @@
+name: Publication
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  velopack:
+    name: Empaquetage Velopack
+    runs-on: windows-latest
+    steps:
+      - name: Récupérer le code
+        uses: actions/checkout@v4
+
+      - name: Installer le SDK .NET (cache NuGet)
+        uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+          cache: true
+          cache-dependency-path: |
+            Directory.Packages.props
+            **/*.csproj
+
+      - name: Lire la version et les notes
+        id: version
+        shell: pwsh
+        run: |
+          $tag = '${{ github.ref_name }}'
+          if (-not $tag.StartsWith('v')) {
+            Write-Error "Étiquette inattendue : $tag"
+            exit 1
+          }
+          $version = $tag.Substring(1)
+          if ($version -notmatch '^\d+\.\d+\.\d+([-+][0-9A-Za-z.-]+)?$') {
+            Write-Error "Version invalide : $version"
+            exit 1
+          }
+          $changelogPath = Join-Path (Get-Location) 'CHANGELOG.md'
+          if (-not (Test-Path -LiteralPath $changelogPath)) {
+            Write-Error 'CHANGELOG.md introuvable.'
+            exit 1
+          }
+          $changelog = Get-Content -LiteralPath $changelogPath -Raw -Encoding utf8
+          $escaped = [regex]::Escape($version)
+          $chunks = [regex]::Split($changelog, '(?m)^(?=## )')
+          $section = $chunks | Where-Object { $_ -match "^## \[$escaped\]" } | Select-Object -First 1
+          if ([string]::IsNullOrWhiteSpace($section)) {
+            Write-Error "Aucune section CHANGELOG pour $version. Ajoutez « ## [$version] » avant d'étiqueter."
+            exit 1
+          }
+          $kept = foreach ($line in ($section -split '\r?\n')) {
+            if ($line -match '^\[[^\]]+\]:\s+\S') { continue }
+            $line
+          }
+          $notes = (($kept -join "`n").Trim()) + "`n"
+          if ([string]::IsNullOrWhiteSpace($notes)) {
+            Write-Error "La section CHANGELOG de $version est vide."
+            exit 1
+          }
+          $notesPath = Join-Path (Get-Location) 'release-notes.md'
+          $utf8 = New-Object System.Text.UTF8Encoding $false
+          [System.IO.File]::WriteAllText($notesPath, $notes, $utf8)
+          Add-Content -Path $env:GITHUB_OUTPUT -Value "version=$version" -Encoding utf8NoBOM
+          Add-Content -Path $env:GITHUB_OUTPUT -Value "notes=$notesPath" -Encoding utf8NoBOM
+          Write-Host "Version : $version"
+
+      - name: Publier l'application
+        run: dotnet publish src/Mixdeck.App/Mixdeck.App.csproj -c Release -r win-x64 --self-contained "-p:Version=${{ steps.version.outputs.version }}" -o publish
+
+      - name: Restaurer l'outil vpk
+        run: dotnet tool restore
+
+      - name: Télécharger la release précédente (deltas)
+        id: download
+        continue-on-error: true
+        run: dotnet tool run vpk -- download github --repoUrl https://github.com/Anarchiejs/Mixdeck --token "${{ secrets.GITHUB_TOKEN }}"
+
+      - name: Pas de base delta
+        if: steps.download.outcome == 'failure'
+        shell: pwsh
+        run: Write-Host "Aucune release précédente utilisable. Le paquet sera complet, sans delta."
+
+      - name: Empaqueter
+        run: dotnet tool run vpk -- pack --packId Mixdeck --packVersion ${{ steps.version.outputs.version }} --packDir publish --mainExe Mixdeck.exe --packTitle Mixdeck --icon src/Mixdeck.App/Assets/Mixdeck.ico
+
+      - name: Envoyer sur GitHub Releases
+        run: dotnet tool run vpk -- upload github --repoUrl https://github.com/Anarchiejs/Mixdeck --publish --releaseName "Mixdeck ${{ steps.version.outputs.version }}" --tag v${{ steps.version.outputs.version }} --releaseNotes "${{ steps.version.outputs.notes }}" --token "${{ secrets.GITHUB_TOKEN }}"

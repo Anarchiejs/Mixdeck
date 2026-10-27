@@ -1,0 +1,39 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  build:
+    name: Compilation et tests
+    runs-on: windows-latest
+    steps:
+      - name: Récupérer le code
+        uses: actions/checkout@v4
+
+      - name: Installer le SDK .NET (cache NuGet)
+        uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+          cache: true
+          cache-dependency-path: |
+            Directory.Packages.props
+            **/*.csproj
+
+      - name: Restaurer
+        run: dotnet restore Mixdeck.slnx
+
+      - name: Compiler
+        run: dotnet build Mixdeck.slnx -c Release -nologo
+
+      - name: Tester
+        run: dotnet test Mixdeck.slnx -c Release -nologo --logger "console;verbosity=minimal" --logger trx --results-directory TestResults
+
+      - name: Publier les résultats de tests
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: resultats-tests
+          path: "**/TestResults/**/*.trx"
+          if-no-files-found: warn
