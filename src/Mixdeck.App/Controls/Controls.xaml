@@ -1,0 +1,13 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <ResourceDictionary.MergedDictionaries>
+        <ResourceDictionary Source="ms-appx:///Themes/Mixdeck.xaml" />
+        <ResourceDictionary Source="ms-appx:///Controls/Generic/VuMeter.xaml" />
+        <ResourceDictionary Source="ms-appx:///Controls/Generic/Fader.xaml" />
+        <ResourceDictionary Source="ms-appx:///Controls/Generic/RouteButton.xaml" />
+        <ResourceDictionary Source="ms-appx:///Controls/Generic/MuteToggle.xaml" />
+        <ResourceDictionary Source="ms-appx:///Controls/Generic/MicButton.xaml" />
+        <ResourceDictionary Source="ms-appx:///Controls/Generic/ProfilePill.xaml" />
+        <ResourceDictionary Source="ms-appx:///Controls/Generic/ProfilePillList.xaml" />
+        <ResourceDictionary Source="ms-appx:///Controls/Generic/ChannelHeader.xaml" />
+    </ResourceDictionary.MergedDictionaries>
+</ResourceDictionary>

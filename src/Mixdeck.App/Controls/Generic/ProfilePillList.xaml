@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:local="using:Mixdeck.App.Controls">
+  <Style TargetType="local:ProfilePillList">
+    <Setter Property="IsTabStop" Value="False" />
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="local:ProfilePillList">
+          <ListView x:Name="PART_List" ItemsSource="{TemplateBinding ItemsSource}" SelectionMode="Single" IsItemClickEnabled="True" ScrollViewer.HorizontalScrollBarVisibility="Auto" ScrollViewer.HorizontalScrollMode="Enabled" ScrollViewer.VerticalScrollBarVisibility="Disabled" ScrollViewer.VerticalScrollMode="Disabled" SingleSelectionFollowsFocus="False" AutomationProperties.Name="Profils">
+            <ListView.ItemsPanel>
+              <ItemsPanelTemplate>
+                <ItemsStackPanel Orientation="Horizontal" />
+              </ItemsPanelTemplate>
+            </ListView.ItemsPanel>
+            <ListView.ItemContainerStyle>
+              <Style TargetType="ListViewItem">
+                <Setter Property="Padding" Value="0" />
+                <Setter Property="Margin" Value="0,0,4,0" />
+                <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+              </Style>
+            </ListView.ItemContainerStyle>
+            <ListView.ItemTemplate>
+              <DataTemplate>
+                <local:ProfilePill ProfileName="{Binding Name}" Icon="{Binding Icon}" Color="{Binding Color}" IsActive="{Binding IsActive}" IsHitTestVisible="False" IsTabStop="False" />
+              </DataTemplate>
+            </ListView.ItemTemplate>
+          </ListView>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </Style>
+</ResourceDictionary>
