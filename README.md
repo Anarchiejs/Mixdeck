@@ -6,12 +6,18 @@ Le projet est en cours de construction vers la v1.0 : l'appli compile, démarre 
 
 ## Fonctionnalités
 
-- Panneau rapide ancré à la barre des tâches.
+- Icône toujours visible près de l'horloge : clic gauche = panneau, clic milieu = couper le micro, info-bulle avec l'état du micro, le volume A1 et le profil.
+- Panneau rapide ancré à la barre des tâches, molette = volume de la ligne survolée.
+- Volume par application (Discord, jeu, navigateur…) et « Envoyer vers… » pour choisir la sortie d'une application.
+- Page Appareils : micro, casque et enceintes de Voicemeeter, préréglages du micro (porte de bruit, compresseur, voix plus claire), redémarrage du moteur audio.
+- Atténuation automatique : la musique baisse quand quelqu'un parle sur Discord.
+- Badge permanent et son de confirmation quand le micro est coupé.
 - Console de mixage.
 - Matrice de routage.
 - Profils rappelés avec un fondu.
 - Règles par application.
-- Raccourcis globaux et push-to-talk.
+- Raccourcis globaux, push-to-talk, raccourci par profil et profil appliqué au démarrage.
+- Journal des plantages et relance automatique unique.
 - Affichage à l'écran (OSD).
 - Installation et mises à jour par [Velopack](https://velopack.io/), avec paquets delta publiés sur GitHub Releases.
 
