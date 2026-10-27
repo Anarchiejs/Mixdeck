@@ -11,6 +11,8 @@
     <!-- Appli non empaquetée (installée par Velopack), Windows App SDK embarqué. -->
     <WindowsPackageType>None</WindowsPackageType>
     <WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>
+    <!-- Indispensable pour que dotnet publish copie Mixdeck.pri (XAML compilé) dans une appli non empaquetée. -->
+    <EnableMsixTooling>true</EnableMsixTooling>
     <Platforms>x64</Platforms>
     <RuntimeIdentifiers>win-x64</RuntimeIdentifiers>
     <ApplicationManifest>app.manifest</ApplicationManifest>
