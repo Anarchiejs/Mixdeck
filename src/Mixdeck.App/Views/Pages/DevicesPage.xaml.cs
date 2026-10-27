@@ -2,6 +2,7 @@ using Mixdeck.App.Localization;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Mixdeck.App.ViewModels.Pages;
+using Mixdeck.App.ViewModels.Shared;
 
 namespace Mixdeck.App.Views.Pages;
 
@@ -14,6 +15,7 @@ public sealed partial class DevicesPage : Page
         InitializeComponent();
     }
     public DevicesPageViewModel ViewModel { get; }
+    public MixerViewModel Mixer { get; } = App.GetService<MixerViewModel>();
     private void OnLoaded(object sender, RoutedEventArgs e) => ViewModel.Activate();
     private void OnUnloaded(object sender, RoutedEventArgs e) => ViewModel.Deactivate();
     private async void OnRestartEngine(object sender, RoutedEventArgs e)

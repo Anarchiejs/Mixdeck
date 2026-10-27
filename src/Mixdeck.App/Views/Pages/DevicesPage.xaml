@@ -49,6 +49,9 @@
                     <TextBlock Text="{x:Bind ViewModel.SelectedPreset.Description, Mode=OneWay}" TextWrapping="Wrap" />
                     <Button x:Uid="DevicesPage011"  Command="{x:Bind ViewModel.ApplyPresetCommand}" IsEnabled="{x:Bind ViewModel.CanApplyPreset, Mode=OneWay}" />
                 </StackPanel></Border>
+                <settings:SettingCard x:Uid="DevicesPage017" Glyph="&#xE7F6;" Description="{x:Bind Mixer.MonitorDescription, Mode=OneWay}">
+                    <settings:SettingCard.ActionContent><ToggleSwitch x:Uid="DevicesPage018" IsOn="{x:Bind Mixer.IsMonitoring, Mode=TwoWay}" IsEnabled="{x:Bind Mixer.CanToggleMonitor, Mode=OneWay}" /></settings:SettingCard.ActionContent>
+                </settings:SettingCard>
             </StackPanel>
             <StackPanel Spacing="8">
                 <TextBlock x:Uid="DevicesPage012"  Style="{StaticResource SubtitleTextBlockStyle}" />

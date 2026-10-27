@@ -72,7 +72,7 @@ public sealed partial class MixerViewModel : ObservableObject, IDisposable
     public bool ShowNoProfilesHint => Profiles.Count == 0;
 
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(IsConnected), nameof(IsDisconnected), nameof(ConnectionTitle), nameof(ConnectionMessage), nameof(CanLaunchVoicemeeter), nameof(CanToggleMic))]
+    [NotifyPropertyChangedFor(nameof(IsConnected), nameof(IsDisconnected), nameof(ConnectionTitle), nameof(ConnectionMessage), nameof(CanLaunchVoicemeeter), nameof(CanToggleMic), nameof(CanToggleMonitor))]
     public partial MixerConnectionState ConnectionState { get; set; }
 
     [ObservableProperty]
@@ -104,6 +104,31 @@ public sealed partial class MixerViewModel : ObservableObject, IDisposable
         get => HasMic && Mic.IsMuted;
         set { if (CanToggleMic) Mic.IsMuted = value; }
     }
+
+    /// <summary>Route du micro vers le premier bus physique (A1, le casque en général) : s'entendre parler.</summary>
+    private RouteViewModel? MonitorRoute => HasMic && Mic.Routes.Count > 0 ? Mic.Routes[0] : null;
+
+    public bool CanToggleMonitor => CanToggleMic && MonitorRoute is not null;
+
+    public bool IsMonitoring
+    {
+        get => MonitorRoute?.IsOn == true;
+        set
+        {
+            if (CanToggleMonitor && MonitorRoute is { } route && route.IsOn != value)
+            {
+                route.IsOn = value;
+                OnPropertyChanged();
+            }
+        }
+    }
+
+    /// <summary>Où l'on s'entend, ex. « Retour du micro dans A1 · Casque ».</summary>
+    public string MonitorDescription => Buses.Count == 0
+        ? string.Empty
+        : Buses[0].DisplayName == Buses[0].BusName
+            ? Strings.Format("CS_MonitorTarget", Buses[0].BusName)
+            : Strings.Format("CS_MonitorTarget", $"{Buses[0].BusName} · {Buses[0].DisplayName}");
 
     public bool CanLaunchVoicemeeter => ConnectionState == MixerConnectionState.VoicemeeterNotRunning;
 
@@ -261,6 +286,8 @@ public sealed partial class MixerViewModel : ObservableObject, IDisposable
             OnPropertyChanged(nameof(ConnectionTitle));
         }
         OnPropertyChanged(nameof(IsMicMuted));
+        OnPropertyChanged(nameof(IsMonitoring));
+        OnPropertyChanged(nameof(MonitorDescription));
     }
 
     private void RebuildChannels(MixerLayout layout)
@@ -306,6 +333,9 @@ public sealed partial class MixerViewModel : ObservableObject, IDisposable
         OnPropertyChanged(nameof(CanToggleMic));
         OnPropertyChanged(nameof(IsMicMuted));
         OnPropertyChanged(nameof(MicDisplayName));
+        OnPropertyChanged(nameof(CanToggleMonitor));
+        OnPropertyChanged(nameof(IsMonitoring));
+        OnPropertyChanged(nameof(MonitorDescription));
     }
 
     private void OnMicPropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)

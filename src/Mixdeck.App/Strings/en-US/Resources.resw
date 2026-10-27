@@ -1593,4 +1593,28 @@
   <data name="Hotkey_NumDigit" xml:space="preserve">
     <value>Num {0}</value>
   </data>
+  <data name="CS_MonitorTarget" xml:space="preserve">
+    <value>Microphone sent to {0}</value>
+  </data>
+  <data name="FlyoutWindow011.Text" xml:space="preserve">
+    <value>Hear myself</value>
+  </data>
+  <data name="FlyoutWindow012.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Hear myself: play my microphone in the headphones</value>
+  </data>
+  <data name="FlyoutWindow012.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
+    <value>Play my microphone in the headphones</value>
+  </data>
+  <data name="DevicesPage017.Title" xml:space="preserve">
+    <value>Hear myself</value>
+  </data>
+  <data name="DevicesPage018.OnContent" xml:space="preserve">
+    <value>On</value>
+  </data>
+  <data name="DevicesPage018.OffContent" xml:space="preserve">
+    <value>Off</value>
+  </data>
+  <data name="DevicesPage018.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Hear myself: play my microphone in the headphones</value>
+  </data>
 </root>

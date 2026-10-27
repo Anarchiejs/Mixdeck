@@ -72,10 +72,9 @@
             </InfoBar.ActionButton>
         </InfoBar>
 
-        <!-- Gros bouton Micro -->
+        <!-- Gros bouton Micro, puis retour du micro dans le casque -->
+        <StackPanel Grid.Row="2" Margin="12,0,12,8" Spacing="4">
         <ToggleButton
-            Grid.Row="2"
-            Margin="12,0,12,8"
             HorizontalAlignment="Stretch"
             AutomationProperties.Name="{x:Bind shared:Converters.MicLabel(Mixer.IsMicMuted), Mode=OneWay}"
             IsChecked="{x:Bind Mixer.IsMicMuted, Mode=TwoWay}"
@@ -96,6 +95,30 @@
                 </StackPanel>
             </Grid>
         </ToggleButton>
+        <Grid Padding="12,2,4,2" ColumnSpacing="12">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <FontIcon VerticalAlignment="Center" FontSize="16" Glyph="&#xE7F6;" />
+            <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                <TextBlock x:Uid="FlyoutWindow011" Style="{StaticResource BodyTextBlockStyle}" />
+                <TextBlock
+                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                    Style="{StaticResource CaptionTextBlockStyle}"
+                    Text="{x:Bind Mixer.MonitorDescription, Mode=OneWay}"
+                    TextTrimming="CharacterEllipsis" />
+            </StackPanel>
+            <ToggleSwitch x:Uid="FlyoutWindow012"
+                Grid.Column="2"
+                MinWidth="0"
+                IsEnabled="{x:Bind Mixer.CanToggleMonitor, Mode=OneWay}"
+                IsOn="{x:Bind Mixer.IsMonitoring, Mode=TwoWay}"
+                OffContent=""
+                OnContent="" />
+        </Grid>
+        </StackPanel>
 
         <!-- Entrées et sorties -->
         <ScrollViewer
