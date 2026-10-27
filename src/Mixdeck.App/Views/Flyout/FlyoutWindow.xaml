@@ -35,6 +35,13 @@
                 ItemsSource="{x:Bind Mixer.Profiles}"
                 SelectedItem="{x:Bind Mixer.ActiveProfile, Mode=OneWay}"
                 ItemInvoked="OnProfileInvoked" />
+            <TextBlock
+                VerticalAlignment="Center"
+                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                Style="{StaticResource CaptionTextBlockStyle}"
+                Text="Aucun profil : + enregistre l'état actuel"
+                TextWrapping="Wrap"
+                Visibility="{x:Bind Mixer.ShowNoProfilesHint, Mode=OneWay}" />
             <Button
                 Grid.Column="1"
                 Margin="8,0,0,0"
@@ -92,7 +99,7 @@
         <!-- Entrées et sorties -->
         <ScrollViewer
             Grid.Row="3"
-            Padding="12,0,12,0"
+            Padding="12,0,12,8"
             HorizontalScrollMode="Disabled"
             VerticalScrollBarVisibility="Auto">
             <StackPanel Spacing="4">
@@ -100,30 +107,24 @@
                     Margin="4,4,0,2"
                     Style="{StaticResource CaptionTextBlockStyle}"
                     Text="Entrées" />
-                <ItemsRepeater ItemsSource="{x:Bind Mixer.Strips}">
-                    <ItemsRepeater.Layout>
-                        <StackLayout Spacing="4" />
-                    </ItemsRepeater.Layout>
-                    <ItemsRepeater.ItemTemplate>
+                <ItemsControl ItemsSource="{x:Bind Mixer.Strips}">
+                    <ItemsControl.ItemTemplate>
                         <DataTemplate x:DataType="shared:StripViewModel">
                             <local:ChannelRow Channel="{x:Bind}" Visibility="{x:Bind ShowInFlyout, Mode=OneWay}" />
                         </DataTemplate>
-                    </ItemsRepeater.ItemTemplate>
-                </ItemsRepeater>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
                 <TextBlock
                     Margin="4,10,0,2"
                     Style="{StaticResource CaptionTextBlockStyle}"
                     Text="Sorties" />
-                <ItemsRepeater ItemsSource="{x:Bind Mixer.Buses}">
-                    <ItemsRepeater.Layout>
-                        <StackLayout Spacing="4" />
-                    </ItemsRepeater.Layout>
-                    <ItemsRepeater.ItemTemplate>
+                <ItemsControl ItemsSource="{x:Bind Mixer.Buses}">
+                    <ItemsControl.ItemTemplate>
                         <DataTemplate x:DataType="shared:BusViewModel">
                             <local:ChannelRow Channel="{x:Bind}" Visibility="{x:Bind ShowInFlyout, Mode=OneWay}" />
                         </DataTemplate>
-                    </ItemsRepeater.ItemTemplate>
-                </ItemsRepeater>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
             </StackPanel>
         </ScrollViewer>
 

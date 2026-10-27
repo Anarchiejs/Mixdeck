@@ -68,6 +68,11 @@ public sealed partial class MixerViewModel : ObservableObject, IDisposable
 
     public ObservableCollection<ProfileItemViewModel> Profiles { get; } = [];
 
+    public bool HasProfiles => Profiles.Count > 0;
+
+    /// <summary>Affiche l'aide « aucun profil » du panneau.</summary>
+    public bool ShowNoProfilesHint => Profiles.Count == 0;
+
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsConnected), nameof(ConnectionTitle), nameof(ConnectionMessage), nameof(CanLaunchVoicemeeter))]
     public partial MixerConnectionState ConnectionState { get; set; }
@@ -298,6 +303,8 @@ public sealed partial class MixerViewModel : ObservableObject, IDisposable
         }
 
         UpdateActiveProfile();
+        OnPropertyChanged(nameof(HasProfiles));
+        OnPropertyChanged(nameof(ShowNoProfilesHint));
     }
 
     private void UpdateActiveProfile()

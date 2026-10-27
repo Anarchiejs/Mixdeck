@@ -17,8 +17,11 @@ public sealed class VuMeter : Control
     private CanvasControl? canvas;
     private readonly CanvasSolidColorBrush?[] brushes = new CanvasSolidColorBrush?[5];
     private CanvasTextFormat? textFormat;
-    private readonly Windows.UI.ViewManagement.AccessibilitySettings accessibility = new();
-    private readonly ResourceDictionary tokens = new() { Source = new Uri("ms-appx:///Themes/Mixdeck.xaml") };
+    // Partagé par tous les vumètres : relire le dictionnaire XAML à chaque instance coûte cher.
+    private static ResourceDictionary? sharedTokens;
+    // Lecture seule de l'état du contraste élevé (la propriété fonctionne, contrairement à l'événement).
+    private static readonly Windows.UI.ViewManagement.AccessibilitySettings accessibility = new();
+    private static ResourceDictionary tokens => sharedTokens ??= new() { Source = new Uri("ms-appx:///Themes/Mixdeck.xaml") };
     private static readonly double[] Ticks = [-48, -24, -12, -6, 0, 6];
     private static readonly string[] Labels = ["−48", "−24", "−12", "−6", "0", "+6"];
 
@@ -27,13 +30,12 @@ public sealed class VuMeter : Control
         DefaultStyleKey = typeof(VuMeter);
         ControlResources.Load(this);
         AutomationProperties.SetName(this, "Niveau audio");
-        Loaded += (_, _) => { accessibility.HighContrastChanged += ContrastChanged; AttachCanvas(); };
-        Unloaded += (_, _) => { accessibility.HighContrastChanged -= ContrastChanged; DetachCanvas(); };
+        // AccessibilitySettings.HighContrastChanged n'existe pas pour une appli de bureau WinUI (0x80070490) :
+        // le passage en contraste élevé change le thème des ressources et déclenche ActualThemeChanged.
+        Loaded += (_, _) => AttachCanvas();
+        Unloaded += (_, _) => DetachCanvas();
         ActualThemeChanged += (_, _) => { ReleaseResources(); canvas?.Invalidate(); };
     }
-
-    private void ContrastChanged(Windows.UI.ViewManagement.AccessibilitySettings sender, object args) =>
-        DispatcherQueue.TryEnqueue(() => { ReleaseResources(); canvas?.Invalidate(); });
 
     private static DependencyProperty Level(string name, object initial) => DependencyProperty.Register(
         name, initial.GetType(), typeof(VuMeter), new PropertyMetadata(initial, Changed));

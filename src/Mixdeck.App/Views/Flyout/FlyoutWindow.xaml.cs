@@ -75,6 +75,16 @@ public sealed partial class FlyoutWindow : Window
         Activate();
         IsOpen = true;
         PlayOpenAnimation();
+
+        // La première mesure précède l'initialisation des liaisons x:Bind (bandeau, lignes masquées) :
+        // on recale la taille une fois la mise en page faite.
+        DispatcherQueue.TryEnqueue(Microsoft.UI.Dispatching.DispatcherQueuePriority.Low, () =>
+        {
+            if (IsOpen)
+            {
+                PlaceNearTray();
+            }
+        });
         ProfilePills.Focus(FocusState.Programmatic);
     }
 
