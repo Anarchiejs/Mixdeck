@@ -6,6 +6,9 @@ public sealed record Profile
     public required string Id { get; init; }
     public required string Name { get; init; }
 
+    /// <summary>Disposition à la capture ; les anciens profils sont des profils Banana.</summary>
+    public int VoicemeeterType { get; init; } = 2;
+
     /// <summary>Glyphe Segoe Fluent Icons (ex. "" micro, "" jeu, "" musique).</summary>
     public string Icon { get; init; } = "";
 
@@ -20,7 +23,7 @@ public sealed record Profile
     public static string NewId() => Guid.NewGuid().ToString("N");
 }
 
-/// <param name="Routes">5 booléens A1, A2, A3, B1, B2.</param>
+/// <param name="Routes">Routages dans l'ordre des bus du type de Voicemeeter enregistré.</param>
 public sealed record StripProfile(int Index, float Gain, bool Mute, IReadOnlyList<bool> Routes, float PanX = 0f);
 
 public sealed record BusProfile(int Index, float Gain, bool Mute);

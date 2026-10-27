@@ -21,17 +21,17 @@ public sealed partial class DevicesPageViewModel : ObservableObject
     private bool active;
     private bool loading;
     private int refreshVersion;
+    private MixerLayout layout = MixerLayout.Banana;
 
     public DevicesPageViewModel(IMixer mixer, ISettingsStore settings, IUiDispatcher ui)
     {
         this.mixer = mixer; this.settings = settings; this.ui = ui;
-        foreach (var index in Enumerable.Range(0, BananaLayout.PhysicalStripCount)) Inputs.Add(new(this, index, false));
-        foreach (var index in Enumerable.Range(0, BananaLayout.PhysicalBusCount)) Outputs.Add(new(this, index, true));
         RefreshSettings();
     }
 
     public ObservableCollection<DeviceRowViewModel> Inputs { get; } = [];
     public ObservableCollection<DeviceRowViewModel> Outputs { get; } = [];
+    public MixerLayout Layout => layout;
     public IReadOnlyList<MicPresetDefinition> Presets => MicPresets.All;
     public bool CanEdit => IsConnected && !IsRefreshing;
     public bool CanApplyPreset => CanEdit && IsPhysicalMic;
@@ -78,28 +78,47 @@ public sealed partial class DevicesPageViewModel : ObservableObject
     {
         if (!active) return;
         IsConnected = state == MixerConnectionState.Connected;
+        RefreshSettings();
         refreshVersion++;
         IsRefreshing = false;
         if (!IsConnected) Report("Le moteur audio est hors connexion. Les appareils seront relus à la reconnexion.", true);
         else _ = RefreshDevicesAsync();
     });
     private void OnSettingsChanged(object? sender, AppSettings value) => ui.Post(() => { if (active) RefreshSettings(); });
-    private void OnSnapshotChanged(object? sender, MixerSnapshot value) => ui.Post(() => { if (active) RefreshSettings(); });
+    private void OnSnapshotChanged(object? sender, MixerSnapshot value) => ui.Post(() =>
+    {
+        if (!active) return;
+        var changed = layout != mixer.Snapshot.Layout;
+        RefreshSettings();
+        if (changed && mixer.State == MixerConnectionState.Connected) _ = RefreshDevicesAsync();
+    });
 
     private string ChannelName(int index, bool bus)
     {
         var custom = bus ? settings.Current.BusCustomization(index) : settings.Current.StripCustomization(index);
         if (!string.IsNullOrWhiteSpace(custom.DisplayName)) return custom.DisplayName;
-        var label = bus ? mixer.Snapshot.Buses[index].Label : mixer.Snapshot.Strips[index].Label;
-        return string.IsNullOrWhiteSpace(label) ? (bus ? BananaLayout.BusNames[index] : BananaLayout.DefaultStripLabels[index]) : label;
+        var snapshot = mixer.Snapshot;
+        var label = bus ? snapshot.Buses.ElementAtOrDefault(index)?.Label : snapshot.Strips.ElementAtOrDefault(index)?.Label;
+        return string.IsNullOrWhiteSpace(label) ? (bus ? layout.BusNames[index] : layout.DefaultStripLabels[index]) : label;
     }
     private void RefreshSettings()
     {
         loading = true;
+        var currentLayout = mixer.Snapshot.Layout;
+        if (layout != currentLayout || Inputs.Count != currentLayout.PhysicalStripCount)
+        {
+            refreshVersion++;
+            IsRefreshing = false;
+            layout = currentLayout;
+            Inputs.Clear();
+            Outputs.Clear();
+            foreach (var channel in Enumerable.Range(0, layout.PhysicalStripCount)) Inputs.Add(new(this, channel, false));
+            foreach (var channel in Enumerable.Range(0, layout.PhysicalBusCount)) Outputs.Add(new(this, channel, true));
+        }
         foreach (var row in Inputs.Concat(Outputs)) row.Name = ChannelName(row.Index, row.IsBus);
         var index = settings.Current.MicStripIndex;
-        IsPhysicalMic = index is >= 0 and < BananaLayout.PhysicalStripCount;
-        MicName = index is >= 0 and < BananaLayout.StripCount ? ChannelName(index, false) : "Micro non configuré";
+        IsPhysicalMic = index >= 0 && index < layout.PhysicalStripCount;
+        MicName = index >= 0 && index < layout.StripCount ? ChannelName(index, false) : "Micro non configuré";
         SelectedPreset = Presets.FirstOrDefault(p => p.Preset == settings.Current.MicPreset) ?? Presets[0];
         HideVoicemeeterWindow = settings.Current.HideVoicemeeterWindow;
         loading = false;
@@ -156,7 +175,8 @@ public sealed partial class DevicesPageViewModel : ObservableObject
         try
         {
             if (mixer.State != MixerConnectionState.Connected) { Report("Le moteur audio est hors connexion.", true); return; }
-            mixer.ApplyScript(MicPresets.CreateScript(strip, preset.Preset));
+            if (strip < 0 || strip >= mixer.Layout.PhysicalStripCount) return;
+            mixer.ApplyScript(MicPresets.CreateScript(strip, preset.Preset, mixer.Layout));
             var saved = await SettingsWriter.UpdateAsync(settings, s => s with { MicPreset = preset.Preset });
             Report(saved ? "Préréglage « " + preset.Name + " » transmis au micro." : "Le traitement a été transmis, mais le choix n’a pas pu être enregistré.", !saved);
         }
@@ -197,10 +217,11 @@ public sealed record DeviceChoice(AudioDevice? Device, string Name, bool IsCurre
 public sealed partial class DeviceRowViewModel(DevicesPageViewModel owner, int index, bool isBus) : ObservableObject
 {
     private bool loading;
+    private readonly string kind = isBus ? owner.Layout.BusNames[index] + " · Sortie physique" : "Entrée physique " + (index + 1);
     public DevicesPageViewModel Owner => owner;
     public int Index => index;
     public bool IsBus => isBus;
-    public string Kind => isBus ? BananaLayout.BusNames[index] + " · Sortie physique" : "Entrée physique " + (index + 1);
+    public string Kind => kind;
     // Liste simple : la ComboBox de WinUI n'affiche pas de groupes, le pilote figure donc dans chaque nom.
     public ObservableCollection<DeviceChoice> Choices { get; } = [];
     [ObservableProperty]

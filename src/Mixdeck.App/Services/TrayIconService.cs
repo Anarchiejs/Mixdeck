@@ -24,6 +24,7 @@ public sealed class TrayIconService : IDisposable
     private MenuFlyoutItem? _micItem;
     private readonly MicFeedbackService _feedback;
     private ProfileItemViewModel? _profile;
+    private BusViewModel? _bus;
     private bool _disposed;
 
     public TrayIconService(IShellService shell, MixerViewModel mixer, ISettingsStore settings,
@@ -83,15 +84,21 @@ public sealed class TrayIconService : IDisposable
         _icon.ForceCreate(enablesEfficiencyMode: false);
 
         _mixer.PropertyChanged += OnMixerPropertyChanged;
-        _mixer.Buses[0].PropertyChanged += OnBusPropertyChanged;
+        TrackBus();
         TrackProfile();
         Refresh();
     }
 
     private void OnMixerPropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
+        if (e.PropertyName == nameof(MixerViewModel.Layout))
+        {
+            TrackBus();
+            Refresh();
+        }
         if (e.PropertyName is nameof(MixerViewModel.IsMicMuted) or nameof(MixerViewModel.ActiveProfile)
-            or nameof(MixerViewModel.ConnectionState) or nameof(MixerViewModel.Mic))
+            or nameof(MixerViewModel.ConnectionState) or nameof(MixerViewModel.Mic)
+            or nameof(MixerViewModel.HasMic) or nameof(MixerViewModel.CanToggleMic))
         {
             TrackProfile();
             Refresh();
@@ -107,12 +114,12 @@ public sealed class TrayIconService : IDisposable
 
         var muted = _mixer.IsMicMuted;
         _icon.Icon = muted ? _mutedIcon : _normalIcon;
-        _micItem.Text = muted ? "Activer le micro" : "Couper le micro";
-        _micItem.IsEnabled = _mixer.IsConnected;
+        _micItem.Text = !_mixer.HasMic ? "Micro non configuré" : muted ? "Activer le micro" : "Couper le micro";
+        _micItem.IsEnabled = _mixer.CanToggleMic;
 
         var status = !_mixer.IsConnected
             ? _mixer.ConnectionTitle
-            : muted ? "Micro coupé" : "Micro activé";
+            : !_mixer.HasMic ? "Micro non configuré" : muted ? "Micro coupé" : "Micro activé";
         var gain = _mixer.Buses[0].Gain.ToString("0.##", CultureInfo.GetCultureInfo("fr-FR")).Replace("-", "−");
         var volume = _mixer.IsConnected ? $" · A1 {gain} dB" : string.Empty;
         var profile = _mixer.ActiveProfile is { } p ? $"\nProfil {p.Name.Replace('\r', ' ').Replace('\n', ' ')}" : string.Empty;
@@ -129,6 +136,13 @@ public sealed class TrayIconService : IDisposable
     private void OnBusPropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
         if (e.PropertyName == nameof(BusViewModel.Gain)) Refresh();
+    }
+
+    private void TrackBus()
+    {
+        if (_bus is not null) _bus.PropertyChanged -= OnBusPropertyChanged;
+        _bus = _mixer.Buses[0];
+        _bus.PropertyChanged += OnBusPropertyChanged;
     }
 
     private void TrackProfile()
@@ -149,7 +163,8 @@ public sealed class TrayIconService : IDisposable
         if (_disposed) return;
         _disposed = true;
         _mixer.PropertyChanged -= OnMixerPropertyChanged;
-        _mixer.Buses[0].PropertyChanged -= OnBusPropertyChanged;
+        if (_bus is not null) _bus.PropertyChanged -= OnBusPropertyChanged;
+        _bus = null;
         if (_profile is not null) _profile.PropertyChanged -= OnProfilePropertyChanged;
         _profile = null;
         _feedback.Dispose();

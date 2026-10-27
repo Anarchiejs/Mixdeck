@@ -13,8 +13,9 @@ public sealed class VoicemeeterMixerTests
     [Theory]
     [InlineData(false, true, 2, MixerConnectionState.NotInstalled)]
     [InlineData(true, false, 2, MixerConnectionState.VoicemeeterNotRunning)]
-    [InlineData(true, true, 1, MixerConnectionState.UnsupportedType)]
-    [InlineData(true, true, 3, MixerConnectionState.UnsupportedType)]
+    [InlineData(true, true, 1, MixerConnectionState.Connected)]
+    [InlineData(true, true, 3, MixerConnectionState.Connected)]
+    [InlineData(true, true, 4, MixerConnectionState.UnsupportedType)]
     [InlineData(true, true, 2, MixerConnectionState.Connected)]
     public async Task ConnectsToExpectedState(bool installed, bool running, int type, MixerConnectionState expected)
     {
@@ -28,7 +29,7 @@ public sealed class VoicemeeterMixerTests
         events.Should().Equal(expected);
         if (expected == MixerConnectionState.Connected)
         {
-            mixer.VoicemeeterType.Should().Be(2);
+            mixer.VoicemeeterType.Should().Be(type);
             mixer.VoicemeeterVersion.Should().Be(api.Version);
             mixer.Snapshot.Strips[0].Label.Should().Be("Micro");
             api.Calls.Take(3).Select(c => c.Method).Should().Equal("Login", "IsParametersDirty", "GetVoicemeeterType");
@@ -294,14 +295,14 @@ public sealed class VoicemeeterMixerTests
         await using var mixer = Create(api, new());
         mixer.LevelsEnabled = true;
         mixer.Tick();
-        for (var i = 0; i < BananaLayout.StripCount; i++)
+        for (var i = 0; i < MixerLayout.Banana.StripCount; i++)
         {
-            var offset = BananaLayout.InputChannelOffset(i);
+            var offset = MixerLayout.Banana.InputChannelOffset(i);
             mixer.Levels.Strips[i].Should().Be(new StereoLevel(100 + offset, offset == 14 ? 0 : 101 + offset));
         }
-        for (var i = 0; i < BananaLayout.BusCount; i++)
+        for (var i = 0; i < MixerLayout.Banana.BusCount; i++)
         {
-            var offset = BananaLayout.OutputChannelOffset(i);
+            var offset = MixerLayout.Banana.OutputChannelOffset(i);
             mixer.Levels.Buses[i].Should().Be(new StereoLevel(300 + offset, 301 + offset));
         }
     }

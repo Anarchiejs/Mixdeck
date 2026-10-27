@@ -1,3 +1,5 @@
+using Mixdeck.Core.Model;
+
 namespace Mixdeck.App;
 
 /// <summary>Arguments de la ligne de commande.</summary>
@@ -9,10 +11,16 @@ namespace Mixdeck.App;
 /// <param name="AfterCrash">--after-crash : relance automatique après un plantage (voir CrashReporter).</param>
 public sealed record AppOptions(bool Demo, bool Minimized, bool Gallery, bool Flyout = false, string? Page = null, bool AfterCrash = false)
 {
+    /// <summary>Disposition du simulateur sélectionnée par --demo=standard|banana|potato.</summary>
+    public MixerLayout DemoLayout { get; init; } = MixerLayout.Banana;
+
     public static AppOptions Parse(IEnumerable<string> args)
     {
         var set = args.Select(a => a.Trim().ToLowerInvariant()).ToHashSet();
         var page = set.FirstOrDefault(a => a.StartsWith("--page=", StringComparison.Ordinal))?["--page=".Length..];
-        return new AppOptions(set.Contains("--demo"), set.Contains("--minimized"), set.Contains("--gallery"), set.Contains("--flyout"), page, set.Contains("--after-crash"));
+        var demoType = set.Contains("--demo=potato") ? 3 : set.Contains("--demo=standard") ? 1 : 2;
+        var demo = set.Contains("--demo") || set.Contains("--demo=banana") || set.Contains("--demo=potato") || set.Contains("--demo=standard");
+        return new AppOptions(demo, set.Contains("--minimized"), set.Contains("--gallery"), set.Contains("--flyout"), page, set.Contains("--after-crash"))
+        { DemoLayout = MixerLayout.ForType(demoType) };
     }
 }

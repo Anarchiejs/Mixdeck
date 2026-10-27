@@ -13,8 +13,8 @@ public static class VmParam
     public static string StripPanX(int strip) => $"Strip[{strip}].Pan_x";
     public static string StripLabel(int strip) => $"Strip[{strip}].Label";
 
-    /// <summary>Routage d'une entrée vers un bus : Strip[i].A1 … Strip[i].B2.</summary>
-    public static string StripRoute(int strip, int bus) => $"Strip[{strip}].{BananaLayout.BusNames[bus]}";
+    /// <summary>Routage d'une entrée vers un bus (A1 et B1 également sur Standard).</summary>
+    public static string StripRoute(int strip, int bus, MixerLayout? layout = null) => $"Strip[{strip}].{(layout ?? MixerLayout.Banana).BusNames[bus]}";
 
     /// <summary>Gain d'EQ d'une tranche virtuelle (band 0..2 → EQGain1..3).</summary>
     public static string StripEqGain(int strip, int band) => $"Strip[{strip}].EQGain{band + 1}";

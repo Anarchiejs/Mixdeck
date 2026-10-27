@@ -5,13 +5,13 @@ namespace Mixdeck.Voicemeeter;
 
 internal sealed class LevelSampler(IVoicemeeterApi api, int inputType)
 {
-    internal LevelFrame Sample(long timestamp)
+    internal LevelFrame Sample(long timestamp, MixerLayout layout)
     {
-        var strips = Enumerable.Range(0, BananaLayout.StripCount)
-            .Select(i => Read(inputType, BananaLayout.InputChannelOffset(i))).ToArray();
-        var buses = Enumerable.Range(0, BananaLayout.BusCount)
-            .Select(i => Read(3, BananaLayout.OutputChannelOffset(i))).ToArray();
-        return new(Array.AsReadOnly(strips), Array.AsReadOnly(buses), timestamp);
+        var strips = Enumerable.Range(0, layout.StripCount)
+            .Select(i => Read(inputType, layout.InputChannelOffset(i))).ToArray();
+        var buses = Enumerable.Range(0, layout.BusCount)
+            .Select(i => Read(3, layout.OutputChannelOffset(i))).ToArray();
+        return new(Array.AsReadOnly(strips), Array.AsReadOnly(buses), timestamp) { Layout = layout };
     }
 
     private StereoLevel Read(int type, int offset)

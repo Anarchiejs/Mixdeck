@@ -6,6 +6,71 @@ using Mixdeck.Core.Serialization;
 namespace Mixdeck.Core.Tests;
 public sealed class ProfileTests
 {
+    [Theory]
+    [InlineData(1, 2)]
+    [InlineData(1, 3)]
+    [InlineData(2, 1)]
+    [InlineData(2, 3)]
+    [InlineData(3, 1)]
+    [InlineData(3, 2)]
+    public async Task CrossLayoutProfilesPreserveBusNamesAndIgnoreMissingChannels(int fromType, int toType)
+    {
+        using var rig = new TestRig();
+        var source = MixerLayout.ForType(fromType);
+        var target = MixerLayout.ForType(toType);
+        rig.Mixer.Snapshot = MixerSnapshot.EmptyFor(source) with
+        {
+            Strips = Enumerable.Range(0, source.StripCount).Select(i => StripState.Default(i, source) with
+            {
+                Gain = -i - 1,
+                Routes = Enumerable.Range(0, source.BusCount).Select(b => source.BusNames[b] == "B1").ToArray()
+            }).ToArray(),
+            Buses = Enumerable.Range(0, source.BusCount).Select(i => BusState.Default(i, source) with { Gain = -i - 10 }).ToArray()
+        };
+        var profile = await rig.Profiles.CaptureCurrentAsync("Disposition source");
+        Assert.Equal(fromType, profile.VoicemeeterType);
+        await rig.Profiles.LoadAsync();
+        Assert.Equal(fromType, Assert.Single(rig.Profiles.Profiles).VoicemeeterType);
+        rig.Mixer.Snapshot = MixerSnapshot.EmptyFor(target);
+        await rig.Profiles.ApplyAsync(profile.Id, TimeSpan.Zero);
+        var script = Assert.Single(rig.Mixer.Scripts);
+        Assert.Contains("Strip[0].B1=1;", script);
+        foreach (var busName in source.BusNames.Except(target.BusNames)) Assert.DoesNotContain("." + busName + "=", script);
+        for (var i = target.StripCount; i < source.StripCount; i++) Assert.DoesNotContain($"Strip[{i}].", script);
+        for (var i = 0; i < source.BusCount; i++)
+        {
+            var targetIndex = target.BusNames.ToList().IndexOf(source.BusNames[i]);
+            if (targetIndex >= 0) Assert.Contains($"Bus[{targetIndex}].Gain={-i - 10};", script);
+        }
+        Assert.Equal(Math.Min(source.StripCount, target.StripCount), rig.Mixer.Snapshot.Strips.Count(s => s.Gain < 0));
+        Assert.Equal(-source.PhysicalStripCount - 1, rig.Mixer.Snapshot.Strips[target.PhysicalStripCount].Gain);
+    }
+
+    [Fact]
+    public async Task EntirelyMissingProfileChannelsAreIgnoredWithoutAnEmptyScript()
+    {
+        using var rig = new TestRig();
+        await rig.Profiles.SaveAsync(new() { Id = "absent", Name = "Absent", VoicemeeterType = 3,
+            Strips = [new(7, -10, false, [])], Buses = [new(4, -12, false)] });
+        rig.Mixer.Snapshot = MixerSnapshot.EmptyFor(MixerLayout.Standard);
+        await rig.Profiles.ApplyAsync("absent", TimeSpan.Zero);
+        Assert.Empty(rig.Mixer.Scripts);
+    }
+
+    [Fact]
+    public async Task FadeStopsWritingWhenLayoutChanges()
+    {
+        using var rig = new TestRig();
+        rig.Mixer.Snapshot = MixerSnapshot.EmptyFor(MixerLayout.Potato);
+        var profile = await rig.Profiles.CaptureCurrentAsync("Potato");
+        var apply = rig.Profiles.ApplyAsync(profile.Id, TimeSpan.FromMilliseconds(32));
+        Assert.Single(rig.Mixer.Scripts);
+        rig.Mixer.Snapshot = MixerSnapshot.EmptyFor(MixerLayout.Standard);
+        rig.Time.Advance(TimeSpan.FromMilliseconds(16));
+        await apply;
+        Assert.Single(rig.Mixer.Scripts);
+    }
+
     [Fact]
     public async Task CaptureDuplicateExportImportDeleteAndReload()
     {

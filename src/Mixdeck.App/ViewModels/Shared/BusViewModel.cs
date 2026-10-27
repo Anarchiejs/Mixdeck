@@ -7,16 +7,18 @@ namespace Mixdeck.App.ViewModels.Shared;
 /// <summary>Un bus de sortie : A1-A3 physiques, B1-B2 virtuels.</summary>
 public sealed partial class BusViewModel : ChannelViewModel
 {
-    public BusViewModel(IMixer mixer, int index)
-        : base(mixer, index)
+    public BusViewModel(IMixer mixer, int index, MixerLayout? layout = null)
+        : base(mixer, index, layout)
     {
         ApplyCustomization(null, null, index == 0);
     }
 
     /// <summary>A1, A2, A3, B1, B2.</summary>
-    public string BusName => BananaLayout.BusNames[Index];
+    public string BusName => Layout.BusNames[Index];
 
-    public bool IsVirtual => BananaLayout.IsVirtualBus(Index);
+    public bool IsVirtual => Layout.IsVirtualBus(Index);
+
+    public bool HasEq => Layout.VoicemeeterType != 1;
 
     public string KindText => IsVirtual ? "Sortie virtuelle" : "Sortie physique";
 
@@ -45,7 +47,7 @@ public sealed partial class BusViewModel : ChannelViewModel
 
     partial void OnEqOnChanged(bool value)
     {
-        if (!IsSyncing)
+        if (!IsSyncing && HasEq)
         {
             Mixer.SetFloat(VmParam.BusEqOn(Index), VmParam.FromBool(value));
         }
