@@ -55,7 +55,7 @@ public sealed partial class RoutingPage : Page
             var output = ViewModel.Mixer.Buses[bus];
             var header = new StackPanel { Spacing = 4, Margin = new Thickness(4, 12, 4, 12), HorizontalAlignment = HorizontalAlignment.Center };
             header.Children.Add(new TextBlock { Text = output.BusName, Style = (Style)Application.Current.Resources["BodyStrongTextBlockStyle"], HorizontalAlignment = HorizontalAlignment.Center });
-            header.Children.Add(new TextBlock { Tag = output, Text = output.DisplayName, MaxWidth = 100, TextTrimming = TextTrimming.CharacterEllipsis, FontSize = 12, HorizontalAlignment = HorizontalAlignment.Center });
+            header.Children.Add(new TextBlock { Tag = output, Text = output.DisplayName, MaxWidth = 100, TextTrimming = TextTrimming.CharacterEllipsis, FontSize = 12, HorizontalAlignment = HorizontalAlignment.Center, Visibility = CustomNameVisibility(output) });
             var kind = (TextBlock)((DataTemplate)Resources["ColumnKind"]).LoadContent();
             kind.Text = output.IsVirtual ? "Virtuelle" : "Physique";
             header.Children.Add(kind);
@@ -109,13 +109,24 @@ public sealed partial class RoutingPage : Page
             foreach (var child in panel.Children.OfType<FrameworkElement>())
                 if (child.Tag is ChannelViewModel channel)
                 {
-                    if (child is TextBlock text) { text.Text = channel.DisplayName; ToolTipService.SetToolTip(text, channel.DisplayName); }
+                    if (child is TextBlock text)
+                    {
+                        text.Text = channel.DisplayName;
+                        ToolTipService.SetToolTip(text, channel.DisplayName);
+                        if (channel is BusViewModel bus) text.Visibility = CustomNameVisibility(bus);
+                    }
                     if (child is FontIcon icon) icon.Glyph = channel.Icon;
                 }
         foreach (var button in _buttons) UpdateAccessibleName(button, (RouteViewModel)button.Tag);
     }
-    private void UpdateAccessibleName(RouteButton button, RouteViewModel route) => AutomationProperties.SetName(button,
-        $"{ViewModel.Mixer.Strips[route.StripIndex].DisplayName} vers {route.BusName}, {ViewModel.Mixer.Buses[route.BusIndex].DisplayName}");
+    // Sans nom personnalisé, le nom d'une sortie est son code (A1…) : on ne l'affiche qu'une fois.
+    private static Visibility CustomNameVisibility(BusViewModel bus) => bus.DisplayName == bus.BusName ? Visibility.Collapsed : Visibility.Visible;
+    private void UpdateAccessibleName(RouteButton button, RouteViewModel route)
+    {
+        var bus = ViewModel.Mixer.Buses[route.BusIndex];
+        var target = bus.DisplayName == route.BusName ? route.BusName : $"{route.BusName}, {bus.DisplayName}";
+        AutomationProperties.SetName(button, $"{ViewModel.Mixer.Strips[route.StripIndex].DisplayName} vers {target}");
+    }
 
     private void Highlight(int row, int column)
     {
