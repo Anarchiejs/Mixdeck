@@ -1,8 +1,230 @@
+using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
+using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Data;
+using Mixdeck.App.Services;
+using Mixdeck.App.Views.Pages.Settings;
+using Mixdeck.Core.Abstractions;
+using Mixdeck.Core.Audio;
+using Mixdeck.Core.Model;
+using Mixdeck.Core.Settings;
 
 namespace Mixdeck.App.ViewModels.Pages;
 
-/// <summary>Page Appareils : appareils de Voicemeeter, préréglages du micro, moteur audio. TODO(L12).</summary>
 public sealed partial class DevicesPageViewModel : ObservableObject
 {
+    private readonly IMixer mixer;
+    private readonly ISettingsStore settings;
+    private readonly IUiDispatcher ui;
+    private readonly SemaphoreSlim saveGate = new(1, 1);
+    private bool active;
+    private bool loading;
+    private int refreshVersion;
+
+    public DevicesPageViewModel(IMixer mixer, ISettingsStore settings, IUiDispatcher ui)
+    {
+        this.mixer = mixer; this.settings = settings; this.ui = ui;
+        foreach (var index in Enumerable.Range(0, BananaLayout.PhysicalStripCount)) Inputs.Add(new(this, index, false));
+        foreach (var index in Enumerable.Range(0, BananaLayout.PhysicalBusCount)) Outputs.Add(new(this, index, true));
+        RefreshSettings();
+    }
+
+    public ObservableCollection<DeviceRowViewModel> Inputs { get; } = [];
+    public ObservableCollection<DeviceRowViewModel> Outputs { get; } = [];
+    public IReadOnlyList<MicPresetDefinition> Presets => MicPresets.All;
+    public bool CanEdit => IsConnected && !IsRefreshing;
+    public bool CanApplyPreset => CanEdit && IsPhysicalMic;
+
+    [ObservableProperty, NotifyPropertyChangedFor(nameof(CanEdit), nameof(CanApplyPreset))]
+    public partial bool IsConnected { get; set; }
+    [ObservableProperty, NotifyPropertyChangedFor(nameof(CanEdit), nameof(CanApplyPreset))]
+    public partial bool IsRefreshing { get; set; }
+    [ObservableProperty, NotifyPropertyChangedFor(nameof(CanApplyPreset))]
+    public partial bool IsPhysicalMic { get; set; }
+    [ObservableProperty]
+    public partial string MicName { get; set; } = "";
+    [ObservableProperty]
+    public partial MicPresetDefinition? SelectedPreset { get; set; }
+    [ObservableProperty]
+    public partial bool HideVoicemeeterWindow { get; set; }
+    [ObservableProperty]
+    public partial bool HasMessage { get; set; }
+    [ObservableProperty]
+    public partial string Message { get; set; } = "";
+    [ObservableProperty]
+    public partial Microsoft.UI.Xaml.Controls.InfoBarSeverity Severity { get; set; }
+
+    public void Activate()
+    {
+        if (active) return;
+        active = true;
+        mixer.StateChanged += OnStateChanged;
+        settings.Changed += OnSettingsChanged;
+        mixer.SnapshotChanged += OnSnapshotChanged;
+        RefreshSettings();
+        IsConnected = mixer.State == MixerConnectionState.Connected;
+        RefreshDevicesCommand.Execute(null);
+    }
+    public void Deactivate()
+    {
+        active = false;
+        refreshVersion++;
+        mixer.StateChanged -= OnStateChanged;
+        mixer.SnapshotChanged -= OnSnapshotChanged;
+        settings.Changed -= OnSettingsChanged;
+    }
+    private void OnStateChanged(object? sender, MixerConnectionState state) => ui.Post(() =>
+    {
+        if (!active) return;
+        IsConnected = state == MixerConnectionState.Connected;
+        refreshVersion++;
+        IsRefreshing = false;
+        if (!IsConnected) Report("Le moteur audio est hors connexion. Les appareils seront relus à la reconnexion.", true);
+        else _ = RefreshDevicesAsync();
+    });
+    private void OnSettingsChanged(object? sender, AppSettings value) => ui.Post(() => { if (active) RefreshSettings(); });
+    private void OnSnapshotChanged(object? sender, MixerSnapshot value) => ui.Post(() => { if (active) RefreshSettings(); });
+
+    private string ChannelName(int index, bool bus)
+    {
+        var custom = bus ? settings.Current.BusCustomization(index) : settings.Current.StripCustomization(index);
+        if (!string.IsNullOrWhiteSpace(custom.DisplayName)) return custom.DisplayName;
+        var label = bus ? mixer.Snapshot.Buses[index].Label : mixer.Snapshot.Strips[index].Label;
+        return string.IsNullOrWhiteSpace(label) ? (bus ? BananaLayout.BusNames[index] : BananaLayout.DefaultStripLabels[index]) : label;
+    }
+    private void RefreshSettings()
+    {
+        loading = true;
+        foreach (var row in Inputs.Concat(Outputs)) row.Name = ChannelName(row.Index, row.IsBus);
+        var index = settings.Current.MicStripIndex;
+        IsPhysicalMic = index is >= 0 and < BananaLayout.PhysicalStripCount;
+        MicName = index is >= 0 and < BananaLayout.StripCount ? ChannelName(index, false) : "Micro non configuré";
+        SelectedPreset = Presets.FirstOrDefault(p => p.Preset == settings.Current.MicPreset) ?? Presets[0];
+        HideVoicemeeterWindow = settings.Current.HideVoicemeeterWindow;
+        loading = false;
+    }
+
+    [RelayCommand]
+    private async Task RefreshDevicesAsync()
+    {
+        var version = ++refreshVersion;
+        IsRefreshing = true;
+        try
+        {
+            var inputs = await mixer.GetDevicesAsync(AudioDeviceDirection.Input);
+            var outputs = await mixer.GetDevicesAsync(AudioDeviceDirection.Output);
+            var rows = Inputs.Concat(Outputs).ToArray();
+            var names = new List<string?>();
+            foreach (var row in rows)
+                names.Add(await mixer.GetStringAsync(row.IsBus ? VmParam.BusDeviceName(row.Index) : VmParam.StripDeviceName(row.Index)));
+            if (!active || version != refreshVersion) return;
+            for (var i = 0; i < rows.Length; i++) rows[i].Populate(rows[i].IsBus ? outputs : inputs, names[i]);
+            IsConnected = mixer.State == MixerConnectionState.Connected;
+            Report(IsConnected ? "Liste des appareils actualisée. WDM est recommandé pour sa faible latence." : "Connectez Voicemeeter pour choisir vos appareils.", !IsConnected);
+        }
+        catch (Exception) { if (active && version == refreshVersion) Report("Impossible de lire les appareils. Réessayez après la connexion au moteur.", true); }
+        finally { if (version == refreshVersion) IsRefreshing = false; }
+    }
+
+    internal void SelectDevice(DeviceRowViewModel row, DeviceChoice choice)
+    {
+        if (!CanEdit || choice.IsCurrent) return;
+        try
+        {
+            var driver = choice.Device?.Driver ?? AudioDeviceDriver.Wdm;
+            mixer.SetString(row.IsBus ? VmParam.BusDevice(row.Index, driver) : VmParam.StripDevice(row.Index, driver), choice.Device?.Name ?? "");
+            Report("Changement d’appareil transmis au moteur. Actualisez la liste pour relire son état.");
+        }
+        catch (Exception) { Report("Impossible de changer cet appareil. Vérifiez la connexion au moteur.", true); }
+    }
+
+    [RelayCommand]
+    private async Task ApplyPresetAsync()
+    {
+        var preset = SelectedPreset;
+        var strip = settings.Current.MicStripIndex;
+        if (!CanApplyPreset || preset is null) { Report("Choisissez une entrée micro physique dans Réglages et connectez le moteur.", true); return; }
+        await saveGate.WaitAsync();
+        try
+        {
+            if (mixer.State != MixerConnectionState.Connected) { Report("Le moteur audio est hors connexion.", true); return; }
+            mixer.ApplyScript(MicPresets.CreateScript(strip, preset.Preset));
+            var saved = await SettingsWriter.UpdateAsync(settings, s => s with { MicPreset = preset.Preset });
+            Report(saved ? "Préréglage « " + preset.Name + " » transmis au micro." : "Le traitement a été transmis, mais le choix n’a pas pu être enregistré.", !saved);
+        }
+        catch (Exception) { Report("Impossible d’appliquer le préréglage du micro.", true); }
+        finally { saveGate.Release(); }
+    }
+
+    partial void OnHideVoicemeeterWindowChanged(bool value) { if (!loading) _ = SaveWindowPreferenceAsync(value); }
+    private async Task SaveWindowPreferenceAsync(bool value)
+    {
+        await saveGate.WaitAsync();
+        try
+        {
+            if (!await SettingsWriter.UpdateAsync(settings, s => s with { HideVoicemeeterWindow = value }))
+            {
+                RefreshSettings();
+                Report("Le réglage de la fenêtre n’a pas pu être enregistré.", true);
+            }
+        }
+        finally { saveGate.Release(); }
+    }
+    public void RestartEngine()
+    {
+        if (!CanEdit) { Report("Le moteur audio est hors connexion.", true); return; }
+        try { mixer.SetFloat(VmParam.CommandRestart, 1); Report("Demande de redémarrage transmise. Une brève interruption audio est normale."); }
+        catch (Exception) { Report("Impossible de demander le redémarrage du moteur audio.", true); }
+    }
+    public void Report(string text, bool error = false)
+    {
+        Message = text;
+        Severity = error ? Microsoft.UI.Xaml.Controls.InfoBarSeverity.Warning : Microsoft.UI.Xaml.Controls.InfoBarSeverity.Success;
+        HasMessage = true;
+    }
+}
+
+public sealed record DeviceChoice(AudioDevice? Device, string Name, bool IsCurrent = false);
+public sealed record DeviceGroup(string Name, IReadOnlyList<DeviceChoice> Items);
+
+public sealed partial class DeviceRowViewModel(DevicesPageViewModel owner, int index, bool isBus) : ObservableObject
+{
+    private bool loading;
+    public DevicesPageViewModel Owner => owner;
+    public int Index => index;
+    public bool IsBus => isBus;
+    public string Kind => isBus ? BananaLayout.BusNames[index] + " · Sortie physique" : "Entrée physique " + (index + 1);
+    public CollectionViewSource Choices { get; } = new() { IsSourceGrouped = true, ItemsPath = new PropertyPath("Items") };
+    [ObservableProperty]
+    public partial string Name { get; set; } = "";
+    [ObservableProperty]
+    public partial DeviceChoice? SelectedDevice { get; set; }
+    [ObservableProperty]
+    public partial string CurrentName { get; set; } = "Aucun";
+    partial void OnSelectedDeviceChanged(DeviceChoice? value) { if (!loading && value is not null) owner.SelectDevice(this, value); }
+    public void Populate(IReadOnlyList<AudioDevice> devices, string? current)
+    {
+        loading = true;
+        var none = new DeviceChoice(null, "Aucun");
+        var groups = new List<DeviceGroup> { new("Sélection", new[] { none }) };
+        CurrentName = string.IsNullOrWhiteSpace(current) ? "Aucun" : current;
+        DeviceChoice selected = none;
+        if (!string.IsNullOrWhiteSpace(current))
+        {
+            // Le nom seul ne permet pas de déduire le pilote : ne pas prétendre que l’appareil courant utilise WDM.
+            selected = new(null, current, true);
+            groups.Add(new("Appareil actuel", new[] { selected }));
+        }
+        AudioDeviceDriver[] drivers = [AudioDeviceDriver.Wdm, AudioDeviceDriver.Ks, AudioDeviceDriver.Mme, AudioDeviceDriver.Asio];
+        foreach (var driver in drivers)
+        {
+            var items = devices.Where(d => d.Driver == driver).OrderBy(d => d.Name, StringComparer.CurrentCultureIgnoreCase)
+                .Select(d => new DeviceChoice(d, d.Name)).ToArray();
+            if (items.Length != 0) groups.Add(new(driver == AudioDeviceDriver.Wdm ? "WDM — recommandé" : VmParam.DriverKey(driver).ToUpperInvariant(), items));
+        }
+        Choices.Source = groups;
+        SelectedDevice = selected;
+        loading = false;
+    }
 }
