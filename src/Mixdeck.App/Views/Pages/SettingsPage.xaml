@@ -1,114 +1,124 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Page x:Class="Mixdeck.App.Views.Pages.SettingsPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:local="using:Mixdeck.App.Views.Pages.Settings"
     xmlns:vm="using:Mixdeck.App.ViewModels.Pages"
     xmlns:shared="using:Mixdeck.App.ViewModels.Shared"
-    Language="fr-FR" Loaded="OnLoaded" Unloaded="OnUnloaded">
+    Loaded="OnLoaded" Unloaded="OnUnloaded">
     <ScrollViewer HorizontalScrollMode="Disabled" VerticalScrollBarVisibility="Auto">
         <StackPanel Padding="{StaticResource MixdeckPagePadding}" Spacing="24" MaxWidth="1040">
             <StackPanel Spacing="8">
-                <TextBlock Text="Réglages" Style="{StaticResource TitleTextBlockStyle}" />
+                <TextBlock x:Uid="SettingsPage001"  Style="{StaticResource TitleTextBlockStyle}" />
                 <TextBlock Text="{x:Bind ViewModel.SaveStatus, Mode=OneWay}" TextWrapping="Wrap" Foreground="{ThemeResource TextFillColorSecondaryBrush}" AutomationProperties.LiveSetting="Polite" />
             </StackPanel>
-            <InfoBar x:Name="PageError" IsOpen="{x:Bind ViewModel.HasError, Mode=OneWay}" Title="Une opération a échoué" Message="{x:Bind ViewModel.ErrorMessage, Mode=OneWay}" Severity="Error" IsClosable="False" />
+            <InfoBar x:Uid="SettingsPage002" x:Name="PageError" IsOpen="{x:Bind ViewModel.HasError, Mode=OneWay}"  Message="{x:Bind ViewModel.ErrorMessage, Mode=OneWay}" Severity="Error" IsClosable="False" />
             <StackPanel Spacing="8">
-                <TextBlock Text="Général" Style="{StaticResource SubtitleTextBlockStyle}" Margin="0,0,0,4" />
-                <local:SettingCard Title="Démarrer avec Windows" Description="Mixdeck est prêt dès l’ouverture de votre session." Glyph="&#xE7E8;">
-                    <local:SettingCard.ActionContent><ToggleSwitch IsOn="{x:Bind ViewModel.StartWithWindows, Mode=TwoWay}" OnContent="Oui" OffContent="Non" AutomationProperties.Name="Démarrer avec Windows" /></local:SettingCard.ActionContent>
+                <TextBlock x:Uid="SettingsPage003"  Style="{StaticResource SubtitleTextBlockStyle}" Margin="0,0,0,4" />
+                <local:SettingCard x:Uid="SettingsPage004"   Glyph="&#xE7E8;">
+                    <local:SettingCard.ActionContent><ToggleSwitch x:Uid="SettingsPage005" IsOn="{x:Bind ViewModel.StartWithWindows, Mode=TwoWay}"    /></local:SettingCard.ActionContent>
                 </local:SettingCard>
-                <local:SettingCard Title="Lancer Voicemeeter au démarrage" Description="Lancer le moteur audio s’il n’est pas déjà ouvert." Glyph="&#xE768;">
-                    <local:SettingCard.ActionContent><ToggleSwitch IsOn="{x:Bind ViewModel.AutoLaunchVoicemeeter, Mode=TwoWay}" OnContent="Oui" OffContent="Non" AutomationProperties.Name="Lancer Voicemeeter au démarrage si besoin" /></local:SettingCard.ActionContent>
+                <local:SettingCard x:Uid="SettingsPage006"   Glyph="&#xE768;">
+                    <local:SettingCard.ActionContent><ToggleSwitch x:Uid="SettingsPage007" IsOn="{x:Bind ViewModel.AutoLaunchVoicemeeter, Mode=TwoWay}"    /></local:SettingCard.ActionContent>
                 </local:SettingCard>
-                <local:SettingCard Title="Afficher les notifications à l’écran" Description="Un indicateur confirme les actions sur le micro et les profils (OSD)." Glyph="&#xE7F4;">
-                    <local:SettingCard.ActionContent><ToggleSwitch IsOn="{x:Bind ViewModel.ShowOsd, Mode=TwoWay}" OnContent="Oui" OffContent="Non" AutomationProperties.Name="Afficher l’OSD" /></local:SettingCard.ActionContent>
+                <local:SettingCard x:Uid="SettingsPage008"   Glyph="&#xE7F4;">
+                    <local:SettingCard.ActionContent><ToggleSwitch x:Uid="SettingsPage009" IsOn="{x:Bind ViewModel.ShowOsd, Mode=TwoWay}"    /></local:SettingCard.ActionContent>
                 </local:SettingCard>
-                <local:SettingCard Title="Toujours afficher l’icône près de l’horloge" Description="Garder Mixdeck accessible dans la zone de notification." Glyph="&#xE718;">
-                    <local:SettingCard.ActionContent><ToggleSwitch IsOn="{x:Bind ViewModel.AlwaysShowTrayIcon, Mode=TwoWay}" OnContent="Oui" OffContent="Non" AutomationProperties.Name="Toujours afficher l’icône près de l’horloge" /></local:SettingCard.ActionContent>
+                <local:SettingCard x:Uid="SettingsPage010"   Glyph="&#xE718;">
+                    <local:SettingCard.ActionContent><ToggleSwitch x:Uid="SettingsPage011" IsOn="{x:Bind ViewModel.AlwaysShowTrayIcon, Mode=TwoWay}"    /></local:SettingCard.ActionContent>
                 </local:SettingCard>
-                <local:SettingCard Title="Rechercher les mises à jour" Description="Vérifier automatiquement si une nouvelle version est disponible." Glyph="&#xE895;">
-                    <local:SettingCard.ActionContent><ToggleSwitch IsOn="{x:Bind ViewModel.CheckForUpdates, Mode=TwoWay}" OnContent="Oui" OffContent="Non" AutomationProperties.Name="Rechercher automatiquement les mises à jour" /></local:SettingCard.ActionContent>
+                <local:SettingCard x:Uid="SettingsPage012"   Glyph="&#xE895;">
+                    <local:SettingCard.ActionContent><ToggleSwitch x:Uid="SettingsPage013" IsOn="{x:Bind ViewModel.CheckForUpdates, Mode=TwoWay}"    /></local:SettingCard.ActionContent>
                 </local:SettingCard>
             </StackPanel>
             <StackPanel Spacing="8">
-                <TextBlock Text="Apparence" Style="{StaticResource SubtitleTextBlockStyle}" Margin="0,0,0,4" />
-                <local:SettingCard Title="Thème de l’application" Description="Le thème est appliqué immédiatement." Glyph="&#xE790;">
+                <TextBlock x:Uid="SettingsPage014"  Style="{StaticResource SubtitleTextBlockStyle}" Margin="0,0,0,4" />
+                <local:SettingCard x:Uid="SettingsPage015"   Glyph="&#xE790;">
                     <local:SettingCard.ActionContent>
-                        <ComboBox SelectedIndex="{x:Bind ViewModel.ThemeIndex, Mode=TwoWay}" MinWidth="136" AutomationProperties.Name="Thème de l’application">
-                            <ComboBoxItem Content="Système" /><ComboBoxItem Content="Clair" /><ComboBoxItem Content="Sombre" />
+                        <ComboBox x:Uid="SettingsPage016" SelectedIndex="{x:Bind ViewModel.ThemeIndex, Mode=TwoWay}" MinWidth="136" >
+                            <ComboBoxItem x:Uid="SettingsPage017"  /><ComboBoxItem x:Uid="SettingsPage018"  /><ComboBoxItem x:Uid="SettingsPage019"  />
                         </ComboBox>
+                    </local:SettingCard.ActionContent>
+                </local:SettingCard>
+                <local:SettingCard x:Uid="SettingsPage020"   Glyph="&#xE774;">
+                    <local:SettingCard.ActionContent>
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <ComboBox x:Uid="SettingsPage021" SelectedIndex="{x:Bind ViewModel.LanguageIndex, Mode=TwoWay}" MinWidth="136" >
+                                <ComboBoxItem x:Uid="SettingsPage022"  /><ComboBoxItem x:Uid="SettingsPage023"  /><ComboBoxItem x:Uid="SettingsPage024"  />
+                            </ComboBox>
+                            <Button x:Uid="SettingsPage025"  Command="{x:Bind ViewModel.RestartCommand}" />
+                        </StackPanel>
                     </local:SettingCard.ActionContent>
                 </local:SettingCard>
                 <Border Style="{StaticResource MixdeckCardStyle}">
                     <StackPanel Spacing="12">
-                        <TextBlock Text="Couleur d’accent" Style="{StaticResource BodyStrongTextBlockStyle}" />
+                        <TextBlock x:Uid="SettingsPage026"  Style="{StaticResource BodyStrongTextBlockStyle}" />
                         <TextBlock Text="{x:Bind ViewModel.AccentSummary, Mode=OneWay}" TextWrapping="Wrap" />
-                        <TextBlock Text="Les changements de couleur d’accent s’appliqueront au prochain démarrage de Mixdeck." TextWrapping="Wrap" Style="{StaticResource CaptionTextBlockStyle}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                        <TextBlock x:Uid="SettingsPage027"  TextWrapping="Wrap" Style="{StaticResource CaptionTextBlockStyle}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
                         <StackPanel Orientation="Horizontal" Spacing="8">
-                            <Button Content="Couleur de Windows" Click="OnWindowsAccent" />
-                            <Button Content="Personnaliser…" Click="OnCustomAccent" />
+                            <Button x:Uid="SettingsPage028"  Click="OnWindowsAccent" />
+                            <Button x:Uid="SettingsPage029"  Click="OnCustomAccent" />
                         </StackPanel>
                     </StackPanel>
                 </Border>
             </StackPanel>
             <StackPanel Spacing="8">
-                <TextBlock Text="Micro" Style="{StaticResource SubtitleTextBlockStyle}" Margin="0,0,0,4" />
+                <TextBlock x:Uid="SettingsPage030"  Style="{StaticResource SubtitleTextBlockStyle}" Margin="0,0,0,4" />
                 <Border Style="{StaticResource MixdeckCardStyle}">
                     <StackPanel Spacing="8">
-                        <TextBlock Text="Entrée pilotée par le bouton Micro et ses raccourcis" TextWrapping="Wrap" />
-                        <ComboBox ItemsSource="{x:Bind ViewModel.Mixer.Strips}" DisplayMemberPath="DisplayName" SelectedIndex="{x:Bind ViewModel.MicStripIndex, Mode=TwoWay}" HorizontalAlignment="Stretch" AutomationProperties.Name="Entrée du micro" />
+                        <TextBlock x:Uid="SettingsPage031"  TextWrapping="Wrap" />
+                        <ComboBox x:Uid="SettingsPage032" ItemsSource="{x:Bind ViewModel.Mixer.Strips}" DisplayMemberPath="DisplayName" SelectedIndex="{x:Bind ViewModel.MicStripIndex, Mode=TwoWay}" HorizontalAlignment="Stretch"  />
                     </StackPanel>
                 </Border>
-                <local:SettingCard Title="Badge micro coupé" Description="Afficher un petit badge permanent à l’écran tant que le micro est coupé." Glyph="&#xE720;">
-                    <local:SettingCard.ActionContent><ToggleSwitch IsOn="{x:Bind ViewModel.ShowMicBadge, Mode=TwoWay}" OnContent="Oui" OffContent="Non" AutomationProperties.Name="Badge micro coupé" /></local:SettingCard.ActionContent>
+                <local:SettingCard x:Uid="SettingsPage033"   Glyph="&#xE720;">
+                    <local:SettingCard.ActionContent><ToggleSwitch x:Uid="SettingsPage034" IsOn="{x:Bind ViewModel.ShowMicBadge, Mode=TwoWay}"    /></local:SettingCard.ActionContent>
                 </local:SettingCard>
-                <local:SettingCard Title="Son de confirmation du micro" Description="Jouer un son bref quand vous activez ou coupez le micro." Glyph="&#xE767;">
-                    <local:SettingCard.ActionContent><ToggleSwitch IsOn="{x:Bind ViewModel.PlayMicSounds, Mode=TwoWay}" OnContent="Oui" OffContent="Non" AutomationProperties.Name="Son de confirmation du micro" /></local:SettingCard.ActionContent>
+                <local:SettingCard x:Uid="SettingsPage035"   Glyph="&#xE767;">
+                    <local:SettingCard.ActionContent><ToggleSwitch x:Uid="SettingsPage036" IsOn="{x:Bind ViewModel.PlayMicSounds, Mode=TwoWay}"    /></local:SettingCard.ActionContent>
                 </local:SettingCard>
             </StackPanel>
             <StackPanel Spacing="8">
-                <TextBlock Text="Profils" Style="{StaticResource SubtitleTextBlockStyle}" Margin="0,0,0,4" />
-                <local:SettingCard Title="Profil au démarrage" Description="Appliquer ce profil à l’ouverture de Mixdeck. « Aucun » conserve les réglages du moteur." Glyph="&#xE8F1;">
-                    <local:SettingCard.ActionContent><ComboBox ItemsSource="{x:Bind ViewModel.ProfileChoices}" DisplayMemberPath="Name" SelectedItem="{x:Bind ViewModel.StartupProfile, Mode=TwoWay}" MinWidth="160" MaxWidth="280" AutomationProperties.Name="Profil au démarrage" /></local:SettingCard.ActionContent>
+                <TextBlock x:Uid="SettingsPage037"  Style="{StaticResource SubtitleTextBlockStyle}" Margin="0,0,0,4" />
+                <local:SettingCard x:Uid="SettingsPage038"   Glyph="&#xE8F1;">
+                    <local:SettingCard.ActionContent><ComboBox x:Uid="SettingsPage039" ItemsSource="{x:Bind ViewModel.ProfileChoices}" DisplayMemberPath="Name" SelectedItem="{x:Bind ViewModel.StartupProfile, Mode=TwoWay}" MinWidth="160" MaxWidth="280"  /></local:SettingCard.ActionContent>
                 </local:SettingCard>
                 <Border Style="{StaticResource MixdeckCardStyle}">
                     <StackPanel Spacing="8">
-                        <Grid><TextBlock Text="Durée du fondu" /><TextBlock Text="{x:Bind ViewModel.FadeText, Mode=OneWay}" HorizontalAlignment="Right" Style="{StaticResource BodyStrongTextBlockStyle}" /></Grid>
-                        <Slider Minimum="0" Maximum="2000" StepFrequency="50" SmallChange="50" LargeChange="250" Value="{x:Bind ViewModel.FadeMilliseconds, Mode=TwoWay}" IsThumbToolTipEnabled="False" AutomationProperties.Name="Durée du fondu en millisecondes" />
-                        <TextBlock Text="De 0 ms (immédiat) à 2 000 ms. Le fondu adoucit les changements de volume entre profils." TextWrapping="Wrap" Style="{StaticResource CaptionTextBlockStyle}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                        <Grid><TextBlock x:Uid="SettingsPage040"  /><TextBlock Text="{x:Bind ViewModel.FadeText, Mode=OneWay}" HorizontalAlignment="Right" Style="{StaticResource BodyStrongTextBlockStyle}" /></Grid>
+                        <Slider x:Uid="SettingsPage041" Minimum="0" Maximum="2000" StepFrequency="50" SmallChange="50" LargeChange="250" Value="{x:Bind ViewModel.FadeMilliseconds, Mode=TwoWay}" IsThumbToolTipEnabled="False"  />
+                        <TextBlock x:Uid="SettingsPage042"  TextWrapping="Wrap" Style="{StaticResource CaptionTextBlockStyle}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
                     </StackPanel>
                 </Border>
             </StackPanel>
             <StackPanel Spacing="8">
-                <TextBlock Text="Atténuation automatique" Style="{StaticResource SubtitleTextBlockStyle}" />
-                <local:SettingCard Title="Activer l’atténuation" Description="Baisser une entrée quand une autre reçoit du son, par exemple la musique pendant un appel." Glyph="&#xE993;">
-                    <local:SettingCard.ActionContent><ToggleSwitch IsOn="{x:Bind ViewModel.DuckingEnabled, Mode=TwoWay}" OnContent="Activée" OffContent="Désactivée" AutomationProperties.Name="Atténuation automatique" /></local:SettingCard.ActionContent>
+                <TextBlock x:Uid="SettingsPage043"  Style="{StaticResource SubtitleTextBlockStyle}" />
+                <local:SettingCard x:Uid="SettingsPage044"   Glyph="&#xE993;">
+                    <local:SettingCard.ActionContent><ToggleSwitch x:Uid="SettingsPage045" IsOn="{x:Bind ViewModel.DuckingEnabled, Mode=TwoWay}"    /></local:SettingCard.ActionContent>
                 </local:SettingCard>
                 <Border Style="{StaticResource MixdeckCardStyle}"><StackPanel Spacing="16">
-                    <ComboBox Header="Entrée écoutée" ItemsSource="{x:Bind ViewModel.Mixer.Strips}" DisplayMemberPath="DisplayName" SelectedIndex="{x:Bind ViewModel.DuckingSourceStrip, Mode=TwoWay}" HorizontalAlignment="Stretch" AutomationProperties.Name="Entrée qui déclenche l’atténuation" />
-                    <ComboBox Header="Entrée baissée" ItemsSource="{x:Bind ViewModel.Mixer.Strips}" DisplayMemberPath="DisplayName" SelectedIndex="{x:Bind ViewModel.DuckingTargetStrip, Mode=TwoWay}" HorizontalAlignment="Stretch" AutomationProperties.Name="Entrée dont le volume est atténué" />
-                    <TextBlock Text="Les deux entrées doivent être différentes. Si vous choisissez la même, l’autre entrée est déplacée automatiquement." TextWrapping="Wrap" Style="{StaticResource CaptionTextBlockStyle}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                    <ComboBox x:Uid="SettingsPage046"  ItemsSource="{x:Bind ViewModel.Mixer.Strips}" DisplayMemberPath="DisplayName" SelectedIndex="{x:Bind ViewModel.DuckingSourceStrip, Mode=TwoWay}" HorizontalAlignment="Stretch"  />
+                    <ComboBox x:Uid="SettingsPage047"  ItemsSource="{x:Bind ViewModel.Mixer.Strips}" DisplayMemberPath="DisplayName" SelectedIndex="{x:Bind ViewModel.DuckingTargetStrip, Mode=TwoWay}" HorizontalAlignment="Stretch"  />
+                    <TextBlock x:Uid="SettingsPage048"  TextWrapping="Wrap" Style="{StaticResource CaptionTextBlockStyle}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
                     <StackPanel Spacing="4">
-                        <TextBlock Text="Seuil de déclenchement" Style="{StaticResource BodyStrongTextBlockStyle}" />
+                        <TextBlock x:Uid="SettingsPage049"  Style="{StaticResource BodyStrongTextBlockStyle}" />
                         <TextBlock Text="{x:Bind ViewModel.DuckingThresholdText, Mode=OneWay}" />
-                        <Slider Minimum="-60" Maximum="-6" StepFrequency="1" Value="{x:Bind ViewModel.DuckingThresholdDb, Mode=TwoWay}" IsThumbToolTipEnabled="False" AutomationProperties.Name="Seuil de déclenchement en décibels pleine échelle" />
+                        <Slider x:Uid="SettingsPage050" Minimum="-60" Maximum="-6" StepFrequency="1" Value="{x:Bind ViewModel.DuckingThresholdDb, Mode=TwoWay}" IsThumbToolTipEnabled="False"  />
                     </StackPanel>
                     <StackPanel Spacing="4">
-                        <TextBlock Text="Baisse de volume" Style="{StaticResource BodyStrongTextBlockStyle}" />
+                        <TextBlock x:Uid="SettingsPage051"  Style="{StaticResource BodyStrongTextBlockStyle}" />
                         <TextBlock Text="{x:Bind ViewModel.DuckingAmountText, Mode=OneWay}" />
-                        <Slider Minimum="-40" Maximum="-1" StepFrequency="1" Value="{x:Bind ViewModel.DuckingAmountDb, Mode=TwoWay}" IsThumbToolTipEnabled="False" AutomationProperties.Name="Baisse de volume en décibels" />
+                        <Slider x:Uid="SettingsPage052" Minimum="-40" Maximum="-1" StepFrequency="1" Value="{x:Bind ViewModel.DuckingAmountDb, Mode=TwoWay}" IsThumbToolTipEnabled="False"  />
                     </StackPanel>
                     <StackPanel Spacing="4">
-                        <TextBlock Text="Maintien avant la remontée" Style="{StaticResource BodyStrongTextBlockStyle}" />
+                        <TextBlock x:Uid="SettingsPage053"  Style="{StaticResource BodyStrongTextBlockStyle}" />
                         <TextBlock Text="{x:Bind ViewModel.DuckingHoldText, Mode=OneWay}" />
-                        <Slider Minimum="100" Maximum="3000" StepFrequency="50" Value="{x:Bind ViewModel.DuckingHoldMilliseconds, Mode=TwoWay}" IsThumbToolTipEnabled="False" AutomationProperties.Name="Temps de maintien en millisecondes" />
+                        <Slider x:Uid="SettingsPage054" Minimum="100" Maximum="3000" StepFrequency="50" Value="{x:Bind ViewModel.DuckingHoldMilliseconds, Mode=TwoWay}" IsThumbToolTipEnabled="False"  />
                     </StackPanel>
                 </StackPanel></Border>
             </StackPanel>
             <StackPanel Spacing="8">
-                <TextBlock Text="Raccourcis" Style="{StaticResource SubtitleTextBlockStyle}" Margin="0,0,0,4" />
-                <TextBlock Text="Utilisables même quand Mixdeck est en arrière-plan. Pour parler en maintenant la touche, le micro reste actif jusqu’au relâchement." TextWrapping="Wrap" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Margin="0,0,0,4" />
+                <TextBlock x:Uid="SettingsPage055"  Style="{StaticResource SubtitleTextBlockStyle}" Margin="0,0,0,4" />
+                <TextBlock x:Uid="SettingsPage056"  TextWrapping="Wrap" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Margin="0,0,0,4" />
                 <ItemsRepeater ItemsSource="{x:Bind ViewModel.Hotkeys}">
                     <ItemsRepeater.Layout><StackLayout Spacing="8" /></ItemsRepeater.Layout>
                     <ItemsRepeater.ItemTemplate>
@@ -120,16 +130,16 @@
                                         <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
                                         <TextBlock Text="{x:Bind Combination, Mode=OneWay}" VerticalAlignment="Center" TextWrapping="Wrap" />
                                         <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8">
-                                            <Button Content="Modifier" Click="OnEditHotkey" AutomationProperties.Name="{x:Bind EditLabel}" />
-                                            <Button Content="Effacer" Click="OnClearHotkey" IsEnabled="{x:Bind HasBinding, Mode=OneWay}" AutomationProperties.Name="{x:Bind ClearLabel}" />
+                                            <Button x:Uid="SettingsPage057"  Click="OnEditHotkey" AutomationProperties.Name="{x:Bind EditLabel}" />
+                                            <Button x:Uid="SettingsPage058"  Click="OnClearHotkey" IsEnabled="{x:Bind HasBinding, Mode=OneWay}" AutomationProperties.Name="{x:Bind ClearLabel}" />
                                         </StackPanel>
                                     </Grid>
-                                    <InfoBar IsOpen="{x:Bind HasConflict, Mode=OneWay}" IsClosable="False" Severity="Warning" Title="Raccourci indisponible" Message="Cette combinaison est déjà utilisée par une autre application. Choisissez-en une autre." />
-                                    <ComboBox Header="Profil à appliquer" ItemsSource="{x:Bind ProfileChoices}" DisplayMemberPath="Name" SelectedItem="{x:Bind TargetProfile, Mode=TwoWay}" Visibility="{x:Bind IsApplyProfile}" IsEnabled="{x:Bind HasBinding, Mode=OneWay}" HorizontalAlignment="Stretch" AutomationProperties.Name="Profil du raccourci" />
+                                    <InfoBar x:Uid="SettingsPage059" IsOpen="{x:Bind HasConflict, Mode=OneWay}" IsClosable="False" Severity="Warning"   />
+                                    <ComboBox x:Uid="SettingsPage060"  ItemsSource="{x:Bind ProfileChoices}" DisplayMemberPath="Name" SelectedItem="{x:Bind TargetProfile, Mode=TwoWay}" Visibility="{x:Bind IsApplyProfile}" IsEnabled="{x:Bind HasBinding, Mode=OneWay}" HorizontalAlignment="Stretch"  />
                                     <Grid ColumnSpacing="16" Visibility="{x:Bind IsVolume}">
                                         <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
-                                        <ComboBox IsEnabled="{x:Bind HasBinding, Mode=OneWay}" Header="Sortie visée" ItemsSource="{x:Bind Mixer.Buses}" DisplayMemberPath="DisplayName" SelectedIndex="{x:Bind TargetBus, Mode=TwoWay}" HorizontalAlignment="Stretch" AutomationProperties.Name="Sortie du raccourci de volume" />
-                                        <NumberBox IsEnabled="{x:Bind HasBinding, Mode=OneWay}" Grid.Column="1" Header="Pas en dB" Minimum="0.1" Maximum="12" SmallChange="0.5" LargeChange="2" NumberFormatter="{x:Bind StepFormatter}" SpinButtonPlacementMode="Compact" Value="{x:Bind StepDb, Mode=TwoWay}" AutomationProperties.Name="Pas du raccourci en décibels" />
+                                        <ComboBox x:Uid="SettingsPage061" IsEnabled="{x:Bind HasBinding, Mode=OneWay}"  ItemsSource="{x:Bind Mixer.Buses}" DisplayMemberPath="DisplayName" SelectedIndex="{x:Bind TargetBus, Mode=TwoWay}" HorizontalAlignment="Stretch"  />
+                                        <NumberBox x:Uid="SettingsPage062" IsEnabled="{x:Bind HasBinding, Mode=OneWay}" Grid.Column="1"  Minimum="0.1" Maximum="12" SmallChange="0.5" LargeChange="2" NumberFormatter="{x:Bind StepFormatter}" SpinButtonPlacementMode="Compact" Value="{x:Bind StepDb, Mode=TwoWay}"  />
                                     </Grid>
                                 </StackPanel>
                             </Border>
@@ -138,40 +148,40 @@
                 </ItemsRepeater>
             </StackPanel>
             <StackPanel Spacing="8">
-                <TextBlock Text="Panneau rapide" Style="{StaticResource SubtitleTextBlockStyle}" Margin="0,0,0,4" />
-                <local:SettingCard Title="Volume par application dans le panneau" Description="Afficher les volumes des applications qui jouent du son dans le panneau rapide." Glyph="&#xE995;">
-                    <local:SettingCard.ActionContent><ToggleSwitch IsOn="{x:Bind ViewModel.ShowAppVolumes, Mode=TwoWay}" OnContent="Oui" OffContent="Non" AutomationProperties.Name="Volume par application dans le panneau" /></local:SettingCard.ActionContent>
+                <TextBlock x:Uid="SettingsPage063"  Style="{StaticResource SubtitleTextBlockStyle}" Margin="0,0,0,4" />
+                <local:SettingCard x:Uid="SettingsPage064"   Glyph="&#xE995;">
+                    <local:SettingCard.ActionContent><ToggleSwitch x:Uid="SettingsPage065" IsOn="{x:Bind ViewModel.ShowAppVolumes, Mode=TwoWay}"    /></local:SettingCard.ActionContent>
                 </local:SettingCard>
-                <TextBlock Text="Choisissez les entrées et les sorties visibles dans le panneau." TextWrapping="Wrap" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
-                <TextBlock Text="Entrées" Style="{StaticResource BodyStrongTextBlockStyle}" Margin="0,8,0,0" />
+                <TextBlock x:Uid="SettingsPage066"  TextWrapping="Wrap" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                <TextBlock x:Uid="SettingsPage067"  Style="{StaticResource BodyStrongTextBlockStyle}" Margin="0,8,0,0" />
                 <ItemsRepeater ItemsSource="{x:Bind ViewModel.Mixer.Strips}">
                     <ItemsRepeater.Layout><StackLayout Spacing="4" /></ItemsRepeater.Layout>
                     <ItemsRepeater.ItemTemplate><DataTemplate x:DataType="shared:StripViewModel">
                         <local:SettingCard Title="{x:Bind DisplayName, Mode=OneWay}" Description="{x:Bind KindText}" Glyph="{x:Bind Icon, Mode=OneWay}">
-                            <local:SettingCard.ActionContent><ToggleSwitch IsOn="{x:Bind ShowInFlyout, Mode=TwoWay}" Toggled="OnVisibilityToggled" OnContent="Visible" OffContent="Masquée" AutomationProperties.Name="{x:Bind DisplayName, Mode=OneWay}" /></local:SettingCard.ActionContent>
+                            <local:SettingCard.ActionContent><ToggleSwitch x:Uid="SettingsPage068" IsOn="{x:Bind ShowInFlyout, Mode=TwoWay}" Toggled="OnVisibilityToggled"   AutomationProperties.Name="{x:Bind DisplayName, Mode=OneWay}" /></local:SettingCard.ActionContent>
                         </local:SettingCard>
                     </DataTemplate></ItemsRepeater.ItemTemplate>
                 </ItemsRepeater>
-                <TextBlock Text="Sorties" Style="{StaticResource BodyStrongTextBlockStyle}" Margin="0,8,0,0" />
+                <TextBlock x:Uid="SettingsPage069"  Style="{StaticResource BodyStrongTextBlockStyle}" Margin="0,8,0,0" />
                 <ItemsRepeater ItemsSource="{x:Bind ViewModel.Mixer.Buses}">
                     <ItemsRepeater.Layout><StackLayout Spacing="4" /></ItemsRepeater.Layout>
                     <ItemsRepeater.ItemTemplate><DataTemplate x:DataType="shared:BusViewModel">
                         <local:SettingCard Title="{x:Bind DisplayName, Mode=OneWay}" Description="{x:Bind KindText}" Glyph="{x:Bind Icon, Mode=OneWay}">
-                            <local:SettingCard.ActionContent><ToggleSwitch IsOn="{x:Bind ShowInFlyout, Mode=TwoWay}" Toggled="OnVisibilityToggled" OnContent="Visible" OffContent="Masquée" AutomationProperties.Name="{x:Bind DisplayName, Mode=OneWay}" /></local:SettingCard.ActionContent>
+                            <local:SettingCard.ActionContent><ToggleSwitch x:Uid="SettingsPage070" IsOn="{x:Bind ShowInFlyout, Mode=TwoWay}" Toggled="OnVisibilityToggled"   AutomationProperties.Name="{x:Bind DisplayName, Mode=OneWay}" /></local:SettingCard.ActionContent>
                         </local:SettingCard>
                     </DataTemplate></ItemsRepeater.ItemTemplate>
                 </ItemsRepeater>
             </StackPanel>
             <StackPanel Spacing="8">
-                <TextBlock Text="Dépannage" Style="{StaticResource SubtitleTextBlockStyle}" Margin="0,0,0,4" />
-                <local:SettingCard Title="Journaux de l’application" Description="Consultez les journaux pour comprendre un problème." Glyph="&#xE8A5;">
-                    <local:SettingCard.ActionContent><Button Content="Ouvrir" Command="{x:Bind ViewModel.OpenLogsCommand}" AutomationProperties.Name="Ouvrir le dossier des journaux" /></local:SettingCard.ActionContent>
+                <TextBlock x:Uid="SettingsPage071"  Style="{StaticResource SubtitleTextBlockStyle}" Margin="0,0,0,4" />
+                <local:SettingCard x:Uid="SettingsPage072"   Glyph="&#xE8A5;">
+                    <local:SettingCard.ActionContent><Button x:Uid="SettingsPage073"  Command="{x:Bind ViewModel.OpenLogsCommand}"  /></local:SettingCard.ActionContent>
                 </local:SettingCard>
                 <Border Style="{StaticResource MixdeckCardStyle}">
                     <StackPanel Spacing="12">
-                        <TextBlock Text="Emplacement des données" Style="{StaticResource BodyStrongTextBlockStyle}" />
+                        <TextBlock x:Uid="SettingsPage080"  Style="{StaticResource BodyStrongTextBlockStyle}" />
                         <TextBlock Text="{x:Bind ViewModel.DataPath}" TextWrapping="Wrap" IsTextSelectionEnabled="True" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
-                        <Button Content="Copier l’emplacement" Command="{x:Bind ViewModel.CopyDataPathCommand}" />
+                        <Button x:Uid="SettingsPage081"  Command="{x:Bind ViewModel.CopyDataPathCommand}" />
                     </StackPanel>
                 </Border>
             </StackPanel>

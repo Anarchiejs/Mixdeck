@@ -5,7 +5,7 @@
     <Setter Property="Template">
       <Setter.Value>
         <ControlTemplate TargetType="local:ProfilePillList">
-          <ListView x:Name="PART_List" ItemsSource="{TemplateBinding ItemsSource}" SelectionMode="Single" IsItemClickEnabled="True" ScrollViewer.HorizontalScrollBarVisibility="Auto" ScrollViewer.HorizontalScrollMode="Enabled" ScrollViewer.VerticalScrollBarVisibility="Disabled" ScrollViewer.VerticalScrollMode="Disabled" SingleSelectionFollowsFocus="False" AutomationProperties.Name="Profils">
+          <ListView x:Uid="ProfilePillList001" x:Name="PART_List" ItemsSource="{TemplateBinding ItemsSource}" SelectionMode="Single" IsItemClickEnabled="True" ScrollViewer.HorizontalScrollBarVisibility="Auto" ScrollViewer.HorizontalScrollMode="Enabled" ScrollViewer.VerticalScrollBarVisibility="Disabled" ScrollViewer.VerticalScrollMode="Disabled" SingleSelectionFollowsFocus="False" >
             <ListView.ItemsPanel>
               <ItemsPanelTemplate>
                 <ItemsStackPanel Orientation="Horizontal" />

@@ -1,3 +1,4 @@
+using Mixdeck.App.Localization;
 using Microsoft.UI;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
@@ -9,7 +10,7 @@ namespace Mixdeck.App.Controls;
 public sealed class ProfilePill : ToggleButton
 {
     private static DependencyProperty Property(string name, Type type, object? value) => DependencyProperty.Register(name, type, typeof(ProfilePill), new PropertyMetadata(value, (d, _) => ((ProfilePill)d).Update()));
-    public static readonly DependencyProperty ProfileNameProperty = Property(nameof(ProfileName), typeof(string), "Profil");
+    public static readonly DependencyProperty ProfileNameProperty = Property(nameof(ProfileName), typeof(string), Strings.Get("CS_004"));
     public static readonly DependencyProperty IconProperty = Property(nameof(Icon), typeof(string), "\uE8A5");
     public static readonly DependencyProperty ColorProperty = Property(nameof(Color), typeof(string), null);
     public static readonly DependencyProperty IsActiveProperty = Property(nameof(IsActive), typeof(bool), false);

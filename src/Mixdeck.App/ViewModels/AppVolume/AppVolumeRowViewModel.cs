@@ -1,3 +1,4 @@
+using Mixdeck.App.Localization;
 using System.Globalization;
 using CommunityToolkit.Mvvm.ComponentModel;
 using Microsoft.UI.Xaml.Media;
@@ -48,8 +49,8 @@ public sealed partial class AppVolumeRowViewModel : ObservableObject, IDisposabl
     [ObservableProperty]
     public partial bool CanRoute { get; set; }
 
-    public string VolumeLabel => Volume.ToString("0", CultureInfo.GetCultureInfo("fr-FR")) + " %";
-    public string MuteLabel => (IsMuted ? "Réactiver le son de " : "Couper le son de ") + DisplayName;
+    public string VolumeLabel => Volume.ToString("0", Strings.Culture) + " %";
+    public string MuteLabel => (IsMuted ? Strings.Get("CS_024") : Strings.Get("CS_025")) + DisplayName;
 
     internal void Synchronize(AppAudioSession session)
     {

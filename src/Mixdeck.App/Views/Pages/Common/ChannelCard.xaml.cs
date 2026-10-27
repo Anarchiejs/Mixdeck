@@ -1,3 +1,4 @@
+using Mixdeck.App.Localization;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Controls.Primitives;
@@ -18,7 +19,7 @@ public sealed partial class ChannelCard : UserControl
     public bool IsStrip => Model is StripViewModel;
     public bool IsBus => Model is BusViewModel;
     public bool HasEq => Strip?.HasEq == true;
-    public string KindText => Model switch { StripViewModel s => s.KindText, BusViewModel b => b.BusName + " · " + (b.IsVirtual ? "Virtuel" : "Physique"), _ => string.Empty };
+    public string KindText => Model switch { StripViewModel s => s.KindText, BusViewModel b => b.BusName + " · " + (b.IsVirtual ? Strings.Get("CS_098") : Strings.Get("CS_092")), _ => string.Empty };
 
     public ChannelCard() { InitializeComponent(); }
 
@@ -38,18 +39,18 @@ public sealed partial class ChannelCard : UserControl
     private MenuFlyout CreateMenu()
     {
         var menu = new MenuFlyout();
-        var rename = new MenuFlyoutItem { Text = "Renommer", Icon = new FontIcon { Glyph = "\uE8AC" } };
+        var rename = new MenuFlyoutItem { Text = Strings.Get("CS_099"), Icon = new FontIcon { Glyph = "\uE8AC" } };
         rename.Click += (_, _) => Rename();
         menu.Items.Add(rename);
-        var icon = new MenuFlyoutItem { Text = "Changer l’icône", Icon = new FontIcon { Glyph = "\uE790" } };
+        var icon = new MenuFlyoutItem { Text = Strings.Get("CS_100"), Icon = new FontIcon { Glyph = "\uE790" } };
         icon.Click += (_, _) => DispatcherQueue.TryEnqueue(() => ShowIcon(Header));
         menu.Items.Add(icon);
-        var show = new ToggleMenuFlyoutItem { Text = "Afficher dans le panneau rapide", IsChecked = Model.ShowInFlyout };
+        var show = new ToggleMenuFlyoutItem { Text = Strings.Get("CS_101"), IsChecked = Model.ShowInFlyout };
         menu.Opening += (_, _) => show.IsChecked = Model.ShowInFlyout;
         show.Click += (_, _) => Model.ShowInFlyout = show.IsChecked;
         menu.Items.Add(show);
         menu.Items.Add(new MenuFlyoutSeparator());
-        var reset = new MenuFlyoutItem { Text = "Rétablir le nom de Voicemeeter" };
+        var reset = new MenuFlyoutItem { Text = Strings.Get("CS_102") };
         reset.Click += (_, _) => Model.DisplayName = string.Empty;
         menu.Items.Add(reset);
         return menu;
@@ -58,8 +59,8 @@ public sealed partial class ChannelCard : UserControl
     private void Rename()
     {
         // Édition ancrée sur l’en-tête, sans quitter la tranche.
-        var editor = new TextBox { Text = Model.DisplayName, Header = "Nom du canal", MaxLength = 100, Width = 240 };
-        var save = new Button { Content = "Renommer", HorizontalAlignment = HorizontalAlignment.Right };
+        var editor = new TextBox { Text = Model.DisplayName, Header = Strings.Get("CS_103"), MaxLength = 100, Width = 240 };
+        var save = new Button { Content = Strings.Get("CS_099"), HorizontalAlignment = HorizontalAlignment.Right };
         var panel = new StackPanel { Spacing = 12 };
         panel.Children.Add(editor); panel.Children.Add(save);
         var flyout = new Microsoft.UI.Xaml.Controls.Flyout { Content = panel };

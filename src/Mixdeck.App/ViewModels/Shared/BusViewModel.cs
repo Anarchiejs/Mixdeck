@@ -1,3 +1,4 @@
+using Mixdeck.App.Localization;
 using CommunityToolkit.Mvvm.ComponentModel;
 using Mixdeck.Core.Abstractions;
 using Mixdeck.Core.Model;
@@ -20,7 +21,7 @@ public sealed partial class BusViewModel : ChannelViewModel
 
     public bool HasEq => Layout.VoicemeeterType != 1;
 
-    public string KindText => IsVirtual ? "Sortie virtuelle" : "Sortie physique";
+    public string KindText => IsVirtual ? Strings.Get("CS_066") : Strings.Get("CS_067");
 
     [ObservableProperty]
     public partial bool IsMono { get; set; }

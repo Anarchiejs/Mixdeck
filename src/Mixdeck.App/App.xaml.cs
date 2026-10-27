@@ -51,6 +51,7 @@ public partial class App : Application
             using var bootstrapLoggers = LoggerFactory.Create(b => b.AddSerilog());
             var settingsStore = new SettingsStore(paths, bootstrapLoggers.CreateLogger<SettingsStore>());
             var settings = await settingsStore.LoadAsync();
+            Localization.Strings.ApplyLanguage(settings.Language);
             if (isFirstRun)
             {
                 // Les lancements suivants ne sont plus des « premiers lancements » (la console ne s'ouvre plus d'elle-même).

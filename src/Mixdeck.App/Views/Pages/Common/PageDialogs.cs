@@ -1,3 +1,4 @@
+using Mixdeck.App.Localization;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 
@@ -7,11 +8,11 @@ public static class PageDialogs
 {
     public static async Task<string?> AskNameAsync(FrameworkElement owner, string title, string action, string initial = "")
     {
-        var input = new TextBox { Header = "Nom du profil", Text = initial, MaxLength = 100, PlaceholderText = "Ex. Musique, Réunion, Jeu…" };
+        var input = new TextBox { Header = Strings.Get("CS_127"), Text = initial, MaxLength = 100, PlaceholderText = Strings.Get("CS_128") };
         var dialog = new ContentDialog
         {
             XamlRoot = owner.XamlRoot, RequestedTheme = owner.ActualTheme,
-            Title = title, Content = input, PrimaryButtonText = action, CloseButtonText = "Annuler",
+            Title = title, Content = input, PrimaryButtonText = action, CloseButtonText = Strings.Get("CS_086"),
             DefaultButton = ContentDialogButton.Primary, IsPrimaryButtonEnabled = !string.IsNullOrWhiteSpace(initial),
         };
         input.TextChanged += (_, _) => dialog.IsPrimaryButtonEnabled = !string.IsNullOrWhiteSpace(input.Text);

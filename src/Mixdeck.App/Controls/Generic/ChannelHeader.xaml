@@ -12,7 +12,7 @@
             </Grid.ColumnDefinitions>
             <FontIcon FontFamily="{StaticResource MixdeckIconFont}" Glyph="{TemplateBinding Icon}" FontSize="18" />
             <TextBlock x:Name="PART_Label" Grid.Column="1" VerticalAlignment="Center" Text="{TemplateBinding ChannelName}" TextTrimming="CharacterEllipsis" />
-            <TextBox x:Name="PART_Editor" Grid.Column="1" Visibility="Collapsed" AutomationProperties.Name="Nom du canal" />
+            <TextBox x:Uid="ChannelHeader001" x:Name="PART_Editor" Grid.Column="1" Visibility="Collapsed"  />
           </Grid>
         </ControlTemplate>
       </Setter.Value>

@@ -1,3 +1,4 @@
+using Mixdeck.App.Localization;
 using Microsoft.UI.Dispatching;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Media;
@@ -26,7 +27,7 @@ public sealed partial class OsdWindow : Window
     public OsdWindow(ITaskbarLocator taskbar, ThemeService theme)
     {
         _taskbar = taskbar;
-        InitializeComponent();
+        InitializeComponent(); Title = Mixdeck.App.Localization.Strings.Get("OsdWindow001.Title");
         WindowInterop.MakeToolWindow(this, alwaysOnTop: true);
         WindowInterop.MakeClickThrough(this);
         theme.Register(this);
@@ -51,7 +52,7 @@ public sealed partial class OsdWindow : Window
         Microsoft.UI.Xaml.Controls.Grid.SetColumnSpan(Glyph, 2);
         Glyph.Glyph = "\uF781";
         Glyph.Foreground = (Brush)Application.Current.Resources["MixdeckMutedBrush"];
-        Microsoft.UI.Xaml.Automation.AutomationProperties.SetName(Root, "Micro coupé");
+        Microsoft.UI.Xaml.Automation.AutomationProperties.SetName(Root, Strings.Get("Core_MicMuted"));
         var placement = _taskbar.GetPrimary();
         var size = (int)Math.Round(44 * placement.Scale);
         var margin = (int)Math.Round(12 * placement.Scale);

@@ -1,0 +1,1596 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <data name="ControlsGalleryWindow001.Title" xml:space="preserve">
+    <value>Mixdeck — Galerie des contrôles</value>
+  </data>
+  <data name="ControlsGalleryWindow002.Text" xml:space="preserve">
+    <value>Galerie Mixdeck</value>
+  </data>
+  <data name="ControlsGalleryWindow003.Header" xml:space="preserve">
+    <value>Thème sombre</value>
+  </data>
+  <data name="ControlsGalleryWindow004.Header" xml:space="preserve">
+    <value>Animation</value>
+  </data>
+  <data name="ControlsGalleryWindow005.ChannelName" xml:space="preserve">
+    <value>Microphone — F2 pour renommer</value>
+  </data>
+  <data name="ControlsGalleryWindow006.Text" xml:space="preserve">
+    <value>Double-clic ou F2 ; Entrée valide, Échap annule.</value>
+  </data>
+  <data name="ControlsGalleryWindow007.ProfileName" xml:space="preserve">
+    <value>Pastille autonome</value>
+  </data>
+  <data name="ControlsGalleryWindow008.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Couper le microphone</value>
+  </data>
+  <data name="ControlsGalleryWindow009.Text" xml:space="preserve">
+    <value>Microphone</value>
+  </data>
+  <data name="ControlsGalleryWindow010.Text" xml:space="preserve">
+    <value>Cliquer pour couper ou rétablir le son</value>
+  </data>
+  <data name="ControlsGalleryWindow011.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Gain horizontal</value>
+  </data>
+  <data name="ControlsGalleryWindow012.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Niveau stéréo horizontal</value>
+  </data>
+  <data name="ControlsGalleryWindow013.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Gain vertical</value>
+  </data>
+  <data name="ControlsGalleryWindow014.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Gain coupé</value>
+  </data>
+  <data name="ControlsGalleryWindow015.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Niveau stéréo vertical</value>
+  </data>
+  <data name="ControlsGalleryWindow016.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Niveau mono coupé</value>
+  </data>
+  <data name="ControlsGalleryWindow017.Text" xml:space="preserve">
+    <value>Molette : 0,5 dB ; Maj : 0,1 dB ; double-clic : 0 dB. Les contrôles suivent les thèmes et le contraste Windows.</value>
+  </data>
+  <data name="ChannelHeader001.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Nom du canal</value>
+  </data>
+  <data name="ProfilePillList001.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Profils</value>
+  </data>
+  <data name="AppVolumeList001.Text" xml:space="preserve">
+    <value>Applications</value>
+  </data>
+  <data name="AppVolumeList002.Text" xml:space="preserve">
+    <value>Aucune application ne joue de son.</value>
+  </data>
+  <data name="AppVolumeRow001.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Envoyer vers…</value>
+  </data>
+  <data name="AppVolumeRow001.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
+    <value>Envoyer vers…</value>
+  </data>
+  <data name="FlyoutWindow001.Title" xml:space="preserve">
+    <value>Mixdeck</value>
+  </data>
+  <data name="FlyoutWindow002.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Profils</value>
+  </data>
+  <data name="FlyoutWindow003.Text" xml:space="preserve">
+    <value>Aucun profil : + enregistre l'état actuel</value>
+  </data>
+  <data name="FlyoutWindow004.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Enregistrer l'état actuel comme nouveau profil</value>
+  </data>
+  <data name="FlyoutWindow004.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
+    <value>Nouveau profil depuis l'état actuel</value>
+  </data>
+  <data name="FlyoutWindow005.Content" xml:space="preserve">
+    <value>Lancer Voicemeeter</value>
+  </data>
+  <data name="FlyoutWindow006.Text" xml:space="preserve">
+    <value>Entrées</value>
+  </data>
+  <data name="FlyoutWindow007.Text" xml:space="preserve">
+    <value>Sorties</value>
+  </data>
+  <data name="FlyoutWindow008.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Ouvrir la console</value>
+  </data>
+  <data name="FlyoutWindow009.Text" xml:space="preserve">
+    <value>Console</value>
+  </data>
+  <data name="FlyoutWindow010.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Réglages</value>
+  </data>
+  <data name="FlyoutWindow010.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
+    <value>Réglages</value>
+  </data>
+  <data name="OsdWindow001.Title" xml:space="preserve">
+    <value>Mixdeck OSD</value>
+  </data>
+  <data name="AboutPage001.Text" xml:space="preserve">
+    <value>À propos</value>
+  </data>
+  <data name="AboutPage002.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Icône de Mixdeck</value>
+  </data>
+  <data name="AboutPage003.Text" xml:space="preserve">
+    <value>Mixdeck</value>
+  </data>
+  <data name="AboutPage004.Text" xml:space="preserve">
+    <value>Votre mixage, à portée de main.</value>
+  </data>
+  <data name="AboutPage005.Text" xml:space="preserve">
+    <value>Mises à jour</value>
+  </data>
+  <data name="AboutPage006.Title" xml:space="preserve">
+    <value>Mise à jour impossible</value>
+  </data>
+  <data name="AboutPage006.Message" xml:space="preserve">
+    <value>Vérifiez votre connexion puis réessayez.</value>
+  </data>
+  <data name="AboutPage007.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Opération de mise à jour en cours</value>
+  </data>
+  <data name="AboutPage008.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Téléchargement de la mise à jour</value>
+  </data>
+  <data name="AboutPage009.Content" xml:space="preserve">
+    <value>Rechercher</value>
+  </data>
+  <data name="AboutPage010.Content" xml:space="preserve">
+    <value>Installer et redémarrer</value>
+  </data>
+  <data name="AboutPage011.Text" xml:space="preserve">
+    <value>Notes de version</value>
+  </data>
+  <data name="AboutPage012.Text" xml:space="preserve">
+    <value>Projet et mentions légales</value>
+  </data>
+  <data name="AboutPage013.Content" xml:space="preserve">
+    <value>Code source sur GitHub</value>
+  </data>
+  <data name="AboutPage014.Content" xml:space="preserve">
+    <value>Licence MIT</value>
+  </data>
+  <data name="AboutPage015.Text" xml:space="preserve">
+    <value>Voicemeeter est un produit de VB-Audio ; Mixdeck n’est pas affilié à VB-Audio.</value>
+  </data>
+  <data name="DevicesPage001.Text" xml:space="preserve">
+    <value>Appareils</value>
+  </data>
+  <data name="DevicesPage002.Text" xml:space="preserve">
+    <value>Appareils audio</value>
+  </data>
+  <data name="DevicesPage003.Text" xml:space="preserve">
+    <value>Choisissez vos micros et vos sorties. WDM est recommandé pour sa faible latence. « Aucun » retire l’appareil de la tranche.</value>
+  </data>
+  <data name="DevicesPage004.Text" xml:space="preserve">
+    <value>Actualiser la liste</value>
+  </data>
+  <data name="DevicesPage005.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Lecture des appareils</value>
+  </data>
+  <data name="DevicesPage006.Text" xml:space="preserve">
+    <value>Entrées physiques</value>
+  </data>
+  <data name="DevicesPage007.Text" xml:space="preserve">
+    <value>Sorties physiques</value>
+  </data>
+  <data name="DevicesPage008.Text" xml:space="preserve">
+    <value>Traitement du micro</value>
+  </data>
+  <data name="DevicesPage009.Text" xml:space="preserve">
+    <value>Les préréglages nécessitent une entrée physique. Vous pouvez choisir l’entrée du micro dans Réglages.</value>
+  </data>
+  <data name="DevicesPage010.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Préréglage du micro</value>
+  </data>
+  <data name="DevicesPage011.Content" xml:space="preserve">
+    <value>Appliquer au micro</value>
+  </data>
+  <data name="DevicesPage012.Text" xml:space="preserve">
+    <value>Moteur audio</value>
+  </data>
+  <data name="DevicesPage013.Title" xml:space="preserve">
+    <value>Cacher la fenêtre de Voicemeeter</value>
+  </data>
+  <data name="DevicesPage013.Description" xml:space="preserve">
+    <value>Au prochain lancement de Voicemeeter par Mixdeck, sa fenêtre sera cachée une fois le moteur connecté.</value>
+  </data>
+  <data name="DevicesPage014.OnContent" xml:space="preserve">
+    <value>Oui</value>
+  </data>
+  <data name="DevicesPage014.OffContent" xml:space="preserve">
+    <value>Non</value>
+  </data>
+  <data name="DevicesPage014.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Cacher la fenêtre de Voicemeeter au lancement</value>
+  </data>
+  <data name="DevicesPage015.Title" xml:space="preserve">
+    <value>Redémarrer le moteur audio</value>
+  </data>
+  <data name="DevicesPage015.Description" xml:space="preserve">
+    <value>Utile après un changement d’appareil. Le son sera interrompu brièvement.</value>
+  </data>
+  <data name="DevicesPage016.Content" xml:space="preserve">
+    <value>Redémarrer…</value>
+  </data>
+  <data name="DevicesPage016.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Redémarrer le moteur audio</value>
+  </data>
+  <data name="MixerPage001.Text" xml:space="preserve">
+    <value>Console</value>
+  </data>
+  <data name="MixerPage002.Text" xml:space="preserve">
+    <value>Un seul endroit pour régler vos entrées, vos sorties et votre mixage.</value>
+  </data>
+  <data name="MixerPage003.Title" xml:space="preserve">
+    <value>Opération impossible</value>
+  </data>
+  <data name="MixerPage004.Title" xml:space="preserve">
+    <value>Personnalisation non enregistrée</value>
+  </data>
+  <data name="MixerPage005.Content" xml:space="preserve">
+    <value>Lancer Voicemeeter</value>
+  </data>
+  <data name="MixerPage006.Text" xml:space="preserve">
+    <value>Profils</value>
+  </data>
+  <data name="MixerPage007.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Appliquer un profil</value>
+  </data>
+  <data name="MixerPage008.Text" xml:space="preserve">
+    <value>Entrées</value>
+  </data>
+  <data name="MixerPage009.Text" xml:space="preserve">
+    <value>Sorties</value>
+  </data>
+  <data name="MixerPage010.Text" xml:space="preserve">
+    <value>Double-cliquez sur un fader pour revenir à 0 dB, ou sur le panoramique pour le centrer. F2 sur un nom permet de le modifier.</value>
+  </data>
+  <data name="ProfilesPage001.Text" xml:space="preserve">
+    <value>Profils</value>
+  </data>
+  <data name="ProfilesPage002.Text" xml:space="preserve">
+    <value>Retrouvez le bon mixage en un clic. Enregistrez vos réglages pour chaque moment.</value>
+  </data>
+  <data name="ProfilesPage003.Text" xml:space="preserve">
+    <value>Nouveau profil depuis l’état actuel</value>
+  </data>
+  <data name="ProfilesPage004.Content" xml:space="preserve">
+    <value>Importer…</value>
+  </data>
+  <data name="ProfilesPage005.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Opération en cours</value>
+  </data>
+  <data name="ProfilesPage006.Title" xml:space="preserve">
+    <value>Opération impossible</value>
+  </data>
+  <data name="ProfilesPage007.Text" xml:space="preserve">
+    <value>Aucun profil pour l’instant</value>
+  </data>
+  <data name="ProfilesPage008.Text" xml:space="preserve">
+    <value>Enregistrez l’état actuel de votre console pour le retrouver quand vous en avez besoin.</value>
+  </data>
+  <data name="ProfilesPage009.Content" xml:space="preserve">
+    <value>Créer mon premier profil</value>
+  </data>
+  <data name="RoutingPage001.Text" xml:space="preserve">
+    <value>Routage</value>
+  </data>
+  <data name="RoutingPage002.Text" xml:space="preserve">
+    <value>Choisissez les sorties qui reçoivent chaque entrée. Une entrée peut alimenter plusieurs sorties.</value>
+  </data>
+  <data name="RoutingPage003.Message" xml:space="preserve">
+    <value>Les niveaux et les routes seront synchronisés à la reconnexion.</value>
+  </data>
+  <data name="RoutingPage004.Text" xml:space="preserve">
+    <value>A = sorties physiques, B = sorties virtuelles</value>
+  </data>
+  <data name="RoutingPage005.Text" xml:space="preserve">
+    <value>Utilisez les flèches pour vous déplacer dans la grille et Espace pour activer ou désactiver une route.</value>
+  </data>
+  <data name="RulesPage001.Text" xml:space="preserve">
+    <value>Règles</value>
+  </data>
+  <data name="RulesPage002.Text" xml:space="preserve">
+    <value>Adaptez votre mixage aux applications que vous utilisez.</value>
+  </data>
+  <data name="RulesPage003.Title" xml:space="preserve">
+    <value>Enregistrement impossible</value>
+  </data>
+  <data name="RulesPage003.Message" xml:space="preserve">
+    <value>La modification n’a pas été enregistrée. Vérifiez l’accès au dossier de données et réessayez.</value>
+  </data>
+  <data name="RulesPage004.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Enregistrement des règles</value>
+  </data>
+  <data name="RulesPage005.Text" xml:space="preserve">
+    <value>Créer une règle</value>
+  </data>
+  <data name="RulesPage006.Text" xml:space="preserve">
+    <value>Votre mixage suit votre activité</value>
+  </data>
+  <data name="RulesPage007.Text" xml:space="preserve">
+    <value>Par exemple : quand FL64.exe démarre, passer au profil Musique. Ou activer le micro quand Discord.exe est au premier plan.</value>
+  </data>
+  <data name="RulesPage008.Content" xml:space="preserve">
+    <value>Créer une règle</value>
+  </data>
+  <data name="RulesPage009.Text" xml:space="preserve">
+    <value>Priorité de haut en bas : la première règle active l’emporte pour chaque action.</value>
+  </data>
+  <data name="RulesPage010.Header" xml:space="preserve">
+    <value>Activée</value>
+  </data>
+  <data name="RulesPage010.OnContent" xml:space="preserve">
+    <value>Oui</value>
+  </data>
+  <data name="RulesPage010.OffContent" xml:space="preserve">
+    <value>Non</value>
+  </data>
+  <data name="RulesPage011.Text" xml:space="preserve">
+    <value>Quand </value>
+  </data>
+  <data name="RulesPage012.Content" xml:space="preserve">
+    <value>Revenir à l’état d’avant ensuite</value>
+  </data>
+  <data name="RulesPage013.Content" xml:space="preserve">
+    <value>Modifier</value>
+  </data>
+  <data name="RulesPage014.Content" xml:space="preserve">
+    <value>Supprimer</value>
+  </data>
+  <data name="RulesPage015.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Monter la priorité</value>
+  </data>
+  <data name="RulesPage015.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
+    <value>Monter la priorité</value>
+  </data>
+  <data name="RulesPage016.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Descendre la priorité</value>
+  </data>
+  <data name="RulesPage016.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
+    <value>Descendre la priorité</value>
+  </data>
+  <data name="SettingsPage001.Text" xml:space="preserve">
+    <value>Réglages</value>
+  </data>
+  <data name="SettingsPage002.Title" xml:space="preserve">
+    <value>Une opération a échoué</value>
+  </data>
+  <data name="SettingsPage003.Text" xml:space="preserve">
+    <value>Général</value>
+  </data>
+  <data name="SettingsPage004.Title" xml:space="preserve">
+    <value>Démarrer avec Windows</value>
+  </data>
+  <data name="SettingsPage004.Description" xml:space="preserve">
+    <value>Mixdeck est prêt dès l’ouverture de votre session.</value>
+  </data>
+  <data name="SettingsPage005.OnContent" xml:space="preserve">
+    <value>Oui</value>
+  </data>
+  <data name="SettingsPage005.OffContent" xml:space="preserve">
+    <value>Non</value>
+  </data>
+  <data name="SettingsPage005.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Démarrer avec Windows</value>
+  </data>
+  <data name="SettingsPage006.Title" xml:space="preserve">
+    <value>Lancer Voicemeeter au démarrage</value>
+  </data>
+  <data name="SettingsPage006.Description" xml:space="preserve">
+    <value>Lancer le moteur audio s’il n’est pas déjà ouvert.</value>
+  </data>
+  <data name="SettingsPage007.OnContent" xml:space="preserve">
+    <value>Oui</value>
+  </data>
+  <data name="SettingsPage007.OffContent" xml:space="preserve">
+    <value>Non</value>
+  </data>
+  <data name="SettingsPage007.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Lancer Voicemeeter au démarrage si besoin</value>
+  </data>
+  <data name="SettingsPage008.Title" xml:space="preserve">
+    <value>Afficher les notifications à l’écran</value>
+  </data>
+  <data name="SettingsPage008.Description" xml:space="preserve">
+    <value>Un indicateur confirme les actions sur le micro et les profils (OSD).</value>
+  </data>
+  <data name="SettingsPage009.OnContent" xml:space="preserve">
+    <value>Oui</value>
+  </data>
+  <data name="SettingsPage009.OffContent" xml:space="preserve">
+    <value>Non</value>
+  </data>
+  <data name="SettingsPage009.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Afficher l’OSD</value>
+  </data>
+  <data name="SettingsPage010.Title" xml:space="preserve">
+    <value>Toujours afficher l’icône près de l’horloge</value>
+  </data>
+  <data name="SettingsPage010.Description" xml:space="preserve">
+    <value>Garder Mixdeck accessible dans la zone de notification.</value>
+  </data>
+  <data name="SettingsPage011.OnContent" xml:space="preserve">
+    <value>Oui</value>
+  </data>
+  <data name="SettingsPage011.OffContent" xml:space="preserve">
+    <value>Non</value>
+  </data>
+  <data name="SettingsPage011.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Toujours afficher l’icône près de l’horloge</value>
+  </data>
+  <data name="SettingsPage012.Title" xml:space="preserve">
+    <value>Rechercher les mises à jour</value>
+  </data>
+  <data name="SettingsPage012.Description" xml:space="preserve">
+    <value>Vérifier automatiquement si une nouvelle version est disponible.</value>
+  </data>
+  <data name="SettingsPage013.OnContent" xml:space="preserve">
+    <value>Oui</value>
+  </data>
+  <data name="SettingsPage013.OffContent" xml:space="preserve">
+    <value>Non</value>
+  </data>
+  <data name="SettingsPage013.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Rechercher automatiquement les mises à jour</value>
+  </data>
+  <data name="SettingsPage014.Text" xml:space="preserve">
+    <value>Apparence</value>
+  </data>
+  <data name="SettingsPage015.Title" xml:space="preserve">
+    <value>Thème de l’application</value>
+  </data>
+  <data name="SettingsPage015.Description" xml:space="preserve">
+    <value>Le thème est appliqué immédiatement.</value>
+  </data>
+  <data name="SettingsPage016.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Thème de l’application</value>
+  </data>
+  <data name="SettingsPage017.Content" xml:space="preserve">
+    <value>Système</value>
+  </data>
+  <data name="SettingsPage018.Content" xml:space="preserve">
+    <value>Clair</value>
+  </data>
+  <data name="SettingsPage019.Content" xml:space="preserve">
+    <value>Sombre</value>
+  </data>
+  <data name="SettingsPage020.Title" xml:space="preserve">
+    <value>Langue</value>
+  </data>
+  <data name="SettingsPage020.Description" xml:space="preserve">
+    <value>Redémarrez Mixdeck pour appliquer.</value>
+  </data>
+  <data name="SettingsPage021.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Langue</value>
+  </data>
+  <data name="SettingsPage022.Content" xml:space="preserve">
+    <value>Système</value>
+  </data>
+  <data name="SettingsPage023.Content" xml:space="preserve">
+    <value>Français</value>
+  </data>
+  <data name="SettingsPage024.Content" xml:space="preserve">
+    <value>English</value>
+  </data>
+  <data name="SettingsPage025.Content" xml:space="preserve">
+    <value>Redémarrer</value>
+  </data>
+  <data name="SettingsPage026.Text" xml:space="preserve">
+    <value>Couleur d’accent</value>
+  </data>
+  <data name="SettingsPage027.Text" xml:space="preserve">
+    <value>Les changements de couleur d’accent s’appliqueront au prochain démarrage de Mixdeck.</value>
+  </data>
+  <data name="SettingsPage028.Content" xml:space="preserve">
+    <value>Couleur de Windows</value>
+  </data>
+  <data name="SettingsPage029.Content" xml:space="preserve">
+    <value>Personnaliser…</value>
+  </data>
+  <data name="SettingsPage030.Text" xml:space="preserve">
+    <value>Micro</value>
+  </data>
+  <data name="SettingsPage031.Text" xml:space="preserve">
+    <value>Entrée pilotée par le bouton Micro et ses raccourcis</value>
+  </data>
+  <data name="SettingsPage032.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Entrée du micro</value>
+  </data>
+  <data name="SettingsPage033.Title" xml:space="preserve">
+    <value>Badge micro coupé</value>
+  </data>
+  <data name="SettingsPage033.Description" xml:space="preserve">
+    <value>Afficher un petit badge permanent à l’écran tant que le micro est coupé.</value>
+  </data>
+  <data name="SettingsPage034.OnContent" xml:space="preserve">
+    <value>Oui</value>
+  </data>
+  <data name="SettingsPage034.OffContent" xml:space="preserve">
+    <value>Non</value>
+  </data>
+  <data name="SettingsPage034.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Badge micro coupé</value>
+  </data>
+  <data name="SettingsPage035.Title" xml:space="preserve">
+    <value>Son de confirmation du micro</value>
+  </data>
+  <data name="SettingsPage035.Description" xml:space="preserve">
+    <value>Jouer un son bref quand vous activez ou coupez le micro.</value>
+  </data>
+  <data name="SettingsPage036.OnContent" xml:space="preserve">
+    <value>Oui</value>
+  </data>
+  <data name="SettingsPage036.OffContent" xml:space="preserve">
+    <value>Non</value>
+  </data>
+  <data name="SettingsPage036.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Son de confirmation du micro</value>
+  </data>
+  <data name="SettingsPage037.Text" xml:space="preserve">
+    <value>Profils</value>
+  </data>
+  <data name="SettingsPage038.Title" xml:space="preserve">
+    <value>Profil au démarrage</value>
+  </data>
+  <data name="SettingsPage038.Description" xml:space="preserve">
+    <value>Appliquer ce profil à l’ouverture de Mixdeck. « Aucun » conserve les réglages du moteur.</value>
+  </data>
+  <data name="SettingsPage039.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Profil au démarrage</value>
+  </data>
+  <data name="SettingsPage040.Text" xml:space="preserve">
+    <value>Durée du fondu</value>
+  </data>
+  <data name="SettingsPage041.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Durée du fondu en millisecondes</value>
+  </data>
+  <data name="SettingsPage042.Text" xml:space="preserve">
+    <value>De 0 ms (immédiat) à 2 000 ms. Le fondu adoucit les changements de volume entre profils.</value>
+  </data>
+  <data name="SettingsPage043.Text" xml:space="preserve">
+    <value>Atténuation automatique</value>
+  </data>
+  <data name="SettingsPage044.Title" xml:space="preserve">
+    <value>Activer l’atténuation</value>
+  </data>
+  <data name="SettingsPage044.Description" xml:space="preserve">
+    <value>Baisser une entrée quand une autre reçoit du son, par exemple la musique pendant un appel.</value>
+  </data>
+  <data name="SettingsPage045.OnContent" xml:space="preserve">
+    <value>Activée</value>
+  </data>
+  <data name="SettingsPage045.OffContent" xml:space="preserve">
+    <value>Désactivée</value>
+  </data>
+  <data name="SettingsPage045.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Atténuation automatique</value>
+  </data>
+  <data name="SettingsPage046.Header" xml:space="preserve">
+    <value>Entrée écoutée</value>
+  </data>
+  <data name="SettingsPage046.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Entrée qui déclenche l’atténuation</value>
+  </data>
+  <data name="SettingsPage047.Header" xml:space="preserve">
+    <value>Entrée baissée</value>
+  </data>
+  <data name="SettingsPage047.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Entrée dont le volume est atténué</value>
+  </data>
+  <data name="SettingsPage048.Text" xml:space="preserve">
+    <value>Les deux entrées doivent être différentes. Si vous choisissez la même, l’autre entrée est déplacée automatiquement.</value>
+  </data>
+  <data name="SettingsPage049.Text" xml:space="preserve">
+    <value>Seuil de déclenchement</value>
+  </data>
+  <data name="SettingsPage050.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Seuil de déclenchement en décibels pleine échelle</value>
+  </data>
+  <data name="SettingsPage051.Text" xml:space="preserve">
+    <value>Baisse de volume</value>
+  </data>
+  <data name="SettingsPage052.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Baisse de volume en décibels</value>
+  </data>
+  <data name="SettingsPage053.Text" xml:space="preserve">
+    <value>Maintien avant la remontée</value>
+  </data>
+  <data name="SettingsPage054.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Temps de maintien en millisecondes</value>
+  </data>
+  <data name="SettingsPage055.Text" xml:space="preserve">
+    <value>Raccourcis</value>
+  </data>
+  <data name="SettingsPage056.Text" xml:space="preserve">
+    <value>Utilisables même quand Mixdeck est en arrière-plan. Pour parler en maintenant la touche, le micro reste actif jusqu’au relâchement.</value>
+  </data>
+  <data name="SettingsPage057.Content" xml:space="preserve">
+    <value>Modifier</value>
+  </data>
+  <data name="SettingsPage058.Content" xml:space="preserve">
+    <value>Effacer</value>
+  </data>
+  <data name="SettingsPage059.Title" xml:space="preserve">
+    <value>Raccourci indisponible</value>
+  </data>
+  <data name="SettingsPage059.Message" xml:space="preserve">
+    <value>Cette combinaison est déjà utilisée par une autre application. Choisissez-en une autre.</value>
+  </data>
+  <data name="SettingsPage060.Header" xml:space="preserve">
+    <value>Profil à appliquer</value>
+  </data>
+  <data name="SettingsPage060.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Profil du raccourci</value>
+  </data>
+  <data name="SettingsPage061.Header" xml:space="preserve">
+    <value>Sortie visée</value>
+  </data>
+  <data name="SettingsPage061.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Sortie du raccourci de volume</value>
+  </data>
+  <data name="SettingsPage062.Header" xml:space="preserve">
+    <value>Pas en dB</value>
+  </data>
+  <data name="SettingsPage062.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Pas du raccourci en décibels</value>
+  </data>
+  <data name="SettingsPage063.Text" xml:space="preserve">
+    <value>Panneau rapide</value>
+  </data>
+  <data name="SettingsPage064.Title" xml:space="preserve">
+    <value>Volume par application dans le panneau</value>
+  </data>
+  <data name="SettingsPage064.Description" xml:space="preserve">
+    <value>Afficher les volumes des applications qui jouent du son dans le panneau rapide.</value>
+  </data>
+  <data name="SettingsPage065.OnContent" xml:space="preserve">
+    <value>Oui</value>
+  </data>
+  <data name="SettingsPage065.OffContent" xml:space="preserve">
+    <value>Non</value>
+  </data>
+  <data name="SettingsPage065.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Volume par application dans le panneau</value>
+  </data>
+  <data name="SettingsPage066.Text" xml:space="preserve">
+    <value>Choisissez les entrées et les sorties visibles dans le panneau.</value>
+  </data>
+  <data name="SettingsPage067.Text" xml:space="preserve">
+    <value>Entrées</value>
+  </data>
+  <data name="SettingsPage068.OnContent" xml:space="preserve">
+    <value>Visible</value>
+  </data>
+  <data name="SettingsPage068.OffContent" xml:space="preserve">
+    <value>Masquée</value>
+  </data>
+  <data name="SettingsPage069.Text" xml:space="preserve">
+    <value>Sorties</value>
+  </data>
+  <data name="SettingsPage070.OnContent" xml:space="preserve">
+    <value>Visible</value>
+  </data>
+  <data name="SettingsPage070.OffContent" xml:space="preserve">
+    <value>Masquée</value>
+  </data>
+  <data name="SettingsPage071.Text" xml:space="preserve">
+    <value>Dépannage</value>
+  </data>
+  <data name="SettingsPage072.Title" xml:space="preserve">
+    <value>Journaux de l’application</value>
+  </data>
+  <data name="SettingsPage072.Description" xml:space="preserve">
+    <value>Consultez les journaux pour comprendre un problème.</value>
+  </data>
+  <data name="SettingsPage073.Content" xml:space="preserve">
+    <value>Ouvrir</value>
+  </data>
+  <data name="SettingsPage073.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Ouvrir le dossier des journaux</value>
+  </data>
+  <data name="SettingsPage080.Text" xml:space="preserve">
+    <value>Emplacement des données</value>
+  </data>
+  <data name="SettingsPage081.Content" xml:space="preserve">
+    <value>Copier l’emplacement</value>
+  </data>
+  <data name="ChannelCard001.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Changer l’icône du canal</value>
+  </data>
+  <data name="ChannelCard001.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
+    <value>Changer l’icône</value>
+  </data>
+  <data name="ChannelCard002.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Options du canal</value>
+  </data>
+  <data name="ChannelCard002.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
+    <value>Options du canal</value>
+  </data>
+  <data name="ChannelCard003.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
+    <value>F2 ou double-clic pour renommer</value>
+  </data>
+  <data name="ChannelCard004.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Niveau stéréo du canal</value>
+  </data>
+  <data name="ChannelCard005.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Gain du canal</value>
+  </data>
+  <data name="ChannelCard005.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
+    <value>Double-clic pour revenir à 0 dB</value>
+  </data>
+  <data name="ChannelCard006.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
+    <value>Couper ou rétablir le son</value>
+  </data>
+  <data name="ChannelCard007.Content" xml:space="preserve">
+    <value>Solo</value>
+  </data>
+  <data name="ChannelCard008.Text" xml:space="preserve">
+    <value>Panoramique</value>
+  </data>
+  <data name="ChannelCard009.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Panoramique gauche-droite</value>
+  </data>
+  <data name="ChannelCard009.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
+    <value>Double-clic pour centrer</value>
+  </data>
+  <data name="ChannelCard010.Text" xml:space="preserve">
+    <value>G</value>
+  </data>
+  <data name="ChannelCard011.Text" xml:space="preserve">
+    <value>D</value>
+  </data>
+  <data name="ChannelCard012.Text" xml:space="preserve">
+    <value>Envoyer vers</value>
+  </data>
+  <data name="ChannelCard013.Text" xml:space="preserve">
+    <value>Égaliseur</value>
+  </data>
+  <data name="ChannelCard014.Text" xml:space="preserve">
+    <value>Graves</value>
+  </data>
+  <data name="ChannelCard015.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Graves</value>
+  </data>
+  <data name="ChannelCard016.Text" xml:space="preserve">
+    <value>Médiums</value>
+  </data>
+  <data name="ChannelCard017.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Médiums</value>
+  </data>
+  <data name="ChannelCard018.Text" xml:space="preserve">
+    <value>Aigus</value>
+  </data>
+  <data name="ChannelCard019.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Aigus</value>
+  </data>
+  <data name="ChannelCard020.Content" xml:space="preserve">
+    <value>Mono</value>
+  </data>
+  <data name="ChannelCard021.Content" xml:space="preserve">
+    <value>EQ activé</value>
+  </data>
+  <data name="ProfileCard001.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Nouveau nom du profil</value>
+  </data>
+  <data name="ProfileCard002.Text" xml:space="preserve">
+    <value>Actif</value>
+  </data>
+  <data name="ProfileCard003.Content" xml:space="preserve">
+    <value>Appliquer</value>
+  </data>
+  <data name="ProfileCard004.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Actions du profil</value>
+  </data>
+  <data name="ProfileCard004.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
+    <value>Actions du profil</value>
+  </data>
+  <data name="HotkeyRecorder001.Text" xml:space="preserve">
+    <value>Appuyez sur la combinaison souhaitée. Utilisez Ctrl, Alt, Maj ou Windows avec une touche.</value>
+  </data>
+  <data name="HotkeyRecorder002.Header" xml:space="preserve">
+    <value>Profil à appliquer</value>
+  </data>
+  <data name="HotkeyRecorder002.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Profil à appliquer par le raccourci</value>
+  </data>
+  <data name="HotkeyRecorder003.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Enregistrer la prochaine combinaison de touches</value>
+  </data>
+  <data name="HotkeyRecorder004.Text" xml:space="preserve">
+    <value>En attente d’une combinaison…</value>
+  </data>
+  <data name="HotkeyRecorder005.Title" xml:space="preserve">
+    <value>Combinaison indisponible</value>
+  </data>
+  <data name="HotkeyRecorder006.Text" xml:space="preserve">
+    <value>Échap annule. Tab permet de rejoindre les boutons. Cliquez sur la zone de capture pour recommencer.</value>
+  </data>
+  <data name="RuleEditor001.Title" xml:space="preserve">
+    <value>Enregistrement impossible</value>
+  </data>
+  <data name="RuleEditor001.Message" xml:space="preserve">
+    <value>Vérifiez l’accès au dossier de données et réessayez.</value>
+  </data>
+  <data name="RuleEditor002.Header" xml:space="preserve">
+    <value>Nom de la règle (facultatif)</value>
+  </data>
+  <data name="RuleEditor002.PlaceholderText" xml:space="preserve">
+    <value>Ex. Mon studio musical</value>
+  </data>
+  <data name="RuleEditor003.Text" xml:space="preserve">
+    <value>Quand…</value>
+  </data>
+  <data name="RuleEditor004.Header" xml:space="preserve">
+    <value>Application ou processus</value>
+  </data>
+  <data name="RuleEditor004.PlaceholderText" xml:space="preserve">
+    <value>Ex. FL64.exe ou Discord</value>
+  </data>
+  <data name="RuleEditor004.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Application ou processus</value>
+  </data>
+  <data name="RuleEditor005.Text" xml:space="preserve">
+    <value>Choisissez une application en cours d’exécution ou saisissez son nom. L’extension .exe est facultative.</value>
+  </data>
+  <data name="RuleEditor006.Header" xml:space="preserve">
+    <value>Déclencheur</value>
+  </data>
+  <data name="RuleEditor007.Content" xml:space="preserve">
+    <value>Démarre (tant qu’elle est ouverte)</value>
+  </data>
+  <data name="RuleEditor008.Content" xml:space="preserve">
+    <value>Est au premier plan</value>
+  </data>
+  <data name="RuleEditor009.Text" xml:space="preserve">
+    <value>Alors…</value>
+  </data>
+  <data name="RuleEditor010.Header" xml:space="preserve">
+    <value>Action</value>
+  </data>
+  <data name="RuleEditor011.Content" xml:space="preserve">
+    <value>Passer au profil</value>
+  </data>
+  <data name="RuleEditor012.Content" xml:space="preserve">
+    <value>Couper le micro</value>
+  </data>
+  <data name="RuleEditor013.Content" xml:space="preserve">
+    <value>Activer le micro</value>
+  </data>
+  <data name="RuleEditor014.Header" xml:space="preserve">
+    <value>Profil à appliquer</value>
+  </data>
+  <data name="RuleEditor014.PlaceholderText" xml:space="preserve">
+    <value>Choisir un profil</value>
+  </data>
+  <data name="RuleEditor015.Text" xml:space="preserve">
+    <value>Un processus et, pour l’action de profil, un profil sont nécessaires pour enregistrer.</value>
+  </data>
+  <data name="RuleEditor016.Content" xml:space="preserve">
+    <value>Revenir à l’état d’avant ensuite</value>
+  </data>
+  <data name="MainWindow001.Title" xml:space="preserve">
+    <value>Mixdeck</value>
+  </data>
+  <data name="MainWindow002.Title" xml:space="preserve">
+    <value>Mixdeck</value>
+  </data>
+  <data name="MainWindow003.Content" xml:space="preserve">
+    <value>Console</value>
+  </data>
+  <data name="MainWindow004.Content" xml:space="preserve">
+    <value>Routage</value>
+  </data>
+  <data name="MainWindow005.Content" xml:space="preserve">
+    <value>Appareils</value>
+  </data>
+  <data name="MainWindow006.Content" xml:space="preserve">
+    <value>Profils</value>
+  </data>
+  <data name="MainWindow007.Content" xml:space="preserve">
+    <value>Règles</value>
+  </data>
+  <data name="MainWindow008.Content" xml:space="preserve">
+    <value>Réglages</value>
+  </data>
+  <data name="MainWindow009.Content" xml:space="preserve">
+    <value>À propos</value>
+  </data>
+  <data name="Settings_AccentCustom" xml:space="preserve">
+    <value>Couleur personnalisée : </value>
+  </data>
+  <data name="Settings_AccentWindows" xml:space="preserve">
+    <value>Couleur de Windows</value>
+  </data>
+  <data name="Settings_AutoSave" xml:space="preserve">
+    <value>Les modifications sont enregistrées automatiquement.</value>
+  </data>
+  <data name="Settings_None" xml:space="preserve">
+    <value>Aucun</value>
+  </data>
+  <data name="Settings_MissingProfile" xml:space="preserve">
+    <value>Profil indisponible</value>
+  </data>
+  <data name="Settings_Saving" xml:space="preserve">
+    <value>Enregistrement…</value>
+  </data>
+  <data name="Settings_SaveError" xml:space="preserve">
+    <value>La modification n’a pas été enregistrée. Vérifiez l’accès au dossier de données et réessayez.</value>
+  </data>
+  <data name="Settings_Saved" xml:space="preserve">
+    <value>Modifications enregistrées.</value>
+  </data>
+  <data name="Settings_SaveFailed" xml:space="preserve">
+    <value>Échec de l’enregistrement.</value>
+  </data>
+  <data name="Settings_ChooseProfile" xml:space="preserve">
+    <value>Choisissez un profil existant pour ce raccourci.</value>
+  </data>
+  <data name="Settings_OpenLogsError" xml:space="preserve">
+    <value>Impossible d’ouvrir le dossier des journaux.</value>
+  </data>
+  <data name="Settings_Copied" xml:space="preserve">
+    <value>Emplacement copié dans le Presse-papiers.</value>
+  </data>
+  <data name="Settings_CopyError" xml:space="preserve">
+    <value>Impossible de copier l’emplacement des données.</value>
+  </data>
+  <data name="Settings_Unassigned" xml:space="preserve">
+    <value>Non attribué</value>
+  </data>
+  <data name="Settings_ToggleMic" xml:space="preserve">
+    <value>Couper / activer le micro</value>
+  </data>
+  <data name="Settings_PushToTalk" xml:space="preserve">
+    <value>Parler en maintenant la touche</value>
+  </data>
+  <data name="Settings_NextProfile" xml:space="preserve">
+    <value>Profil suivant</value>
+  </data>
+  <data name="Settings_PreviousProfile" xml:space="preserve">
+    <value>Profil précédent</value>
+  </data>
+  <data name="Settings_ApplyProfile" xml:space="preserve">
+    <value>Appliquer un profil</value>
+  </data>
+  <data name="Settings_VolumeUp" xml:space="preserve">
+    <value>Volume +</value>
+  </data>
+  <data name="Settings_VolumeDown" xml:space="preserve">
+    <value>Volume −</value>
+  </data>
+  <data name="Settings_OpenFlyout" xml:space="preserve">
+    <value>Ouvrir le panneau rapide</value>
+  </data>
+  <data name="Settings_Edit" xml:space="preserve">
+    <value>Modifier : </value>
+  </data>
+  <data name="Settings_Clear" xml:space="preserve">
+    <value>Effacer : </value>
+  </data>
+  <data name="Settings_CannotSave" xml:space="preserve">
+    <value>Enregistrement impossible</value>
+  </data>
+  <data name="Settings_CheckData" xml:space="preserve">
+    <value>Vérifiez l’accès au dossier de données et réessayez.</value>
+  </data>
+  <data name="Settings_AccentTitle" xml:space="preserve">
+    <value>Couleur d’accent</value>
+  </data>
+  <data name="Settings_Save" xml:space="preserve">
+    <value>Enregistrer</value>
+  </data>
+  <data name="Settings_Cancel" xml:space="preserve">
+    <value>Annuler</value>
+  </data>
+  <data name="Settings_AccentError" xml:space="preserve">
+    <value>Impossible d’ouvrir le choix de la couleur d’accent.</value>
+  </data>
+  <data name="Settings_HotkeySaveError" xml:space="preserve">
+    <value>Le raccourci n’a pas été enregistré. Vérifiez l’accès au dossier de données et réessayez.</value>
+  </data>
+  <data name="Settings_HotkeyOpenError" xml:space="preserve">
+    <value>Impossible d’ouvrir l’enregistreur de raccourcis.</value>
+  </data>
+  <data name="Settings_HotkeyRestoreError" xml:space="preserve">
+    <value>Impossible de réactiver les raccourcis. Relancez Mixdeck.</value>
+  </data>
+  <data name="Settings_RestartError" xml:space="preserve">
+    <value>Impossible de redémarrer Mixdeck.</value>
+  </data>
+  <data name="CS_085" xml:space="preserve">
+    <value>Redémarrer</value>
+  </data>
+  <data name="CS_040" xml:space="preserve">
+    <value>Changement d’appareil transmis au moteur. Actualisez la liste pour relire son état.</value>
+  </data>
+  <data name="CS_062" xml:space="preserve">
+    <value> démarre</value>
+  </data>
+  <data name="CS_038" xml:space="preserve">
+    <value>Connectez Voicemeeter pour choisir vos appareils.</value>
+  </data>
+  <data name="CS_081" xml:space="preserve">
+    <value>Entrée physique</value>
+  </data>
+  <data name="CS_100" xml:space="preserve">
+    <value>Changer l’icône</value>
+  </data>
+  <data name="CS_114" xml:space="preserve">
+    <value>Téléphone</value>
+  </data>
+  <data name="CS_RouteName" xml:space="preserve">
+    <value>{0} vers {1}</value>
+  </data>
+  <data name="CS_053" xml:space="preserve">
+    <value>WDM, recommandé</value>
+  </data>
+  <data name="CS_007" xml:space="preserve">
+    <value>Le niveau est en lecture seule.</value>
+  </data>
+  <data name="CS_087" xml:space="preserve">
+    <value>Impossible d’ouvrir la confirmation du redémarrage.</value>
+  </data>
+  <data name="CS_134" xml:space="preserve">
+    <value>Couleur d’accent</value>
+  </data>
+  <data name="CS_067" xml:space="preserve">
+    <value>Sortie physique</value>
+  </data>
+  <data name="CS_115" xml:space="preserve">
+    <value>Enregistrement</value>
+  </data>
+  <data name="CS_057" xml:space="preserve">
+    <value>Ce fichier n’est pas un profil Mixdeck valide. Choisissez un fichier .mixdeck-profile.json exporté depuis Mixdeck.</value>
+  </data>
+  <data name="CS_054" xml:space="preserve">
+    <value>Impossible d’appliquer ce profil. Réessayez après avoir vérifié la connexion et l’accès aux fichiers.</value>
+  </data>
+  <data name="CS_111" xml:space="preserve">
+    <value>Guitare</value>
+  </data>
+  <data name="CS_086" xml:space="preserve">
+    <value>Annuler</value>
+  </data>
+  <data name="CS_019" xml:space="preserve">
+    <value>Micro coupé</value>
+  </data>
+  <data name="CS_066" xml:space="preserve">
+    <value>Sortie virtuelle</value>
+  </data>
+  <data name="Core_Gain" xml:space="preserve">
+    <value>{0} : {1} dB</value>
+  </data>
+  <data name="CS_084" xml:space="preserve">
+    <value>Le son sera interrompu quelques instants. Vos réglages restent conservés.</value>
+  </data>
+  <data name="Core_PresetStrongName" xml:space="preserve">
+    <value>Fort</value>
+  </data>
+  <data name="CS_056" xml:space="preserve">
+    <value>L’accès au fichier est refusé. Choisissez un dossier accessible ou vérifiez les droits d’accès, puis réessayez.</value>
+  </data>
+  <data name="CS_011" xml:space="preserve">
+    <value>Nom validé : </value>
+  </data>
+  <data name="CS_StereoLevel" xml:space="preserve">
+    <value>Gauche {0}, droite {1}</value>
+  </data>
+  <data name="CS_003" xml:space="preserve">
+    <value>Couper le son</value>
+  </data>
+  <data name="CS_RuleSentence" xml:space="preserve">
+    <value>Quand {0} {1} → {2}</value>
+  </data>
+  <data name="Core_MicMuted" xml:space="preserve">
+    <value>Micro coupé</value>
+  </data>
+  <data name="CS_022" xml:space="preserve">
+    <value>Mises à jour désactivées : Mixdeck n'a pas été installé avec son installateur.</value>
+  </data>
+  <data name="CS_063" xml:space="preserve">
+    <value>micro coupé</value>
+  </data>
+  <data name="CS_077" xml:space="preserve">
+    <value>Mixdeck pilote Voicemeeter Standard, Banana et Potato. Cette version n’est pas prise en charge.</value>
+  </data>
+  <data name="Core_Profile" xml:space="preserve">
+    <value>Profil : {0}</value>
+  </data>
+  <data name="Core_MicOn" xml:space="preserve">
+    <value>Micro activé</value>
+  </data>
+  <data name="CS_118" xml:space="preserve">
+    <value>Réseau</value>
+  </data>
+  <data name="CS_075" xml:space="preserve">
+    <value>Mixdeck se reconnectera tout seul dès que le moteur audio sera lancé.</value>
+  </data>
+  <data name="CS_127" xml:space="preserve">
+    <value>Nom du profil</value>
+  </data>
+  <data name="CS_ProfileName" xml:space="preserve">
+    <value>Profil {0}</value>
+  </data>
+  <data name="CS_031" xml:space="preserve">
+    <value>Aucune note de version fournie.</value>
+  </data>
+  <data name="CS_123" xml:space="preserve">
+    <value>Maison</value>
+  </data>
+  <data name="CS_088" xml:space="preserve">
+    <value>Nouveau profil</value>
+  </data>
+  <data name="CS_016" xml:space="preserve">
+    <value>Micro non configuré</value>
+  </data>
+  <data name="CS_096" xml:space="preserve">
+    <value>Supprimer cette règle ?</value>
+  </data>
+  <data name="CS_061" xml:space="preserve">
+    <value>est au premier plan</value>
+  </data>
+  <data name="Core_PresetOffDescription" xml:space="preserve">
+    <value>Désactive la porte de bruit, la compression et la couleur de la voix.</value>
+  </data>
+  <data name="CS_045" xml:space="preserve">
+    <value>Impossible d’appliquer le préréglage du micro.</value>
+  </data>
+  <data name="CS_126" xml:space="preserve">
+    <value>Choisir une icône</value>
+  </data>
+  <data name="CS_017" xml:space="preserve">
+    <value>Activer le micro</value>
+  </data>
+  <data name="CS_109" xml:space="preserve">
+    <value>Navigateur</value>
+  </data>
+  <data name="CS_004" xml:space="preserve">
+    <value>Profil</value>
+  </data>
+  <data name="CS_097" xml:space="preserve">
+    <value>Supprimer</value>
+  </data>
+  <data name="CS_037" xml:space="preserve">
+    <value>Liste des appareils actualisée. WDM est recommandé pour sa faible latence.</value>
+  </data>
+  <data name="CS_083" xml:space="preserve">
+    <value>Redémarrer le moteur audio ?</value>
+  </data>
+  <data name="CS_113" xml:space="preserve">
+    <value>Ordinateur</value>
+  </data>
+  <data name="CS_005" xml:space="preserve">
+    <value>Envoyer vers </value>
+  </data>
+  <data name="CS_051" xml:space="preserve">
+    <value>Aucun</value>
+  </data>
+  <data name="CS_107" xml:space="preserve">
+    <value>Jeu</value>
+  </data>
+  <data name="CS_046" xml:space="preserve">
+    <value>Le réglage de la fenêtre n’a pas pu être enregistré.</value>
+  </data>
+  <data name="CS_135" xml:space="preserve">
+    <value>Profil Mixdeck</value>
+  </data>
+  <data name="CS_002" xml:space="preserve">
+    <value>F2 ou double-clic pour renommer le canal</value>
+  </data>
+  <data name="CS_131" xml:space="preserve">
+    <value>Couleur</value>
+  </data>
+  <data name="CS_023" xml:space="preserve">
+    <value>Impossible de joindre GitHub pour l'instant.</value>
+  </data>
+  <data name="CS_104" xml:space="preserve">
+    <value>Microphone</value>
+  </data>
+  <data name="CS_008" xml:space="preserve">
+    <value>Par défaut</value>
+  </data>
+  <data name="CS_136" xml:space="preserve">
+    <value>Supprimer ce profil ?</value>
+  </data>
+  <data name="CS_UpdateAvailable" xml:space="preserve">
+    <value>La version {0} est disponible.</value>
+  </data>
+  <data name="CS_076" xml:space="preserve">
+    <value>Installez Voicemeeter depuis vb-audio.com, puis relancez Mixdeck.</value>
+  </data>
+  <data name="CS_132" xml:space="preserve">
+    <value>Exporter…</value>
+  </data>
+  <data name="CS_101" xml:space="preserve">
+    <value>Afficher dans le panneau rapide</value>
+  </data>
+  <data name="CS_106" xml:space="preserve">
+    <value>Haut-parleur</value>
+  </data>
+  <data name="CS_080" xml:space="preserve">
+    <value>Entrée virtuelle</value>
+  </data>
+  <data name="CS_059" xml:space="preserve">
+    <value>L’opération n’a pas abouti. Vérifiez le fichier et la connexion à Voicemeeter, puis réessayez.</value>
+  </data>
+  <data name="CS_140" xml:space="preserve">
+    <value>démarre</value>
+  </data>
+  <data name="CS_021" xml:space="preserve">
+    <value>Micro actif</value>
+  </data>
+  <data name="CS_044" xml:space="preserve">
+    <value>Le traitement a été transmis, mais le choix n’a pas pu être enregistré.</value>
+  </data>
+  <data name="CS_074" xml:space="preserve">
+    <value>Connexion à Voicemeeter…</value>
+  </data>
+  <data name="CS_032" xml:space="preserve">
+    <value>Impossible de rechercher les mises à jour. Réessayez plus tard.</value>
+  </data>
+  <data name="CS_047" xml:space="preserve">
+    <value>Demande de redémarrage transmise. Une brève interruption audio est normale.</value>
+  </data>
+  <data name="CS_092" xml:space="preserve">
+    <value>Physique</value>
+  </data>
+  <data name="CS_060" xml:space="preserve">
+    <value> — copie</value>
+  </data>
+  <data name="CS_090" xml:space="preserve">
+    <value>Entrées / Sorties</value>
+  </data>
+  <data name="CS_DeleteRule" xml:space="preserve">
+    <value>La règle « {0} » sera supprimée. Cette action est définitive.</value>
+  </data>
+  <data name="CS_036" xml:space="preserve">
+    <value>Le moteur audio est hors connexion. Les appareils seront relus à la reconnexion.</value>
+  </data>
+  <data name="CS_068" xml:space="preserve">
+    <value>Rétablir le son</value>
+  </data>
+  <data name="CS_027" xml:space="preserve">
+    <value>Mises à jour désactivées en développement.</value>
+  </data>
+  <data name="Core_PresetVoiceName" xml:space="preserve">
+    <value>Voix</value>
+  </data>
+  <data name="CS_033" xml:space="preserve">
+    <value>Téléchargement de la mise à jour…</value>
+  </data>
+  <data name="CS_070" xml:space="preserve">
+    <value>Connecté à Voicemeeter </value>
+  </data>
+  <data name="CS_009" xml:space="preserve">
+    <value>Réunion</value>
+  </data>
+  <data name="CS_082" xml:space="preserve">
+    <value>Sortie par défaut de Windows</value>
+  </data>
+  <data name="Core_PresetStrongDescription" xml:space="preserve">
+    <value>Pour une pièce bruyante : porte de bruit marquée et voix plus présente.</value>
+  </data>
+  <data name="CS_119" xml:space="preserve">
+    <value>Bureau</value>
+  </data>
+  <data name="CS_041" xml:space="preserve">
+    <value>Impossible de changer cet appareil. Vérifiez la connexion au moteur.</value>
+  </data>
+  <data name="CS_034" xml:space="preserve">
+    <value>Installation et redémarrage…</value>
+  </data>
+  <data name="CS_050" xml:space="preserve">
+    <value>Entrée physique </value>
+  </data>
+  <data name="Core_InputName" xml:space="preserve">
+    <value>Entrée {0}</value>
+  </data>
+  <data name="CS_DeleteProfile" xml:space="preserve">
+    <value>« {0} » sera supprimé. Les réglages audio actuels seront conservés.</value>
+  </data>
+  <data name="CS_013" xml:space="preserve">
+    <value>Console</value>
+  </data>
+  <data name="CS_052" xml:space="preserve">
+    <value> (actuel)</value>
+  </data>
+  <data name="CS_122" xml:space="preserve">
+    <value>Travail</value>
+  </data>
+  <data name="CS_029" xml:space="preserve">
+    <value>La recherche a échoué. Réessayez plus tard.</value>
+  </data>
+  <data name="CS_058" xml:space="preserve">
+    <value>Impossible de lire ou d’enregistrer le profil. Vérifiez que le fichier est disponible et que le disque dispose d’espace libre.</value>
+  </data>
+  <data name="CS_116" xml:space="preserve">
+    <value>Lecture</value>
+  </data>
+  <data name="CS_026" xml:space="preserve">
+    <value>Recherchez une nouvelle version de Mixdeck.</value>
+  </data>
+  <data name="CS_094" xml:space="preserve">
+    <value>Modifier la règle</value>
+  </data>
+  <data name="CS_112" xml:space="preserve">
+    <value>Synthétiseur</value>
+  </data>
+  <data name="Core_PresetOffName" xml:space="preserve">
+    <value>Aucun</value>
+  </data>
+  <data name="CS_078" xml:space="preserve">
+    <value>Connecté</value>
+  </data>
+  <data name="CS_073" xml:space="preserve">
+    <value>Version de Voicemeeter non prise en charge</value>
+  </data>
+  <data name="CS_010" xml:space="preserve">
+    <value>Musique</value>
+  </data>
+  <data name="CS_065" xml:space="preserve">
+    <value>Profil introuvable</value>
+  </data>
+  <data name="CS_117" xml:space="preserve">
+    <value>Diffusion</value>
+  </data>
+  <data name="CS_069" xml:space="preserve">
+    <value>Le changement s'applique jusqu'à la fermeture de Mixdeck. Vérifiez l'accès au dossier de données, puis modifiez à nouveau le nom ou l'icône.</value>
+  </data>
+  <data name="CS_Priority" xml:space="preserve">
+    <value>Priorité {0}</value>
+  </data>
+  <data name="CS_095" xml:space="preserve">
+    <value>Enregistrer</value>
+  </data>
+  <data name="CS_079" xml:space="preserve">
+    <value>Hors ligne</value>
+  </data>
+  <data name="CS_024" xml:space="preserve">
+    <value>Réactiver le son de </value>
+  </data>
+  <data name="Core_PresetLightName" xml:space="preserve">
+    <value>Léger</value>
+  </data>
+  <data name="CS_120" xml:space="preserve">
+    <value>Vidéo</value>
+  </data>
+  <data name="CS_071" xml:space="preserve">
+    <value>Voicemeeter n'est pas lancé</value>
+  </data>
+  <data name="CS_105" xml:space="preserve">
+    <value>Casque</value>
+  </data>
+  <data name="CS_030" xml:space="preserve">
+    <value>Mixdeck est à jour.</value>
+  </data>
+  <data name="CS_042" xml:space="preserve">
+    <value>Choisissez une entrée micro physique dans Réglages et connectez le moteur.</value>
+  </data>
+  <data name="CS_130" xml:space="preserve">
+    <value>Dupliquer</value>
+  </data>
+  <data name="CS_072" xml:space="preserve">
+    <value>Voicemeeter est introuvable</value>
+  </data>
+  <data name="CS_103" xml:space="preserve">
+    <value>Nom du canal</value>
+  </data>
+  <data name="CS_048" xml:space="preserve">
+    <value>Impossible de demander le redémarrage du moteur audio.</value>
+  </data>
+  <data name="CS_110" xml:space="preserve">
+    <value>Film</value>
+  </data>
+  <data name="CS_012" xml:space="preserve">
+    <value>Ouvrir le panneau</value>
+  </data>
+  <data name="CS_138" xml:space="preserve">
+    <value>Cette combinaison est déjà attribuée à une autre action de Mixdeck.</value>
+  </data>
+  <data name="CS_133" xml:space="preserve">
+    <value>Couleur du profil</value>
+  </data>
+  <data name="CS_125" xml:space="preserve">
+    <value>Écoute</value>
+  </data>
+  <data name="CS_137" xml:space="preserve">
+    <value>Ajoutez un modificateur (Ctrl, Alt, Maj ou Windows). Une touche seule n’est pas un raccourci valide, sauf certaines touches multimédias ou F13 à F24.</value>
+  </data>
+  <data name="Core_PresetLightDescription" xml:space="preserve">
+    <value>Réduit doucement les bruits faibles et lisse les écarts de voix.</value>
+  </data>
+  <data name="CS_Version" xml:space="preserve">
+    <value>Version {0}</value>
+  </data>
+  <data name="CS_039" xml:space="preserve">
+    <value>Impossible de lire les appareils. Réessayez après la connexion au moteur.</value>
+  </data>
+  <data name="CS_128" xml:space="preserve">
+    <value>Ex. Musique, Réunion, Jeu…</value>
+  </data>
+  <data name="CS_043" xml:space="preserve">
+    <value>Le moteur audio est hors connexion.</value>
+  </data>
+  <data name="CS_124" xml:space="preserve">
+    <value>Nuit</value>
+  </data>
+  <data name="CS_014" xml:space="preserve">
+    <value>Réglages</value>
+  </data>
+  <data name="CS_018" xml:space="preserve">
+    <value>Couper le micro</value>
+  </data>
+  <data name="CS_001" xml:space="preserve">
+    <value>Canal</value>
+  </data>
+  <data name="CS_098" xml:space="preserve">
+    <value>Virtuel</value>
+  </data>
+  <data name="CS_099" xml:space="preserve">
+    <value>Renommer</value>
+  </data>
+  <data name="CS_121" xml:space="preserve">
+    <value>Favori</value>
+  </data>
+  <data name="CS_089" xml:space="preserve">
+    <value>Créer</value>
+  </data>
+  <data name="CS_PresetApplied" xml:space="preserve">
+    <value>Préréglage « {0} » transmis au micro.</value>
+  </data>
+  <data name="CS_093" xml:space="preserve">
+    <value>Créer une règle</value>
+  </data>
+  <data name="CS_025" xml:space="preserve">
+    <value>Couper le son de </value>
+  </data>
+  <data name="CS_006" xml:space="preserve">
+    <value>Niveau audio</value>
+  </data>
+  <data name="CS_108" xml:space="preserve">
+    <value>Conversation</value>
+  </data>
+  <data name="CS_139" xml:space="preserve">
+    <value>Choisissez le profil à appliquer avant d’enregistrer.</value>
+  </data>
+  <data name="CS_091" xml:space="preserve">
+    <value>Virtuelle</value>
+  </data>
+  <data name="CS_020" xml:space="preserve">
+    <value>Micro activé</value>
+  </data>
+  <data name="CS_035" xml:space="preserve">
+    <value>L’installation a échoué. Vous pouvez réessayer.</value>
+  </data>
+  <data name="CS_064" xml:space="preserve">
+    <value>micro activé</value>
+  </data>
+  <data name="CS_055" xml:space="preserve">
+    <value>Impossible de lancer Voicemeeter. Vérifiez son installation, puis réessayez.</value>
+  </data>
+  <data name="CS_129" xml:space="preserve">
+    <value>Créé le </value>
+  </data>
+  <data name="CS_049" xml:space="preserve">
+    <value> · Sortie physique</value>
+  </data>
+  <data name="Core_PresetVoiceDescription" xml:space="preserve">
+    <value>Atténue les bruits entre les phrases et rend la voix plus claire et régulière.</value>
+  </data>
+  <data name="CS_RuleProfile" xml:space="preserve">
+    <value>profil « {0} »</value>
+  </data>
+  <data name="CS_028" xml:space="preserve">
+    <value>Recherche d’une mise à jour…</value>
+  </data>
+  <data name="CS_102" xml:space="preserve">
+    <value>Rétablir le nom de Voicemeeter</value>
+  </data>
+  <data name="CS_015" xml:space="preserve">
+    <value>Quitter Mixdeck</value>
+  </data>
+  <data name="Hotkey_Control" xml:space="preserve">
+    <value>Ctrl</value>
+  </data>
+  <data name="Hotkey_Alt" xml:space="preserve">
+    <value>Alt</value>
+  </data>
+  <data name="Hotkey_Shift" xml:space="preserve">
+    <value>Maj</value>
+  </data>
+  <data name="Hotkey_Windows" xml:space="preserve">
+    <value>Win</value>
+  </data>
+  <data name="Hotkey_Backspace" xml:space="preserve">
+    <value>Retour arrière</value>
+  </data>
+  <data name="Hotkey_Tab" xml:space="preserve">
+    <value>Tab</value>
+  </data>
+  <data name="Hotkey_Enter" xml:space="preserve">
+    <value>Entrée</value>
+  </data>
+  <data name="Hotkey_Escape" xml:space="preserve">
+    <value>Échap</value>
+  </data>
+  <data name="Hotkey_Space" xml:space="preserve">
+    <value>Espace</value>
+  </data>
+  <data name="Hotkey_PageUp" xml:space="preserve">
+    <value>Page précédente</value>
+  </data>
+  <data name="Hotkey_PageDown" xml:space="preserve">
+    <value>Page suivante</value>
+  </data>
+  <data name="Hotkey_End" xml:space="preserve">
+    <value>Fin</value>
+  </data>
+  <data name="Hotkey_Home" xml:space="preserve">
+    <value>Début</value>
+  </data>
+  <data name="Hotkey_Insert" xml:space="preserve">
+    <value>Inser</value>
+  </data>
+  <data name="Hotkey_Delete" xml:space="preserve">
+    <value>Suppr</value>
+  </data>
+  <data name="Hotkey_NumMultiply" xml:space="preserve">
+    <value>Num *</value>
+  </data>
+  <data name="Hotkey_NumAdd" xml:space="preserve">
+    <value>Num +</value>
+  </data>
+  <data name="Hotkey_NumSeparator" xml:space="preserve">
+    <value>Num séparateur</value>
+  </data>
+  <data name="Hotkey_NumSubtract" xml:space="preserve">
+    <value>Num -</value>
+  </data>
+  <data name="Hotkey_NumDecimal" xml:space="preserve">
+    <value>Num ,</value>
+  </data>
+  <data name="Hotkey_NumDivide" xml:space="preserve">
+    <value>Num /</value>
+  </data>
+  <data name="Hotkey_Mute" xml:space="preserve">
+    <value>Muet</value>
+  </data>
+  <data name="Hotkey_VolumeDown" xml:space="preserve">
+    <value>Volume −</value>
+  </data>
+  <data name="Hotkey_VolumeUp" xml:space="preserve">
+    <value>Volume +</value>
+  </data>
+  <data name="Hotkey_NextTrack" xml:space="preserve">
+    <value>Piste suivante</value>
+  </data>
+  <data name="Hotkey_PreviousTrack" xml:space="preserve">
+    <value>Piste précédente</value>
+  </data>
+  <data name="Hotkey_Stop" xml:space="preserve">
+    <value>Arrêt</value>
+  </data>
+  <data name="Hotkey_PlayPause" xml:space="preserve">
+    <value>Lecture/Pause</value>
+  </data>
+  <data name="Hotkey_NumDigit" xml:space="preserve">
+    <value>Num {0}</value>
+  </data>
+</root>

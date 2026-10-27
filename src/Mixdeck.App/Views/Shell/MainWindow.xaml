@@ -4,7 +4,7 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:shared="using:Mixdeck.App.ViewModels.Shared"
-    Title="Mixdeck">
+    >
     <Window.SystemBackdrop>
         <MicaBackdrop />
     </Window.SystemBackdrop>
@@ -15,9 +15,9 @@
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
-        <TitleBar
+        <TitleBar x:Uid="MainWindow002"
             x:Name="AppTitleBar"
-            Title="Mixdeck"
+
             IsBackButtonVisible="False"
             IsPaneToggleButtonVisible="True"
             PaneToggleRequested="OnPaneToggleRequested"
@@ -71,39 +71,39 @@
             PaneDisplayMode="Left"
             SelectionChanged="OnNavigationSelectionChanged">
             <NavigationView.MenuItems>
-                <NavigationViewItem Content="Console" Tag="Mixer">
+                <NavigationViewItem x:Uid="MainWindow003"  Tag="Mixer">
                     <NavigationViewItem.Icon>
                         <FontIcon Glyph="&#xE9E9;" />
                     </NavigationViewItem.Icon>
                 </NavigationViewItem>
-                <NavigationViewItem Content="Routage" Tag="Routing">
+                <NavigationViewItem x:Uid="MainWindow004"  Tag="Routing">
                     <NavigationViewItem.Icon>
                         <FontIcon Glyph="&#xE8AB;" />
                     </NavigationViewItem.Icon>
                 </NavigationViewItem>
-                <NavigationViewItem Content="Appareils" Tag="Devices">
+                <NavigationViewItem x:Uid="MainWindow005"  Tag="Devices">
                     <NavigationViewItem.Icon>
                         <FontIcon Glyph="&#xE7F5;" />
                     </NavigationViewItem.Icon>
                 </NavigationViewItem>
-                <NavigationViewItem Content="Profils" Tag="Profiles">
+                <NavigationViewItem x:Uid="MainWindow006"  Tag="Profiles">
                     <NavigationViewItem.Icon>
                         <FontIcon Glyph="&#xE8F1;" />
                     </NavigationViewItem.Icon>
                 </NavigationViewItem>
-                <NavigationViewItem Content="Règles" Tag="Rules">
+                <NavigationViewItem x:Uid="MainWindow007"  Tag="Rules">
                     <NavigationViewItem.Icon>
                         <FontIcon Glyph="&#xE945;" />
                     </NavigationViewItem.Icon>
                 </NavigationViewItem>
             </NavigationView.MenuItems>
             <NavigationView.FooterMenuItems>
-                <NavigationViewItem Content="Réglages" Tag="Settings">
+                <NavigationViewItem x:Uid="MainWindow008"  Tag="Settings">
                     <NavigationViewItem.Icon>
                         <FontIcon Glyph="&#xE713;" />
                     </NavigationViewItem.Icon>
                 </NavigationViewItem>
-                <NavigationViewItem Content="À propos" Tag="About">
+                <NavigationViewItem x:Uid="MainWindow009"  Tag="About">
                     <NavigationViewItem.Icon>
                         <FontIcon Glyph="&#xE946;" />
                     </NavigationViewItem.Icon>

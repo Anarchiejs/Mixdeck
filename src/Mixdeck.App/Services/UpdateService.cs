@@ -1,3 +1,4 @@
+using Mixdeck.App.Localization;
 using System.Reflection;
 using Microsoft.Extensions.Logging;
 using Velopack;
@@ -46,7 +47,7 @@ public sealed class UpdateService : IUpdateService
     {
         if (!IsInstalled)
         {
-            return new UpdateCheckResult(false, null, null, "Mises à jour désactivées : Mixdeck n'a pas été installé avec son installateur.");
+            return new UpdateCheckResult(false, null, null, Strings.Get("CS_022"));
         }
 
         try
@@ -63,7 +64,7 @@ public sealed class UpdateService : IUpdateService
         catch (Exception ex)
         {
             _logger.LogWarning(ex, "Échec de la recherche de mise à jour");
-            return new UpdateCheckResult(false, null, null, "Impossible de joindre GitHub pour l'instant.");
+            return new UpdateCheckResult(false, null, null, Strings.Get("CS_023"));
         }
     }
 

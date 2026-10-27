@@ -6,6 +6,34 @@ using Mixdeck.Core.Settings;
 namespace Mixdeck.Core.Tests;
 public sealed class SettingsTests
 {
+    [Theory]
+    [InlineData(null)]
+    [InlineData("fr-FR")]
+    [InlineData("en-US")]
+    public async Task InterfaceLanguageSurvivesSavingAndReloading(string? language)
+    {
+        using var rig = new TestRig();
+        var store = new SettingsStore(rig.Paths, NullLogger<SettingsStore>.Instance);
+        await store.SaveAsync(new() { Language = language, ShowOsd = false });
+
+        var reloadedStore = new SettingsStore(rig.Paths, NullLogger<SettingsStore>.Instance);
+        var reloaded = await reloadedStore.LoadAsync();
+
+        Assert.Equal(language, reloaded.Language);
+        Assert.False(reloaded.ShowOsd);
+        using var document = JsonDocument.Parse(await File.ReadAllTextAsync(rig.Paths.SettingsFile));
+        Assert.Equal(language, document.RootElement.GetProperty("language").GetString());
+    }
+
+    [Fact]
+    public void ExistingSettingsWithoutLanguageUseTheWindowsLanguage()
+    {
+        var settings = JsonSerializer.Deserialize("{\"showOsd\":false}", MixdeckJsonContext.Default.AppSettings);
+
+        Assert.Null(settings!.Language);
+        Assert.False(settings.ShowOsd);
+    }
+
     [Fact]
     public async Task AtomicSaveBackupRecoveryAndChanged()
     {
