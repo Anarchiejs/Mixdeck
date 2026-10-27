@@ -37,7 +37,8 @@ internal static partial class RenderEndpoints
         }
     }
 
-    internal static IReadOnlyList<AudioEndpoint> Read(Action<string>? trace)
+    /// <param name="flow">0 = sorties (eRender), 1 = entrées (eCapture).</param>
+    internal static IReadOnlyList<AudioEndpoint> Read(Action<string>? trace, int flow = 0)
     {
         using var apartment = new PrivateApiApartment();
         var classId = new Guid("bcde0395-e52f-467c-8e3d-c4579291692e");
@@ -49,7 +50,7 @@ internal static partial class RenderEndpoints
         {
             PrivateApiNative.Check(PrivateApiNative.CoCreateInstance(classId, 0, 1, iid, out pointer), $"MMDeviceEnumerator IID={iid:B}", trace);
             enumerator = (IDeviceEnumerator)Marshal.GetObjectForIUnknown(pointer);
-            PrivateApiNative.Check(enumerator.EnumAudioEndpoints(0, 1, out collection), "EnumAudioEndpoints eRender ACTIVE", trace);
+            PrivateApiNative.Check(enumerator.EnumAudioEndpoints(flow, 1, out collection), $"EnumAudioEndpoints flow={flow} ACTIVE", trace);
             PrivateApiNative.Check(collection.GetCount(out uint count), "IMMDeviceCollection.GetCount", trace);
             var endpoints = new List<AudioEndpoint>();
             for (uint index = 0; index < count; index++)

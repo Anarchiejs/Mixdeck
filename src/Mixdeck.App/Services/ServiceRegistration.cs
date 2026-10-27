@@ -65,6 +65,7 @@ internal static class ServiceRegistration
             var logger = sp.GetRequiredService<ILogger<AppAudioSessions>>();
             return () => new AppAudioSessions(logger);
         });
+        services.AddSingleton<IAppAudioRouter, Mixdeck.Platform.Audio.AudioPolicy.AppAudioRouter>();
         services.AddSingleton<SystemEventsWatcher>();
 
         // Interface
