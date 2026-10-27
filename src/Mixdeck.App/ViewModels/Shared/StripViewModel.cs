@@ -17,7 +17,7 @@ public sealed partial class StripViewModel : ChannelViewModel
         ApplyCustomization(null, null, true);
     }
 
-    public bool IsVirtual => Layout.IsVirtualStrip(Index);
+    public override bool IsVirtual => Layout.IsVirtualStrip(Index);
 
     public bool HasEq => IsVirtual;
 

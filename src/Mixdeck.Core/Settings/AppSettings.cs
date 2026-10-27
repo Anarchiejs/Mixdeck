@@ -50,7 +50,8 @@ public sealed record DuckingSettings
 /// <summary>Nom, icône et visibilité d'une tranche ou d'un bus, choisis par l'utilisateur.</summary>
 /// <param name="DisplayName">null = libellé de Voicemeeter, sinon nom par défaut.</param>
 /// <param name="Icon">Glyphe Segoe Fluent Icons ; null = icône par défaut.</param>
-public sealed record ChannelCustomization(int Index, string? DisplayName = null, string? Icon = null, bool ShowInFlyout = true);
+/// <param name="ShowInConsole">null = automatique : affichée dans la console si elle est virtuelle ou a un périphérique.</param>
+public sealed record ChannelCustomization(int Index, string? DisplayName = null, string? Icon = null, bool ShowInFlyout = true, bool? ShowInConsole = null);
 
 /// <summary>Réglages de l'application, enregistrés dans settings.json.</summary>
 public sealed record AppSettings

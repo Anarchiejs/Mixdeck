@@ -17,7 +17,7 @@ public sealed partial class BusViewModel : ChannelViewModel
     /// <summary>A1, A2, A3, B1, B2.</summary>
     public string BusName => Layout.BusNames[Index];
 
-    public bool IsVirtual => Layout.IsVirtualBus(Index);
+    public override bool IsVirtual => Layout.IsVirtualBus(Index);
 
     public bool HasEq => Layout.VoicemeeterType != 1;
 

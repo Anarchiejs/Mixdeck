@@ -55,6 +55,21 @@ public abstract partial class ChannelViewModel : ObservableObject
     [ObservableProperty]
     public partial bool ShowInFlyout { get; set; } = true;
 
+    /// <summary>Choix de l'utilisateur pour la console ; null = automatique.</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsInConsole))]
+    public partial bool? ShowInConsole { get; set; }
+
+    /// <summary>Un périphérique est réglé dans Voicemeeter ; null tant qu'il n'a pas été lu.</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsInConsole))]
+    public partial bool? HasDevice { get; set; }
+
+    public abstract bool IsVirtual { get; }
+
+    /// <summary>Affichée dans la console : choix de l'utilisateur, sinon canal virtuel ou relié à un périphérique.</summary>
+    public bool IsInConsole => ShowInConsole ?? (IsVirtual || HasDevice != false);
+
     [ObservableProperty]
     public partial double LeftDb { get; set; } = -60;
 
@@ -145,6 +160,17 @@ public abstract partial class ChannelViewModel : ObservableObject
             CustomizationChanged?.Invoke(this, EventArgs.Empty);
         }
     }
+
+    partial void OnShowInConsoleChanged(bool? value)
+    {
+        if (!_syncing)
+        {
+            CustomizationChanged?.Invoke(this, EventArgs.Empty);
+        }
+    }
+
+    /// <summary>Applique le choix enregistré pour la console, sans le réenregistrer.</summary>
+    public void ApplyConsoleVisibility(bool? show) => Sync(() => ShowInConsole = show);
 
     /// <summary>Applique les personnalisations enregistrées (nom, icône, visibilité).</summary>
     public void ApplyCustomization(string? displayName, string? icon, bool showInFlyout)
