@@ -24,6 +24,8 @@ public sealed class ShellService(IServiceProvider services, MixdeckPaths paths, 
         _main.ShowPage(page);
     }
 
+    public nint MainWindowHandle => _main is null ? 0 : WinRT.Interop.WindowNative.GetWindowHandle(_main);
+
     public void ToggleFlyout()
     {
         _flyout ??= services.GetRequiredService<FlyoutWindow>();

@@ -65,7 +65,8 @@ internal static class ServiceRegistration
         services.AddSingleton<TrayIconService>();
         services.AddSingleton<MixerViewModel>();
         services.AddSingleton<FlyoutWindow>();
-        services.AddSingleton<MainWindow>();
+        // La console est recréée à chaque ouverture et libérée à la fermeture (mémoire au repos).
+        services.AddTransient<MainWindow>();
         services.AddSingleton<OsdWindow>();
 
         // Pages de la console : une instance par navigation.

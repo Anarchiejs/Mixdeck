@@ -1,9 +1,9 @@
 using System.Collections.Specialized;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Mixdeck.App.Services;
 using Mixdeck.App.ViewModels.Pages;
 using Mixdeck.App.Views.Pages.Common;
-using Mixdeck.App.Views.Shell;
 using Windows.Storage.Pickers;
 
 namespace Mixdeck.App.Views.Pages;
@@ -37,7 +37,7 @@ public sealed partial class ProfilesPage : Page
     {
         var picker = new FileOpenPicker { SuggestedStartLocation = PickerLocationId.DocumentsLibrary };
         picker.FileTypeFilter.Add(".json");
-        WinRT.Interop.InitializeWithWindow.Initialize(picker, WinRT.Interop.WindowNative.GetWindowHandle(App.GetService<MainWindow>()));
+        WinRT.Interop.InitializeWithWindow.Initialize(picker, App.GetService<IShellService>().MainWindowHandle);
         var file = await picker.PickSingleFileAsync();
         if (file is null) return;
         await using var stream = await file.OpenStreamForReadAsync();
