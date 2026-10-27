@@ -39,6 +39,7 @@
                     Text="{x:Bind shared:Converters.Db(Channel.Gain), Mode=OneWay}" />
             </Grid>
             <controls:Fader
+                x:Name="VolumeFader"
                 AutomationProperties.Name="{x:Bind Channel.DisplayName, Mode=OneWay}"
                 IsMuted="{x:Bind Channel.IsMuted, Mode=OneWay}"
                 Orientation="Horizontal"

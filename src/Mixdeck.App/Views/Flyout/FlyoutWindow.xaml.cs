@@ -32,6 +32,7 @@ public sealed partial class FlyoutWindow : Window
     private IDisposable? _meters;
     private DateTime _hiddenAt = DateTime.MinValue;
     private TaskbarEdge _edge = TaskbarEdge.Bottom;
+    private Storyboard? _openAnimation;
 
     public FlyoutWindow(MixerViewModel mixer, ITaskbarLocator taskbar, IShellService shell, ThemeService theme)
     {
@@ -99,6 +100,8 @@ public sealed partial class FlyoutWindow : Window
         _hiddenAt = DateTime.UtcNow;
         _meters?.Dispose();
         _meters = null;
+        _openAnimation?.Stop();
+        _openAnimation = null;
         AppWindow.Hide();
     }
 
@@ -178,7 +181,9 @@ public sealed partial class FlyoutWindow : Window
 
         var ease = new ExponentialEase { EasingMode = EasingMode.EaseOut, Exponent = 6 };
         var duration = new Duration(TimeSpan.FromMilliseconds(250));
+        _openAnimation?.Stop();
         var storyboard = new Storyboard();
+        _openAnimation = storyboard;
         AddAnimation(storyboard, SlideTransform, "X", fromX, 0, duration, ease);
         AddAnimation(storyboard, SlideTransform, "Y", fromY, 0, duration, ease);
         AddAnimation(storyboard, Root, nameof(UIElement.Opacity), 0, 1, new Duration(TimeSpan.FromMilliseconds(160)), null);

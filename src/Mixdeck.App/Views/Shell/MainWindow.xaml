@@ -110,7 +110,7 @@
                 </NavigationViewItem>
             </NavigationView.FooterMenuItems>
 
-            <Frame x:Name="ContentFrame" Navigated="OnFrameNavigated" />
+            <Frame x:Name="ContentFrame" CacheSize="0" IsNavigationStackEnabled="False" Navigated="OnFrameNavigated" />
         </NavigationView>
     </Grid>
 </Window>
