@@ -16,14 +16,10 @@ jobs:
       - name: Récupérer le code
         uses: actions/checkout@v4
 
-      - name: Installer le SDK .NET (cache NuGet)
+      - name: Installer le SDK .NET
         uses: actions/setup-dotnet@v4
         with:
           global-json-file: global.json
-          cache: true
-          cache-dependency-path: |
-            Directory.Packages.props
-            **/*.csproj
 
       - name: Lire la version et les notes
         id: version
@@ -85,7 +81,7 @@ jobs:
         run: Write-Host "Aucune release précédente utilisable. Le paquet sera complet, sans delta."
 
       - name: Empaqueter
-        run: dotnet tool run vpk -- pack --packId Mixdeck --packVersion ${{ steps.version.outputs.version }} --packDir publish --mainExe Mixdeck.exe --packTitle Mixdeck --icon src/Mixdeck.App/Assets/Mixdeck.ico
+        run: dotnet tool run vpk -- pack --packId MixdeckApp --packVersion ${{ steps.version.outputs.version }} --packDir publish --mainExe Mixdeck.exe --packTitle Mixdeck --icon src/Mixdeck.App/Assets/Mixdeck.ico
 
       - name: Envoyer sur GitHub Releases
         run: dotnet tool run vpk -- upload github --repoUrl https://github.com/Anarchiejs/Mixdeck --publish --releaseName "Mixdeck ${{ steps.version.outputs.version }}" --tag v${{ steps.version.outputs.version }} --releaseNotes "${{ steps.version.outputs.notes }}" --token "${{ secrets.GITHUB_TOKEN }}"

@@ -131,7 +131,7 @@ Write-Step "Empaquetage Velopack vers $artifacts"
 Invoke-DotNet -ArgumentList @(
     'tool', 'run', 'vpk', '--',
     'pack',
-    '--packId', 'Mixdeck',
+    '--packId', 'MixdeckApp',
     '--packVersion', $Version,
     '--packDir', $publishDir,
     '--mainExe', 'Mixdeck.exe',

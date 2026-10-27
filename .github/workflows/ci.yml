@@ -12,14 +12,10 @@ jobs:
       - name: Récupérer le code
         uses: actions/checkout@v4
 
-      - name: Installer le SDK .NET (cache NuGet)
+      - name: Installer le SDK .NET
         uses: actions/setup-dotnet@v4
         with:
           global-json-file: global.json
-          cache: true
-          cache-dependency-path: |
-            Directory.Packages.props
-            **/*.csproj
 
       - name: Restaurer
         run: dotnet restore Mixdeck.slnx
