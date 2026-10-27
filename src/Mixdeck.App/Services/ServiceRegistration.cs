@@ -1,6 +1,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.UI.Dispatching;
+using Mixdeck.App.ViewModels.AppVolume;
 using Mixdeck.App.ViewModels.Pages;
 using Mixdeck.App.ViewModels.Shared;
 using Mixdeck.App.Views.Flyout;
@@ -10,6 +11,7 @@ using Mixdeck.Core.Abstractions;
 using Mixdeck.Core.Automation;
 using Mixdeck.Core.Profiles;
 using Mixdeck.Core.Settings;
+using Mixdeck.Platform.Audio;
 using Mixdeck.Platform.Foreground;
 using Mixdeck.Platform.Hotkeys;
 using Mixdeck.Platform.Power;
@@ -46,6 +48,7 @@ internal static class ServiceRegistration
         // Cœur
         services.AddSingleton<IProfileService, ProfileService>();
         services.AddSingleton<ActionDispatcher>();
+        services.AddSingleton<DuckingController>();
         services.AddSingleton<AutomationCoordinator>();
 
         // Plateforme Win32
@@ -55,6 +58,13 @@ internal static class ServiceRegistration
         services.AddSingleton<IAutoStart, AutoStart>();
         services.AddSingleton<ITaskbarLocator, TaskbarLocator>();
         services.AddSingleton<TrayIconPromoter>();
+
+        // Volume par application : une instance par ouverture du panneau, libérée à sa fermeture.
+        services.AddSingleton<Func<IAppAudioSessions>>(sp =>
+        {
+            var logger = sp.GetRequiredService<ILogger<AppAudioSessions>>();
+            return () => new AppAudioSessions(logger);
+        });
         services.AddSingleton<SystemEventsWatcher>();
 
         // Interface
@@ -65,6 +75,7 @@ internal static class ServiceRegistration
         services.AddSingleton<IShellService>(sp => sp.GetRequiredService<ShellService>());
         services.AddSingleton<TrayIconService>();
         services.AddSingleton<MixerViewModel>();
+        services.AddTransient<AppVolumeListViewModel>();
         services.AddSingleton<FlyoutWindow>();
         // La console est recréée à chaque ouverture et libérée à la fermeture (mémoire au repos).
         services.AddTransient<MainWindow>();

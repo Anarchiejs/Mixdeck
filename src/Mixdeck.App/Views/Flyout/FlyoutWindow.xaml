@@ -3,6 +3,7 @@
     x:Class="Mixdeck.App.Views.Flyout.FlyoutWindow"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:appVolume="using:Mixdeck.App.Views.AppVolume"
     xmlns:controls="using:Mixdeck.App.Controls"
     xmlns:local="using:Mixdeck.App.Views.Flyout"
     xmlns:shared="using:Mixdeck.App.ViewModels.Shared"
@@ -125,6 +126,7 @@
                         </DataTemplate>
                     </ItemsControl.ItemTemplate>
                 </ItemsControl>
+                <appVolume:AppVolumeList x:Name="AppVolumes" Visibility="Collapsed" />
             </StackPanel>
         </ScrollViewer>
 

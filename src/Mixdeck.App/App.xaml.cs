@@ -26,6 +26,10 @@ public partial class App : Application
         _options = options;
         _instance = instance;
         InitializeComponent();
+
+        // Mixdeck vit dans la zone de notification : fermer la console (souvent la seule fenêtre) ne doit pas
+        // arrêter l'appli. L'arrêt passe uniquement par « Quitter » (Application.Exit).
+        DispatcherShutdownMode = DispatcherShutdownMode.OnExplicitShutdown;
         UnhandledException += OnUnhandledException;
     }
 
@@ -107,7 +111,9 @@ public partial class App : Application
 
         GetService<TrayIconService>().Create();
         _ = KeepTrayIconVisibleAsync(settings);
+        GetService<DuckingController>().Start();
         GetService<AutomationCoordinator>().Start();
+        _ = GetService<AutomationCoordinator>().ApplyStartupProfileAsync();
 
         var actions = GetService<ActionDispatcher>();
         var shell = GetService<IShellService>();
@@ -206,6 +212,7 @@ public partial class App : Application
         {
             GetService<TrayIconService>().Dispose();
             GetService<AutomationCoordinator>().Dispose();
+            GetService<DuckingController>().Dispose();
             GetService<IHotkeyService>().Dispose();
             GetService<IMixer>().DisposeAsync().AsTask().Wait(TimeSpan.FromSeconds(2));
             _host?.Dispose();

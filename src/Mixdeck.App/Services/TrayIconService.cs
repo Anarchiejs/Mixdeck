@@ -77,7 +77,7 @@ public sealed class TrayIconService : IDisposable
             ContextMenuMode = ContextMenuMode.PopupMenu,
             ContextFlyout = menu,
             LeftClickCommand = new RelayCommand(_shell.ToggleFlyout),
-            MiddleClickCommand = _mixer.ToggleMicCommand,
+            MiddleClickCommand = _mixer.ToggleMicFromTrayCommand,
             NoLeftClickDelay = true,
         };
         _icon.ForceCreate(enablesEfficiencyMode: false);

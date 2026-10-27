@@ -5,6 +5,8 @@ using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media.Animation;
 using Mixdeck.App.Controls;
 using Mixdeck.App.Services;
+using Mixdeck.App.ViewModels.AppVolume;
+using Mixdeck.Core.Abstractions;
 using Mixdeck.App.ViewModels.Shared;
 using Mixdeck.Platform.Taskbar;
 using Windows.Foundation;
@@ -29,14 +31,19 @@ public sealed partial class FlyoutWindow : Window
 
     private readonly ITaskbarLocator _taskbar;
     private readonly IShellService _shell;
+    private readonly AppVolumeListViewModel _appVolumes;
+    private readonly ISettingsStore _settings;
     private IDisposable? _meters;
     private DateTime _hiddenAt = DateTime.MinValue;
     private TaskbarEdge _edge = TaskbarEdge.Bottom;
     private Storyboard? _openAnimation;
 
-    public FlyoutWindow(MixerViewModel mixer, ITaskbarLocator taskbar, IShellService shell, ThemeService theme)
+    public FlyoutWindow(MixerViewModel mixer, ITaskbarLocator taskbar, IShellService shell, ThemeService theme,
+        AppVolumeListViewModel appVolumes, ISettingsStore settings)
     {
         Mixer = mixer;
+        _appVolumes = appVolumes;
+        _settings = settings;
         _taskbar = taskbar;
         _shell = shell;
         InitializeComponent();
@@ -72,6 +79,7 @@ public sealed partial class FlyoutWindow : Window
     {
         PlaceNearTray();
         _meters ??= Mixer.AcquireMeters();
+        ShowAppVolumes(_settings.Current.ShowAppVolumes);
         AppWindow.Show();
         Activate();
         IsOpen = true;
@@ -100,9 +108,27 @@ public sealed partial class FlyoutWindow : Window
         _hiddenAt = DateTime.UtcNow;
         _meters?.Dispose();
         _meters = null;
+        ShowAppVolumes(false);
         _openAnimation?.Stop();
         _openAnimation = null;
         AppWindow.Hide();
+    }
+
+    /// <summary>Le suivi des sessions audio ne tourne que panneau ouvert (aucun coût au repos).</summary>
+    private void ShowAppVolumes(bool show)
+    {
+        if (show)
+        {
+            AppVolumes.Visibility = Visibility.Visible;
+            AppVolumes.ViewModel = _appVolumes;
+            _appVolumes.Activate();
+        }
+        else
+        {
+            _appVolumes.Deactivate();
+            AppVolumes.ViewModel = null;
+            AppVolumes.Visibility = Visibility.Collapsed;
+        }
     }
 
     private void OnActivated(object sender, WindowActivatedEventArgs args)
