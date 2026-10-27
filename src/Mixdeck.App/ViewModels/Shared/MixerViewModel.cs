@@ -24,6 +24,7 @@ public sealed partial class MixerViewModel : ObservableObject, IDisposable
     private readonly AutomationCoordinator _automation;
     private readonly IUiDispatcher _ui;
     private readonly ILogger<MixerViewModel> _logger;
+    private readonly IOsdService _osd;
     private int _meterUsers;
     private TimeSpan _lastRender;
     private bool _savingCustomization;
@@ -34,7 +35,8 @@ public sealed partial class MixerViewModel : ObservableObject, IDisposable
         ISettingsStore settings,
         AutomationCoordinator automation,
         IUiDispatcher ui,
-        ILogger<MixerViewModel> logger)
+        ILogger<MixerViewModel> logger,
+        IOsdService osd)
     {
         _mixer = mixer;
         _profiles = profiles;
@@ -42,6 +44,7 @@ public sealed partial class MixerViewModel : ObservableObject, IDisposable
         _automation = automation;
         _ui = ui;
         _logger = logger;
+        _osd = osd;
 
         Strips = [.. Enumerable.Range(0, BananaLayout.StripCount).Select(i => new StripViewModel(mixer, i))];
         Buses = [.. Enumerable.Range(0, BananaLayout.BusCount).Select(i => new BusViewModel(mixer, i))];
@@ -118,7 +121,15 @@ public sealed partial class MixerViewModel : ObservableObject, IDisposable
     };
 
     [RelayCommand]
-    private void ToggleMic() => Mic.IsMuted = !Mic.IsMuted;
+    private void ToggleMic()
+    {
+        if (!IsConnected) return;
+        Mic.IsMuted = !Mic.IsMuted;
+        if (_settings.Current.ShowOsd)
+        {
+            _osd.Show(IsMicMuted ? "Micro coupé" : "Micro activé", IsMicMuted ? "\uF781" : "\uE720", IsMicMuted);
+        }
+    }
 
     [RelayCommand]
     private async Task LaunchVoicemeeterAsync()
@@ -347,6 +358,12 @@ public sealed partial class MixerViewModel : ObservableObject, IDisposable
         _profiles.ProfilesChanged -= OnProfilesChanged;
         _profiles.ActiveChanged -= OnActiveProfileChanged;
         _settings.Changed -= OnSettingsChanged;
+        Mic.PropertyChanged -= OnMicPropertyChanged;
+        foreach (var channel in Strips.Cast<ChannelViewModel>().Concat(Buses))
+        {
+            channel.CustomizationChanged -= OnChannelCustomizationChanged;
+        }
+        _mixer.LevelsEnabled = false;
     }
 
     private sealed class MeterLease(MixerViewModel owner) : IDisposable
