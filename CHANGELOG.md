@@ -13,6 +13,15 @@ et ce projet adhère au [versionnage sémantique](https://semver.org/lang/fr/).
 - Cœur : réglages JSON à écriture atomique avec copie de secours, profils avec fondu des gains, moteur de règles par application, balistique des vumètres.
 - Services Windows : raccourcis globaux et push-to-talk, détection des applications lancées et au premier plan, démarrage avec Windows, position de la barre des tâches, instance unique.
 - Interface WinUI 3 : panneau rapide ancré à l'horloge, console (Console, Routage, Profils, Règles, Réglages, À propos), icône qui passe au rouge quand le micro est coupé, OSD.
+- Icône toujours visible près de l'horloge (une seule fois : si vous la rangez derrière la flèche ^, elle y reste), clic milieu pour couper le micro, info-bulle détaillée.
+- Molette sur une ligne du panneau pour régler son volume.
+- Volume par application dans le panneau et choix de la sortie d'une application (« Envoyer vers… », API de Windows non documentée : désactivé automatiquement si elle disparaît).
+- Page Appareils : appareils des entrées et sorties physiques (micros de Windows proposés quand Voicemeeter n'en liste aucun), préréglages du micro, redémarrage du moteur audio, fenêtre de Voicemeeter cachée quand Mixdeck le lance.
+- Atténuation automatique d'une entrée quand une autre a du signal (seuil, baisse, attaque, maintien, relâche réglables).
+- Badge permanent « micro coupé » et son de confirmation (facultatifs).
+- Raccourci « Appliquer un profil » et profil appliqué au démarrage.
+- Journal des plantages (`logs\crash-*.txt`) et relance automatique unique ; l'entrée de démarrage avec Windows est retirée à la désinstallation.
+- Tests d'interface FlaUI en CI ; signature Azure Trusted Signing facultative à la publication (`docs/SIGNATURE.md`).
 - `MIXDECK_DATA_DIR` pour choisir le dossier des données ; arguments de développement `--flyout` et `--page=<nom>`.
 
 - Intégration continue GitHub Actions : restauration, compilation Release et tests sur `windows-latest` et dépôt des résultats de tests.
@@ -25,6 +34,9 @@ et ce projet adhère au [versionnage sémantique](https://semver.org/lang/fr/).
 - Les règles déclenchées pendant que Voicemeeter est fermé sont appliquées dès qu'il revient.
 - Un fondu de profil ne retarde plus la coupure du micro ni les règles suivantes ; un nouveau profil interrompt le fondu en cours.
 - Les réglages restaurés depuis la copie de secours sont conservés même si le fichier principal ne peut pas être réécrit.
+- Plus léger au repos : la console n'est créée qu'à la première ouverture et ses pages sont déchargées à la fermeture (≈ 115 Mo au démarrage au lieu de 208 Mo).
+- Fermer la console n'arrête plus l'application ; une console réduite par Windows au lancement est remise à l'écran.
+- Un fichier de réglages incomplet (sections absentes ou nulles) n'empêche plus le démarrage.
 - Textes harmonisés au vouvoiement, en-têtes du routage sans doublon, boutons de la page Profils côte à côte, erreur affichée si une personnalisation n'est pas enregistrée.
 
 [Non publié]: https://github.com/Anarchiejs/Mixdeck/commits/main
