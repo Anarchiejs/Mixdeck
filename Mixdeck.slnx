@@ -13,6 +13,7 @@
     <Project Path="tests/Mixdeck.Voicemeeter.Tests/Mixdeck.Voicemeeter.Tests.csproj" />
   </Folder>
   <Folder Name="/tools/">
+    <Project Path="tools/Mixdeck.PrivateApiProbe/Mixdeck.PrivateApiProbe.csproj" />
     <Project Path="tools/Mixdeck.PlatformProbe/Mixdeck.PlatformProbe.csproj" />
     <Project Path="tools/Mixdeck.Probe/Mixdeck.Probe.csproj" />
   </Folder>
