@@ -1,0 +1,14 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Mixdeck.App/Mixdeck.App.csproj">
+      <Platform Project="x64" />
+    </Project>
+    <Project Path="src/Mixdeck.Core/Mixdeck.Core.csproj" />
+    <Project Path="src/Mixdeck.Platform/Mixdeck.Platform.csproj" />
+    <Project Path="src/Mixdeck.Voicemeeter/Mixdeck.Voicemeeter.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Mixdeck.Core.Tests/Mixdeck.Core.Tests.csproj" />
+    <Project Path="tests/Mixdeck.Voicemeeter.Tests/Mixdeck.Voicemeeter.Tests.csproj" />
+  </Folder>
+</Solution>
