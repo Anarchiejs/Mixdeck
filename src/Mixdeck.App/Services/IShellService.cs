@@ -5,6 +5,7 @@ public enum ShellPage
 {
     Mixer,
     Routing,
+    Devices,
     Profiles,
     Rules,
     Settings,

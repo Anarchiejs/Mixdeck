@@ -13,6 +13,11 @@ internal sealed class FakeMixer : IMixer
     public MixerSnapshot Snapshot { get; set; } = MixerSnapshot.Empty;
     public LevelFrame Levels => LevelFrame.Silent;
     public bool LevelsEnabled { get; set; }
+    public int LevelRequests { get; private set; }
+    public IDisposable RequestLevels() { LevelRequests++; return new LevelLease(this); }
+    private sealed class LevelLease(FakeMixer owner) : IDisposable { private bool _done; public void Dispose() { if (!_done) { _done = true; owner.LevelRequests--; } } }
+    public Task<IReadOnlyList<AudioDevice>> GetDevicesAsync(AudioDeviceDirection direction, CancellationToken cancellationToken = default) => Task.FromResult<IReadOnlyList<AudioDevice>>([]);
+    public Task<string?> GetStringAsync(string parameter, CancellationToken cancellationToken = default) => Task.FromResult<string?>(null);
     public ConcurrentQueue<string> Scripts { get; } = new();
     public ConcurrentQueue<(string Parameter, float Value)> Floats { get; } = new();
     public event EventHandler<MixerConnectionState>? StateChanged;

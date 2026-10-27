@@ -23,6 +23,22 @@ public interface IMixer : IAsyncDisposable
     /// </summary>
     bool LevelsEnabled { get; set; }
 
+    /// <summary>
+    /// Demande la lecture des niveaux tant que le jeton rendu n'est pas libéré. Les demandes se cumulent avec
+    /// <see cref="LevelsEnabled"/> : la lecture s'arrête quand plus personne n'en a besoin (ex. l'atténuation
+    /// automatique garde les niveaux pendant que le panneau s'ouvre et se ferme).
+    /// </summary>
+    IDisposable RequestLevels();
+
+    /// <summary>
+    /// Appareils audio connus de Voicemeeter (VBVMR_Input/Output_GetDeviceNumber/DescW), lus sur le thread dédié.
+    /// Liste vide hors connexion.
+    /// </summary>
+    Task<IReadOnlyList<AudioDevice>> GetDevicesAsync(AudioDeviceDirection direction, CancellationToken cancellationToken = default);
+
+    /// <summary>Lit un paramètre texte à la demande (ex. "Strip[0].device.name") ; null hors connexion ou si refusé.</summary>
+    Task<string?> GetStringAsync(string parameter, CancellationToken cancellationToken = default);
+
     event EventHandler<MixerConnectionState>? StateChanged;
 
     /// <summary>Levé après une relecture qui a changé l'état (depuis Mixdeck ou depuis Voicemeeter).</summary>

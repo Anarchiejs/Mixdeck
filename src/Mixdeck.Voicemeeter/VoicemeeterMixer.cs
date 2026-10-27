@@ -55,6 +55,12 @@ public sealed class VoicemeeterMixer : IMixer
         get => Volatile.Read(ref _levelsEnabled) != 0;
         set { Volatile.Write(ref _levelsEnabled, value ? 1 : 0); Signal(); }
     }
+    // TODO(L12) : compteur de demandes, lecture des appareils et des textes sur le thread dédié.
+    public IDisposable RequestLevels() => throw new NotImplementedException();
+    public Task<IReadOnlyList<AudioDevice>> GetDevicesAsync(AudioDeviceDirection direction, CancellationToken cancellationToken = default) =>
+        throw new NotImplementedException();
+    public Task<string?> GetStringAsync(string parameter, CancellationToken cancellationToken = default) =>
+        throw new NotImplementedException();
     public event EventHandler<MixerConnectionState>? StateChanged;
     public event EventHandler<MixerSnapshot>? SnapshotChanged;
     public event EventHandler<LevelFrame>? LevelsUpdated;
