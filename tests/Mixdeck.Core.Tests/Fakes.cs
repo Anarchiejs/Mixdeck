@@ -11,7 +11,7 @@ internal sealed class FakeMixer : IMixer
 {
     public MixerConnectionState State { get; private set; } = MixerConnectionState.Connected;
     public MixerSnapshot Snapshot { get; set; } = MixerSnapshot.Empty;
-    public LevelFrame Levels => LevelFrame.Silent;
+    public LevelFrame Levels { get; private set; } = LevelFrame.Silent;
     public bool LevelsEnabled { get; set; }
     public int LevelRequests { get; private set; }
     public IDisposable RequestLevels() { LevelRequests++; return new LevelLease(this); }
@@ -21,14 +21,28 @@ internal sealed class FakeMixer : IMixer
     public ConcurrentQueue<string> Scripts { get; } = new();
     public ConcurrentQueue<(string Parameter, float Value)> Floats { get; } = new();
     public event EventHandler<MixerConnectionState>? StateChanged;
-    public event EventHandler<MixerSnapshot>? SnapshotChanged { add { } remove { } }
-    public event EventHandler<LevelFrame>? LevelsUpdated { add { } remove { } }
+    public event EventHandler<MixerSnapshot>? SnapshotChanged;
+    public event EventHandler<LevelFrame>? LevelsUpdated;
+    public bool DeferWrites { get; set; }
+    private readonly Queue<(string Parameter, float Value)> deferred = new();
+    public void PublishLevels(LevelFrame frame) { Levels = frame; LevelsUpdated?.Invoke(this, frame); }
+    public void PublishSnapshot(MixerSnapshot snapshot) { Snapshot = snapshot; SnapshotChanged?.Invoke(this, snapshot); }
+    public void FlushWrites()
+    {
+        while (deferred.TryDequeue(out var write)) ApplyFloat(write.Parameter, write.Value);
+        SnapshotChanged?.Invoke(this, Snapshot);
+    }
     public Task StartAsync(CancellationToken cancellationToken = default) => Task.CompletedTask;
     public void SetState(MixerConnectionState state) { State = state; StateChanged?.Invoke(this, state); }
     public void SetFloat(string parameter, float value)
     {
         if (State != MixerConnectionState.Connected) return; // comme Voicemeeter : écritures ignorées hors connexion
         Floats.Enqueue((parameter, value));
+        if (DeferWrites) { deferred.Enqueue((parameter, value)); return; }
+        ApplyFloat(parameter, value);
+    }
+    private void ApplyFloat(string parameter, float value)
+    {
         var index = int.Parse(parameter.AsSpan(parameter.IndexOf('[') + 1, 1), CultureInfo.InvariantCulture);
         if (parameter.StartsWith("Strip", StringComparison.Ordinal))
             Snapshot = Snapshot with { Strips = Snapshot.Strips.Select(s => s.Index != index ? s : parameter.EndsWith("Gain", StringComparison.Ordinal) ? s with { Gain = value } : s with { Mute = value != 0 }).ToArray() };
