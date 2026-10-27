@@ -12,12 +12,10 @@
                 <StackPanel Spacing="8">
                     <TextBlock Text="{x:Bind Name, Mode=OneWay}" Style="{StaticResource BodyStrongTextBlockStyle}" />
                     <TextBlock Text="{x:Bind Kind}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
-                    <ComboBox ItemsSource="{x:Bind Choices.View, Mode=OneWay}" SelectedItem="{x:Bind SelectedDevice, Mode=TwoWay}"
+                    <ComboBox ItemsSource="{x:Bind Choices}" SelectedItem="{x:Bind SelectedDevice, Mode=TwoWay}"
                               HorizontalAlignment="Stretch" IsEnabled="{x:Bind Owner.CanEdit, Mode=OneWay}" AutomationProperties.Name="{x:Bind Name, Mode=OneWay}">
                         <ComboBox.ItemTemplate><DataTemplate x:DataType="vm:DeviceChoice"><TextBlock Text="{x:Bind Name}" TextTrimming="CharacterEllipsis" /></DataTemplate></ComboBox.ItemTemplate>
-                        <ComboBox.GroupStyle><GroupStyle>
-                            <GroupStyle.HeaderTemplate><DataTemplate x:DataType="vm:DeviceGroup"><TextBlock Text="{x:Bind Name}" Style="{StaticResource BodyStrongTextBlockStyle}" Margin="0,8,0,4" /></DataTemplate></GroupStyle.HeaderTemplate>
-                        </GroupStyle></ComboBox.GroupStyle>
+                        
                     </ComboBox>
                     <TextBlock Text="{x:Bind CurrentName, Mode=OneWay}" TextWrapping="Wrap" Style="{StaticResource CaptionTextBlockStyle}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
                 </StackPanel>

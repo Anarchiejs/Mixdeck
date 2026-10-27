@@ -186,7 +186,6 @@ public sealed partial class DevicesPageViewModel : ObservableObject
 }
 
 public sealed record DeviceChoice(AudioDevice? Device, string Name, bool IsCurrent = false);
-public sealed record DeviceGroup(string Name, IReadOnlyList<DeviceChoice> Items);
 
 public sealed partial class DeviceRowViewModel(DevicesPageViewModel owner, int index, bool isBus) : ObservableObject
 {
@@ -195,7 +194,8 @@ public sealed partial class DeviceRowViewModel(DevicesPageViewModel owner, int i
     public int Index => index;
     public bool IsBus => isBus;
     public string Kind => isBus ? BananaLayout.BusNames[index] + " · Sortie physique" : "Entrée physique " + (index + 1);
-    public CollectionViewSource Choices { get; } = new() { IsSourceGrouped = true, ItemsPath = new PropertyPath("Items") };
+    // Liste simple : la ComboBox de WinUI n'affiche pas de groupes, le pilote figure donc dans chaque nom.
+    public ObservableCollection<DeviceChoice> Choices { get; } = [];
     [ObservableProperty]
     public partial string Name { get; set; } = "";
     [ObservableProperty]
@@ -207,23 +207,23 @@ public sealed partial class DeviceRowViewModel(DevicesPageViewModel owner, int i
     {
         loading = true;
         var none = new DeviceChoice(null, "Aucun");
-        var groups = new List<DeviceGroup> { new("Sélection", new[] { none }) };
+        Choices.Clear();
+        Choices.Add(none);
         CurrentName = string.IsNullOrWhiteSpace(current) ? "Aucun" : current;
         DeviceChoice selected = none;
         if (!string.IsNullOrWhiteSpace(current))
         {
             // Le nom seul ne permet pas de déduire le pilote : ne pas prétendre que l’appareil courant utilise WDM.
-            selected = new(null, current, true);
-            groups.Add(new("Appareil actuel", new[] { selected }));
+            selected = new(null, current + " (actuel)", true);
+            Choices.Add(selected);
         }
         AudioDeviceDriver[] drivers = [AudioDeviceDriver.Wdm, AudioDeviceDriver.Ks, AudioDeviceDriver.Mme, AudioDeviceDriver.Asio];
         foreach (var driver in drivers)
         {
-            var items = devices.Where(d => d.Driver == driver).OrderBy(d => d.Name, StringComparer.CurrentCultureIgnoreCase)
-                .Select(d => new DeviceChoice(d, d.Name)).ToArray();
-            if (items.Length != 0) groups.Add(new(driver == AudioDeviceDriver.Wdm ? "WDM — recommandé" : VmParam.DriverKey(driver).ToUpperInvariant(), items));
+            var label = driver == AudioDeviceDriver.Wdm ? "WDM, recommandé" : VmParam.DriverKey(driver).ToUpperInvariant();
+            foreach (var device in devices.Where(d => d.Driver == driver).OrderBy(d => d.Name, StringComparer.CurrentCultureIgnoreCase))
+                Choices.Add(new DeviceChoice(device, $"{device.Name} · {label}"));
         }
-        Choices.Source = groups;
         SelectedDevice = selected;
         loading = false;
     }
