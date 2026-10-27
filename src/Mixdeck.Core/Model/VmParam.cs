@@ -5,6 +5,10 @@ public static class VmParam
 {
     public static string StripGain(int strip) => $"Strip[{strip}].Gain";
     public static string StripMute(int strip) => $"Strip[{strip}].Mute";
+    public static string StripGate(int strip) => $"Strip[{strip}].Gate";
+    public static string StripComp(int strip) => $"Strip[{strip}].Comp";
+    public static string StripColorX(int strip) => $"Strip[{strip}].Color_x";
+    public static string StripColorY(int strip) => $"Strip[{strip}].Color_y";
     public static string StripSolo(int strip) => $"Strip[{strip}].Solo";
     public static string StripPanX(int strip) => $"Strip[{strip}].Pan_x";
     public static string StripLabel(int strip) => $"Strip[{strip}].Label";

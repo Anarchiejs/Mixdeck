@@ -3,6 +3,7 @@ using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Input;
 using Mixdeck.Core.Model;
+using Mixdeck.App.ViewModels.Pages;
 using Mixdeck.Platform.Hotkeys;
 using Windows.System;
 using Windows.UI.Core;
@@ -15,15 +16,24 @@ public sealed partial class HotkeyRecorder : UserControl
     private readonly int targetBus;
     private readonly float stepDb;
     private readonly Func<HotkeyBinding, bool> conflicts;
-    public HotkeyRecorder(HotkeyAction action, int targetBus, float stepDb, Func<HotkeyBinding, bool> conflicts)
+    public HotkeyRecorder(HotkeyAction action, int targetBus, float stepDb, Func<HotkeyBinding, bool> conflicts, IReadOnlyList<SettingsProfileChoice> profiles, string? profileId)
     {
         this.action = action;
         this.targetBus = targetBus;
         this.stepDb = stepDb;
         this.conflicts = conflicts;
         InitializeComponent();
+        ProfilePicker.Visibility = action == HotkeyAction.ApplyProfile ? Visibility.Visible : Visibility.Collapsed;
+        ProfilePicker.ItemsSource = profiles.Where(p => p.Id is not null).ToArray();
+        ProfilePicker.SelectedItem = profiles.FirstOrDefault(p => p.Id == profileId && p.Id is not null);
     }
-    public HotkeyBinding? Value { get; private set; }
+    private HotkeyBinding? captured;
+    public HotkeyBinding? Value => captured is null || (action == HotkeyAction.ApplyProfile && ProfilePicker.SelectedItem is not SettingsProfileChoice { Id: not null })
+        ? null : captured with { ProfileId = action == HotkeyAction.ApplyProfile ? ((SettingsProfileChoice)ProfilePicker.SelectedItem).Id : null };
+    private void OnProfileChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (captured is not null) { ValidationError.IsOpen = false; Captured?.Invoke(this, EventArgs.Empty); }
+    }
     public event EventHandler? Captured;
     private void OnLoaded(object sender, RoutedEventArgs e) => CaptureButton.Focus(FocusState.Programmatic);
     public void ShowError(string message) { ValidationError.Message = message; ValidationError.IsOpen = true; }
@@ -40,7 +50,7 @@ public sealed partial class HotkeyRecorder : UserControl
         e.Handled = true;
         var key = (int)e.Key;
         if (key is 0x10 or 0x11 or 0x12 or 0x5B or 0x5C or >= 0xA0 and <= 0xA5) return;
-        Value = null;
+        captured = null;
         if (!HotkeyFormatter.IsValidCombination(modifiers, key))
             ShowError("Ajoutez un modificateur (Ctrl, Alt, Maj ou Windows). Une touche seule n’est pas un raccourci valide, sauf certaines touches multimédias ou F13 à F24.");
         else
@@ -49,9 +59,10 @@ public sealed partial class HotkeyRecorder : UserControl
             if (conflicts(binding)) ShowError("Cette combinaison est déjà attribuée à une autre action de Mixdeck.");
             else
             {
-                Value = binding;
+                captured = binding;
                 ValidationError.IsOpen = false;
                 CombinationText.Text = HotkeyFormatter.Format(binding);
+                if (Value is null) ShowError("Choisissez le profil à appliquer avant d’enregistrer.");
             }
         }
         Captured?.Invoke(this, EventArgs.Empty);

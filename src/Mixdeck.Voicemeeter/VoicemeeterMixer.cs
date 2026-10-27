@@ -20,7 +20,7 @@ public sealed class VoicemeeterMixer : IMixer
     private readonly TaskCompletionSource _stopped = new(TaskCreationOptions.RunContinuationsAsynchronously);
     private Thread? _thread;
     private Task? _disposeTask;
-    private int _disposed, _levelsEnabled, _state, _type, _version;
+    private int _disposed, _levelsEnabled, _levelRequests, _state, _type, _version;
     private bool _loggedIn;
     private DateTimeOffset _nextConnect = DateTimeOffset.MinValue;
     private DateTimeOffset _nextDirty = DateTimeOffset.MinValue;
@@ -55,12 +55,80 @@ public sealed class VoicemeeterMixer : IMixer
         get => Volatile.Read(ref _levelsEnabled) != 0;
         set { Volatile.Write(ref _levelsEnabled, value ? 1 : 0); Signal(); }
     }
-    // TODO(L12) : compteur de demandes, lecture des appareils et des textes sur le thread dédié.
-    public IDisposable RequestLevels() => throw new NotImplementedException();
-    public Task<IReadOnlyList<AudioDevice>> GetDevicesAsync(AudioDeviceDirection direction, CancellationToken cancellationToken = default) =>
-        throw new NotImplementedException();
-    public Task<string?> GetStringAsync(string parameter, CancellationToken cancellationToken = default) =>
-        throw new NotImplementedException();
+    private bool ShouldReadLevels => LevelsEnabled || Volatile.Read(ref _levelRequests) > 0;
+
+    public IDisposable RequestLevels()
+    {
+        lock (_lifecycle)
+        {
+            ObjectDisposedException.ThrowIf(_disposed != 0, this);
+            Interlocked.Increment(ref _levelRequests);
+        }
+        Signal();
+        return new LevelRequest(this);
+    }
+
+    private sealed class LevelRequest(VoicemeeterMixer owner) : IDisposable
+    {
+        private VoicemeeterMixer? _owner = owner;
+        public void Dispose()
+        {
+            var mixer = Interlocked.Exchange(ref _owner, null);
+            if (mixer is null) return;
+            Interlocked.Decrement(ref mixer._levelRequests);
+            mixer.Signal();
+        }
+    }
+
+    public Task<IReadOnlyList<AudioDevice>> GetDevicesAsync(AudioDeviceDirection direction, CancellationToken cancellationToken = default)
+    {
+        ObjectDisposedException.ThrowIf(Volatile.Read(ref _disposed) != 0, this);
+        cancellationToken.ThrowIfCancellationRequested();
+        if (!Enum.IsDefined(direction)) throw new ArgumentOutOfRangeException(nameof(direction));
+        if (State != MixerConnectionState.Connected) return Task.FromResult<IReadOnlyList<AudioDevice>>([]);
+        var completion = new TaskCompletionSource<IReadOnlyList<AudioDevice>>(TaskCreationOptions.RunContinuationsAsynchronously);
+        _commands.Enqueue(new(CommandKind.Devices, "", (float)direction, null, null, cancellationToken, completion));
+        if (Volatile.Read(ref _disposed) != 0) completion.TrySetResult([]);
+        Signal();
+        return completion.Task.WaitAsync(cancellationToken);
+    }
+
+    public Task<string?> GetStringAsync(string parameter, CancellationToken cancellationToken = default)
+    {
+        ValidateText(parameter, nameof(parameter));
+        ObjectDisposedException.ThrowIf(Volatile.Read(ref _disposed) != 0, this);
+        cancellationToken.ThrowIfCancellationRequested();
+        if (State != MixerConnectionState.Connected) return Task.FromResult<string?>(null);
+        var completion = new TaskCompletionSource<string?>(TaskCreationOptions.RunContinuationsAsynchronously);
+        _commands.Enqueue(new(CommandKind.ReadString, parameter, 0, null, null, cancellationToken, StringCompletion: completion));
+        if (Volatile.Read(ref _disposed) != 0) completion.TrySetResult(null);
+        Signal();
+        return completion.Task.WaitAsync(cancellationToken);
+    }
+
+    /// <summary>À appeler après un lancement accepté par Mixdeck ; attend la connexion sans bloquer l'interface.</summary>
+    public async Task HideWindowWhenConnectedAsync(bool hide, CancellationToken cancellationToken = default)
+    {
+        if (!hide) return;
+        var connected = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
+        void Changed(object? sender, MixerConnectionState state)
+        {
+            if (state == MixerConnectionState.Connected) connected.TrySetResult(true);
+            else if (state == MixerConnectionState.Disconnected) connected.TrySetResult(false);
+        }
+        StateChanged += Changed;
+        try
+        {
+            if (Volatile.Read(ref _disposed) != 0) return;
+            if (State == MixerConnectionState.Connected) connected.TrySetResult(true);
+            if (await connected.Task.WaitAsync(TimeSpan.FromSeconds(15), cancellationToken).ConfigureAwait(false)
+                && Volatile.Read(ref _disposed) == 0)
+                SetFloat(VmParam.CommandShow, 0);
+        }
+        catch (TimeoutException) { _logger.LogWarning("Voicemeeter n’a pas été connecté à temps pour cacher sa fenêtre."); }
+        catch (ObjectDisposedException) { /* La fermeture peut croiser la connexion. */ }
+        finally { StateChanged -= Changed; }
+    }
     public event EventHandler<MixerConnectionState>? StateChanged;
     public event EventHandler<MixerSnapshot>? SnapshotChanged;
     public event EventHandler<LevelFrame>? LevelsUpdated;
@@ -171,7 +239,7 @@ public sealed class VoicemeeterMixer : IMixer
                 if (dirty < 0) { ConnectionLost(now); return; }
                 if (dirty == 1) PublishSnapshot(ReadSnapshot());
             }
-            if (LevelsEnabled && now >= _nextLevel)
+            if (ShouldReadLevels && now >= _nextLevel)
             {
                 _nextLevel = now + _options.LevelInterval;
                 var frame = _sampler.Sample(_time.GetTimestamp());
@@ -250,14 +318,58 @@ public sealed class VoicemeeterMixer : IMixer
             try { Flush(pending); }
             catch
             {
-                command.Completion?.TrySetResult(false);
+                CompletePending(command);
                 throw;
             }
-            if (command.Kind == CommandKind.Launch) Launch(command);
+            if (command.Kind is CommandKind.Devices or CommandKind.ReadString) ReadCommand(command);
+            else if (command.Kind == CommandKind.Launch) Launch(command);
             else if (State == MixerConnectionState.Connected) CheckWrite(_api.SetParameters(command.Text!), "script");
             else _logger.LogDebug("Script ignoré hors connexion.");
         }
         Flush(pending);
+    }
+    private void ReadCommand(Command command)
+    {
+        try
+        {
+            if (command.Cancellation.IsCancellationRequested)
+            {
+                command.DevicesCompletion?.TrySetCanceled(command.Cancellation);
+                command.StringCompletion?.TrySetCanceled(command.Cancellation);
+                return;
+            }
+            if (State != MixerConnectionState.Connected) return;
+            if (command.Kind == CommandKind.ReadString)
+            {
+                command.StringCompletion!.TrySetResult(_api.GetParameterString(command.Parameter, out var value) == 0 ? value : null);
+                return;
+            }
+            var input = (AudioDeviceDirection)command.Number == AudioDeviceDirection.Input;
+            var count = input ? _api.InputGetDeviceNumber() : _api.OutputGetDeviceNumber();
+            var devices = new List<AudioDevice>();
+            for (var index = 0; index < count; index++)
+            {
+                command.Cancellation.ThrowIfCancellationRequested();
+                var result = input ? _api.InputGetDeviceDesc(index, out var type, out var name, out var id)
+                    : _api.OutputGetDeviceDesc(index, out type, out name, out id);
+                if (result == 0 && Enum.IsDefined((AudioDeviceDriver)type) && !string.IsNullOrWhiteSpace(name))
+                    devices.Add(new((AudioDeviceDriver)type, name, id));
+            }
+            command.DevicesCompletion!.TrySetResult(devices.AsReadOnly());
+        }
+        catch (OperationCanceledException) when (command.Cancellation.IsCancellationRequested)
+        {
+            command.DevicesCompletion?.TrySetCanceled(command.Cancellation);
+            command.StringCompletion?.TrySetCanceled(command.Cancellation);
+        }
+        finally { CompletePending(command); }
+    }
+
+    private static void CompletePending(Command command)
+    {
+        command.Completion?.TrySetResult(false);
+        command.DevicesCompletion?.TrySetResult([]);
+        command.StringCompletion?.TrySetResult(null);
     }
     private void Flush(Dictionary<string, Command> pending)
     {
@@ -299,11 +411,11 @@ public sealed class VoicemeeterMixer : IMixer
         var count = _commands.Count;
         for (var i = 0; i < count && _commands.TryDequeue(out var command); i++)
             if (command.Kind == CommandKind.Launch) Launch(command);
-            else _logger.LogDebug("Commande ignorée hors connexion : {Parameter}", command.Parameter);
+            else { CompletePending(command); _logger.LogDebug("Commande ignorée hors connexion : {Parameter}", command.Parameter); }
     }
     private void CancelPending()
     {
-        while (_commands.TryDequeue(out var command)) command.Completion?.TrySetResult(false);
+        while (_commands.TryDequeue(out var command)) CompletePending(command);
     }
 
     private MixerSnapshot ReadSnapshot()
@@ -367,7 +479,7 @@ public sealed class VoicemeeterMixer : IMixer
     {
         if (!_commands.IsEmpty) return TimeSpan.Zero;
         var next = State == MixerConnectionState.Connected ? _nextDirty : _nextConnect;
-        if (State == MixerConnectionState.Connected && LevelsEnabled && _nextLevel < next) next = _nextLevel;
+        if (State == MixerConnectionState.Connected && ShouldReadLevels && _nextLevel < next) next = _nextLevel;
         var remaining = next - _time.GetUtcNow();
         return remaining <= TimeSpan.Zero ? TimeSpan.Zero : TimeSpan.FromMilliseconds(Math.Clamp(Math.Ceiling(remaining.TotalMilliseconds), 1, 30000));
     }
@@ -394,7 +506,9 @@ public sealed class VoicemeeterMixer : IMixer
         _wake.Dispose();
     }
 
-    private enum CommandKind { Float, String, Script, Launch }
+    private enum CommandKind { Float, String, Script, Launch, Devices, ReadString }
     private sealed record Command(CommandKind Kind, string Parameter, float Number, string? Text,
-        TaskCompletionSource<bool>? Completion, CancellationToken Cancellation = default);
+        TaskCompletionSource<bool>? Completion, CancellationToken Cancellation = default,
+        TaskCompletionSource<IReadOnlyList<AudioDevice>>? DevicesCompletion = null,
+        TaskCompletionSource<string?>? StringCompletion = null);
 }

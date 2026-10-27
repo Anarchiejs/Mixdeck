@@ -26,6 +26,14 @@ public class SimulatedVoicemeeterApi : IVoicemeeterApi
         for (var i = 0; i < BananaLayout.StripCount; i++)
         {
             _strings[VmParam.StripLabel(i)] = labels[i];
+            if (i < BananaLayout.PhysicalStripCount)
+            {
+                _strings[VmParam.StripDeviceName(i)] = i == 0 ? "Microphone (USB Audio)" : "";
+                _floats[VmParam.StripGate(i)] = 0;
+                _floats[VmParam.StripComp(i)] = 0;
+                _floats[VmParam.StripColorX(i)] = 0;
+                _floats[VmParam.StripColorY(i)] = 0;
+            }
             _floats[VmParam.StripGain(i)] = i == 0 ? -3 : 0;
             _floats[VmParam.StripMute(i)] = 0;
             _floats[VmParam.StripSolo(i)] = 0;
@@ -38,6 +46,8 @@ public class SimulatedVoicemeeterApi : IVoicemeeterApi
         for (var i = 0; i < BananaLayout.BusCount; i++)
         {
             _strings[VmParam.BusLabel(i)] = BananaLayout.BusNames[i];
+            if (i < BananaLayout.PhysicalBusCount)
+                _strings[VmParam.BusDeviceName(i)] = i == 0 ? "Casque (Realtek Audio)" : "";
             _floats[VmParam.BusGain(i)] = 0;
             _floats[VmParam.BusMute(i)] = 0;
             _floats[VmParam.BusMono(i)] = 0;
@@ -139,7 +149,10 @@ public class SimulatedVoicemeeterApi : IVoicemeeterApi
         {
             Record(nameof(SetParameterString), name); _stringCount++;
             if (!Available) return -2;
-            _strings[name] = value; _dirty = true; return 0;
+            _strings[name] = value;
+            var device = name.IndexOf(".device.", StringComparison.OrdinalIgnoreCase);
+            if (device >= 0) _strings[name[..device] + ".device.name"] = value;
+            _dirty = true; return 0;
         }
     }
     public int SetParameters(string script)
@@ -159,6 +172,39 @@ public class SimulatedVoicemeeterApi : IVoicemeeterApi
                 else _strings[name] = value.Trim('"', '\'');
             }
             _dirty = true;
+            return 0;
+        }
+    }
+    private static readonly AudioDevice[] InputDevices =
+    [
+        new(AudioDeviceDriver.Wdm, "Microphone (USB Audio)", "demo-usb-mic"),
+        new(AudioDeviceDriver.Wdm, "Microphone (Realtek Audio)", "demo-realtek-mic"),
+        new(AudioDeviceDriver.Ks, "Microphone (USB Audio)", "demo-usb-mic"),
+        new(AudioDeviceDriver.Mme, "Microphone (USB Audio)", "demo-usb-mic"),
+    ];
+    private static readonly AudioDevice[] OutputDevices =
+    [
+        new(AudioDeviceDriver.Wdm, "Casque (Realtek Audio)", "demo-headphones"),
+        new(AudioDeviceDriver.Wdm, "Enceintes (USB Audio)", "demo-speakers"),
+        new(AudioDeviceDriver.Ks, "Casque (Realtek Audio)", "demo-headphones"),
+        new(AudioDeviceDriver.Mme, "Casque (Realtek Audio)", "demo-headphones"),
+        new(AudioDeviceDriver.Asio, "USB Audio ASIO", "demo-asio"),
+    ];
+    public int InputGetDeviceNumber() { lock (_gate) { Record(nameof(InputGetDeviceNumber)); return Available ? InputDevices.Length : -1; } }
+    public int OutputGetDeviceNumber() { lock (_gate) { Record(nameof(OutputGetDeviceNumber)); return Available ? OutputDevices.Length : -1; } }
+    public int InputGetDeviceDesc(int index, out int type, out string name, out string hardwareId) =>
+        DeviceDesc(InputDevices, nameof(InputGetDeviceDesc), index, out type, out name, out hardwareId);
+    public int OutputGetDeviceDesc(int index, out int type, out string name, out string hardwareId) =>
+        DeviceDesc(OutputDevices, nameof(OutputGetDeviceDesc), index, out type, out name, out hardwareId);
+    private int DeviceDesc(AudioDevice[] devices, string method, int index, out int type, out string name, out string hardwareId)
+    {
+        lock (_gate)
+        {
+            Record(method, channel: index);
+            type = 0; name = ""; hardwareId = "";
+            if (!Available || index < 0 || index >= devices.Length) return -1;
+            var device = devices[index];
+            type = (int)device.Driver; name = device.Name; hardwareId = device.HardwareId;
             return 0;
         }
     }

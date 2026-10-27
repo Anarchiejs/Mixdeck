@@ -1,12 +1,66 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<Page
-    x:Class="Mixdeck.App.Views.Pages.DevicesPage"
+<Page x:Class="Mixdeck.App.Views.Pages.DevicesPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
-    <!--  TODO(L12) : appareils (micro, casque, enceintes), préréglages du micro, moteur audio.  -->
-    <ScrollViewer>
-        <StackPanel Padding="{StaticResource MixdeckPagePadding}">
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:vm="using:Mixdeck.App.ViewModels.Pages"
+    xmlns:audio="using:Mixdeck.Core.Audio"
+    xmlns:settings="using:Mixdeck.App.Views.Pages.Settings"
+    Language="fr-FR" Loaded="OnLoaded" Unloaded="OnUnloaded">
+    <Page.Resources>
+        <DataTemplate x:Key="DeviceTemplate" x:DataType="vm:DeviceRowViewModel">
+            <Border Style="{StaticResource MixdeckCardStyle}">
+                <StackPanel Spacing="8">
+                    <TextBlock Text="{x:Bind Name, Mode=OneWay}" Style="{StaticResource BodyStrongTextBlockStyle}" />
+                    <TextBlock Text="{x:Bind Kind}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                    <ComboBox ItemsSource="{x:Bind Choices.View, Mode=OneWay}" SelectedItem="{x:Bind SelectedDevice, Mode=TwoWay}"
+                              HorizontalAlignment="Stretch" IsEnabled="{x:Bind Owner.CanEdit, Mode=OneWay}" AutomationProperties.Name="{x:Bind Name, Mode=OneWay}">
+                        <ComboBox.ItemTemplate><DataTemplate x:DataType="vm:DeviceChoice"><TextBlock Text="{x:Bind Name}" TextTrimming="CharacterEllipsis" /></DataTemplate></ComboBox.ItemTemplate>
+                        <ComboBox.GroupStyle><GroupStyle>
+                            <GroupStyle.HeaderTemplate><DataTemplate x:DataType="vm:DeviceGroup"><TextBlock Text="{x:Bind Name}" Style="{StaticResource BodyStrongTextBlockStyle}" Margin="0,8,0,4" /></DataTemplate></GroupStyle.HeaderTemplate>
+                        </GroupStyle></ComboBox.GroupStyle>
+                    </ComboBox>
+                    <TextBlock Text="{x:Bind CurrentName, Mode=OneWay}" TextWrapping="Wrap" Style="{StaticResource CaptionTextBlockStyle}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                </StackPanel>
+            </Border>
+        </DataTemplate>
+    </Page.Resources>
+    <ScrollViewer HorizontalScrollMode="Disabled" VerticalScrollBarVisibility="Auto">
+        <StackPanel Padding="{StaticResource MixdeckPagePadding}" Spacing="24" MaxWidth="1040">
             <TextBlock Style="{StaticResource TitleTextBlockStyle}" Text="Appareils" />
+            <InfoBar IsOpen="{x:Bind ViewModel.HasMessage, Mode=OneWay}" IsClosable="False" Severity="{x:Bind ViewModel.Severity, Mode=OneWay}" Message="{x:Bind ViewModel.Message, Mode=OneWay}" />
+            <StackPanel Spacing="8">
+                <TextBlock Text="Appareils audio" Style="{StaticResource SubtitleTextBlockStyle}" />
+                <TextBlock Text="Choisissez vos micros et vos sorties. WDM est recommandé pour sa faible latence. « Aucun » retire l’appareil de la tranche." TextWrapping="Wrap" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                <Button Command="{x:Bind ViewModel.RefreshDevicesCommand}">
+                    <StackPanel Orientation="Horizontal" Spacing="8"><FontIcon Glyph="&#xE72C;" FontSize="16" /><TextBlock Text="Actualiser la liste" /></StackPanel>
+                </Button>
+                <ProgressBar IsIndeterminate="{x:Bind ViewModel.IsRefreshing, Mode=OneWay}" Visibility="{x:Bind ViewModel.IsRefreshing, Mode=OneWay}" AutomationProperties.Name="Lecture des appareils" />
+                <StackPanel Spacing="8">
+                    <TextBlock Text="Entrées physiques" Style="{StaticResource BodyStrongTextBlockStyle}" />
+                    <ItemsRepeater ItemsSource="{x:Bind ViewModel.Inputs}" ItemTemplate="{StaticResource DeviceTemplate}"><ItemsRepeater.Layout><StackLayout Spacing="8" /></ItemsRepeater.Layout></ItemsRepeater>
+                    <TextBlock Text="Sorties physiques" Style="{StaticResource BodyStrongTextBlockStyle}" Margin="0,8,0,0" />
+                    <ItemsRepeater ItemsSource="{x:Bind ViewModel.Outputs}" ItemTemplate="{StaticResource DeviceTemplate}"><ItemsRepeater.Layout><StackLayout Spacing="8" /></ItemsRepeater.Layout></ItemsRepeater>
+                </StackPanel>
+            </StackPanel>
+            <StackPanel Spacing="8">
+                <TextBlock Text="Traitement du micro" Style="{StaticResource SubtitleTextBlockStyle}" />
+                <Border Style="{StaticResource MixdeckCardStyle}"><StackPanel Spacing="12">
+                    <TextBlock Text="{x:Bind ViewModel.MicName, Mode=OneWay}" Style="{StaticResource BodyStrongTextBlockStyle}" />
+                    <TextBlock Text="Les préréglages nécessitent une entrée physique. Vous pouvez choisir l’entrée du micro dans Réglages." TextWrapping="Wrap" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                    <ComboBox ItemsSource="{x:Bind ViewModel.Presets}" SelectedItem="{x:Bind ViewModel.SelectedPreset, Mode=TwoWay}" DisplayMemberPath="Name" IsEnabled="{x:Bind ViewModel.CanApplyPreset, Mode=OneWay}" HorizontalAlignment="Stretch" AutomationProperties.Name="Préréglage du micro" />
+                    <TextBlock Text="{x:Bind ViewModel.SelectedPreset.Description, Mode=OneWay}" TextWrapping="Wrap" />
+                    <Button Content="Appliquer au micro" Command="{x:Bind ViewModel.ApplyPresetCommand}" IsEnabled="{x:Bind ViewModel.CanApplyPreset, Mode=OneWay}" />
+                </StackPanel></Border>
+            </StackPanel>
+            <StackPanel Spacing="8">
+                <TextBlock Text="Moteur audio" Style="{StaticResource SubtitleTextBlockStyle}" />
+                <settings:SettingCard Title="Cacher la fenêtre de Voicemeeter" Description="Au prochain lancement de Voicemeeter par Mixdeck, sa fenêtre sera cachée une fois le moteur connecté." Glyph="&#xE8F4;">
+                    <settings:SettingCard.ActionContent><ToggleSwitch IsOn="{x:Bind ViewModel.HideVoicemeeterWindow, Mode=TwoWay}" OnContent="Oui" OffContent="Non" AutomationProperties.Name="Cacher la fenêtre de Voicemeeter au lancement" /></settings:SettingCard.ActionContent>
+                </settings:SettingCard>
+                <settings:SettingCard Title="Redémarrer le moteur audio" Description="Utile après un changement d’appareil. Le son sera interrompu brièvement." Glyph="&#xE777;">
+                    <settings:SettingCard.ActionContent><Button Content="Redémarrer…" Click="OnRestartEngine" IsEnabled="{x:Bind ViewModel.CanEdit, Mode=OneWay}" AutomationProperties.Name="Redémarrer le moteur audio" /></settings:SettingCard.ActionContent>
+                </settings:SettingCard>
+            </StackPanel>
         </StackPanel>
     </ScrollViewer>
 </Page>
