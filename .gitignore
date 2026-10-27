@@ -487,3 +487,6 @@ artifacts/
 publish/
 Releases/
 
+.grok/
+.grok-mcp.json
+
