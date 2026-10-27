@@ -48,6 +48,37 @@ internal static partial class WindowInterop
 
     public static uint GetDpi(Window window) => GetDpiForWindow(GetHandle(window));
 
+    /// <summary>
+    /// Remet la fenêtre à l'écran si Windows l'a réduite à son premier affichage (lancement avec une consigne
+    /// « réduit », ex. depuis un raccourci) : le presenter WinUI ne le voit pas toujours.
+    /// </summary>
+    public static void RestoreIfMinimized(Window window)
+    {
+        var hwnd = GetHandle(window);
+        if (IsIconic(hwnd))
+        {
+            ShowWindow(hwnd, 9); // SW_RESTORE
+        }
+    }
+
+    /// <summary>Rend à Windows les pages mémoire inutilisées du processus.</summary>
+    public static void TrimWorkingSet() => SetProcessWorkingSetSize(GetCurrentProcess(), -1, -1);
+
+    [LibraryImport("kernel32.dll")]
+    private static partial nint GetCurrentProcess();
+
+    [LibraryImport("kernel32.dll")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    private static partial bool SetProcessWorkingSetSize(nint process, nint minimum, nint maximum);
+
+    [LibraryImport("user32.dll")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    private static partial bool IsIconic(nint hWnd);
+
+    [LibraryImport("user32.dll")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    private static partial bool ShowWindow(nint hWnd, int nCmdShow);
+
     private static void AddExStyle(nint hwnd, long flags)
     {
         var style = GetWindowLongPtrW(hwnd, GWL_EXSTYLE);

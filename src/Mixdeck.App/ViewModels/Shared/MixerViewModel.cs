@@ -123,6 +123,13 @@ public sealed partial class MixerViewModel : ObservableObject, IDisposable
     [RelayCommand]
     private void ToggleMic()
     {
+        if (IsConnected) Mic.IsMuted = !Mic.IsMuted;
+    }
+
+    /// <summary>Clic milieu sur l'icône : même retour à l'écran que le raccourci clavier (le panneau, lui, montre déjà l'état).</summary>
+    [RelayCommand]
+    private void ToggleMicFromTray()
+    {
         if (!IsConnected) return;
         Mic.IsMuted = !Mic.IsMuted;
         if (_settings.Current.ShowOsd)

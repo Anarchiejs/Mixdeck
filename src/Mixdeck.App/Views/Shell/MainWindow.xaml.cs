@@ -46,7 +46,22 @@ public sealed partial class MainWindow : Window
 
         ResizeForDpi(1180, 760);
         AppWindow.Changed += OnAppWindowChanged;
+        AppWindow.Closing += OnClosing;
         Closed += OnClosed;
+    }
+
+    /// <summary>Levé quand la console est fermée par l'utilisateur et que ses pages ont été déchargées.</summary>
+    public event EventHandler? ContentReleased;
+
+    // WinUI ne libère jamais une fenêtre fermée (mesuré : ~7 Mo perdus à chaque fermeture). La console est donc cachée,
+    // mais ses pages (vumètres Win2D, cartes, liaisons) sont déchargées : c'est l'essentiel de sa mémoire.
+    private void OnClosing(AppWindow sender, AppWindowClosingEventArgs args)
+    {
+        args.Cancel = true;
+        AppWindow.Hide();
+        UpdateMeters();
+        ContentFrame.Content = null;
+        ContentReleased?.Invoke(this, EventArgs.Empty);
     }
 
     public MixerViewModel Mixer { get; }
@@ -57,14 +72,14 @@ public sealed partial class MainWindow : Window
         _meters?.Dispose();
         _meters = null;
         AppWindow.Changed -= OnAppWindowChanged;
+        AppWindow.Closing -= OnClosing;
         Closed -= OnClosed;
         Bindings.StopTracking();
         ContentFrame.Navigated -= OnFrameNavigated;
         Navigation.SelectionChanged -= OnNavigationSelectionChanged;
         // Décharger la page déclenche ses désabonnements et libère les ressources Win2D des vumètres.
+        // (Pas de BackStack.Clear : interdit pendant une navigation, et la pile disparaît avec la fenêtre.)
         ContentFrame.Content = null;
-        ContentFrame.BackStack.Clear();
-        ContentFrame.ForwardStack.Clear();
         Navigation.Content = null;
         Content = null;
         // ThemeService ne conserve que des WeakReference<Window> : aucun abonnement à défaire.
@@ -72,13 +87,15 @@ public sealed partial class MainWindow : Window
 
     public void ShowPage(ShellPage? page)
     {
-        Navigate(page ?? (ContentFrame.Content is null ? ShellPage.Mixer : CurrentPage));
+        // Après une fermeture, on rouvre sur la dernière page consultée.
+        Navigate(page ?? CurrentPage);
         AppWindow.Show();
         if (AppWindow.Presenter is OverlappedPresenter { State: OverlappedPresenterState.Minimized } presenter)
         {
             presenter.Restore();
         }
 
+        WindowInterop.RestoreIfMinimized(this);
         Activate();
         UpdateMeters();
     }
