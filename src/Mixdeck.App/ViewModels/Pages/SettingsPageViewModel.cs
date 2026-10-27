@@ -1,8 +1,254 @@
+﻿using System.Collections.ObjectModel;
+using System.Globalization;
 using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
+using Mixdeck.App.Services;
+using Mixdeck.App.ViewModels.Shared;
+using Mixdeck.App.Views.Pages.Settings;
+using Mixdeck.Core.Abstractions;
+using Mixdeck.Core.Model;
+using Mixdeck.Core.Settings;
+using Mixdeck.Platform.Hotkeys;
+using Windows.ApplicationModel.DataTransfer;
+using Windows.Globalization.NumberFormatting;
 
 namespace Mixdeck.App.ViewModels.Pages;
 
-/// <summary>Page « Réglages ». Gabarit de départ : le lot L7 le complète.</summary>
 public sealed partial class SettingsPageViewModel : ObservableObject
 {
+    private readonly ISettingsStore settings;
+    private readonly IHotkeyService hotkeys;
+    private readonly IShellService shell;
+    private readonly SemaphoreSlim saveGate = new(1, 1);
+    private bool loading;
+    private CancellationTokenSource? fadeDelay;
+    private Task pendingFade = Task.CompletedTask;
+    private int pendingSaves;
+    private bool refreshAfterFailure;
+
+    public SettingsPageViewModel(ISettingsStore settings, MixerViewModel mixer, IHotkeyService hotkeys, IShellService shell, MixdeckPaths paths)
+    {
+        this.settings = settings;
+        this.hotkeys = hotkeys;
+        this.shell = shell;
+        Mixer = mixer;
+        DataPath = paths.Root;
+        foreach (var action in Enum.GetValues<HotkeyAction>()) Hotkeys.Add(new(action, this));
+        Refresh();
+    }
+
+    public MixerViewModel Mixer { get; }
+    public string DataPath { get; }
+    public ObservableCollection<HotkeyRowViewModel> Hotkeys { get; } = [];
+    public string FadeText => Math.Round(FadeMilliseconds).ToString("0", CultureInfo.GetCultureInfo("fr-FR")) + " ms";
+    public string AccentSummary => settings.Current.AccentColor is { } color ? "Couleur personnalisée : " + color : "Couleur de Windows";
+    public string? AccentColor => settings.Current.AccentColor;
+
+    [ObservableProperty]
+    public partial bool StartWithWindows { get; set; }
+    [ObservableProperty]
+    public partial bool AutoLaunchVoicemeeter { get; set; }
+    [ObservableProperty]
+    public partial bool ShowOsd { get; set; }
+    [ObservableProperty]
+    public partial bool CheckForUpdates { get; set; }
+    [ObservableProperty]
+    public partial int ThemeIndex { get; set; }
+    [ObservableProperty]
+    public partial int MicStripIndex { get; set; }
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(FadeText))]
+    public partial double FadeMilliseconds { get; set; }
+    [ObservableProperty]
+    public partial bool HasError { get; set; }
+    [ObservableProperty]
+    public partial string ErrorMessage { get; set; } = string.Empty;
+    [ObservableProperty]
+    public partial string SaveStatus { get; set; } = "Les modifications sont enregistrées automatiquement.";
+
+    public void Refresh()
+    {
+        loading = true;
+        var current = settings.Current;
+        StartWithWindows = current.StartWithWindows;
+        AutoLaunchVoicemeeter = current.AutoLaunchVoicemeeter;
+        ShowOsd = current.ShowOsd;
+        CheckForUpdates = current.CheckForUpdates;
+        ThemeIndex = (int)current.Theme;
+        MicStripIndex = Math.Clamp(current.MicStripIndex, 0, Mixer.Strips.Count - 1);
+        FadeMilliseconds = Math.Clamp(current.FadeMilliseconds, 0, 2000);
+        foreach (var row in Hotkeys) row.Refresh(current.Hotkeys.FirstOrDefault(h => h.Action == row.Action), hotkeys.Failed);
+        OnPropertyChanged(nameof(AccentSummary));
+        loading = false;
+    }
+
+    private void QueueSave(Func<AppSettings, AppSettings> change)
+    {
+        if (!loading) _ = SaveAsync(change);
+    }
+
+    partial void OnStartWithWindowsChanged(bool value) => QueueSave(s => s with { StartWithWindows = value });
+    partial void OnAutoLaunchVoicemeeterChanged(bool value) => QueueSave(s => s with { AutoLaunchVoicemeeter = value });
+    partial void OnShowOsdChanged(bool value) => QueueSave(s => s with { ShowOsd = value });
+    partial void OnCheckForUpdatesChanged(bool value) => QueueSave(s => s with { CheckForUpdates = value });
+    partial void OnThemeIndexChanged(int value) { if (value is >= 0 and <= 2) QueueSave(s => s with { Theme = (ThemeMode)value }); }
+    partial void OnMicStripIndexChanged(int value) { if (value >= 0 && value < Mixer.Strips.Count) QueueSave(s => s with { MicStripIndex = value }); }
+    partial void OnFadeMillisecondsChanged(double value)
+    {
+        if (loading) return;
+        fadeDelay?.Cancel();
+        fadeDelay?.Dispose();
+        fadeDelay = new();
+        pendingFade = SaveFadeAsync((int)Math.Clamp(Math.Round(value), 0, 2000), fadeDelay.Token);
+    }
+
+    private async Task SaveFadeAsync(int value, CancellationToken token)
+    {
+        try
+        {
+            await Task.Delay(250, token);
+            await SaveAsync(s => s with { FadeMilliseconds = value });
+        }
+        catch (OperationCanceledException) { }
+    }
+
+    public async Task<bool> SaveAsync(Func<AppSettings, AppSettings> change)
+    {
+        pendingSaves++;
+        await saveGate.WaitAsync();
+        try
+        {
+            SaveStatus = "Enregistrement…";
+            var success = await SettingsWriter.UpdateAsync(settings, change);
+            HasError = !success;
+            ErrorMessage = success ? string.Empty : "La modification n’a pas été enregistrée. Vérifiez l’accès au dossier de données et réessayez.";
+            SaveStatus = success ? "Modifications enregistrées." : "Échec de l’enregistrement.";
+            if (!success) refreshAfterFailure = true;
+            OnPropertyChanged(nameof(AccentSummary));
+            RefreshHotkeyWarnings();
+            return success;
+        }
+        finally
+        {
+            saveGate.Release();
+            if (--pendingSaves == 0 && refreshAfterFailure)
+            {
+                refreshAfterFailure = false;
+                Refresh();
+            }
+        }
+    }
+
+    public void ReportError(string message)
+    {
+        ErrorMessage = message;
+        HasError = true;
+    }
+
+    public Task<bool> SetAccentAsync(string? color) => SaveAsync(s => s with { AccentColor = color });
+
+    public async Task FlushAsync()
+    {
+        await pendingFade;
+        await saveGate.WaitAsync();
+        saveGate.Release();
+    }
+
+    public async Task SaveHotkeyParameterAsync(HotkeyRowViewModel row, Func<HotkeyBinding, HotkeyBinding> change)
+    {
+        await SaveAsync(s => s with { Hotkeys = s.Hotkeys.Select(h => h.Action == row.Action ? change(h) : h).ToArray() });
+        row.Refresh(settings.Current.Hotkeys.FirstOrDefault(h => h.Action == row.Action), hotkeys.Failed);
+    }
+
+    public async Task<bool> SaveHotkeyAsync(HotkeyRowViewModel row, HotkeyBinding? binding)
+    {
+        var success = await SaveAsync(s => s with
+        {
+            Hotkeys = s.Hotkeys.Where(h => h.Action != row.Action).Concat(binding is null ? [] : new[] { binding }).ToArray(),
+        });
+        row.Refresh(settings.Current.Hotkeys.FirstOrDefault(h => h.Action == row.Action), hotkeys.Failed);
+        return success;
+    }
+
+    public bool Conflicts(HotkeyBinding binding) => settings.Current.Hotkeys.Any(h => h.Action != binding.Action && h.Modifiers == binding.Modifiers && h.VirtualKey == binding.VirtualKey);
+    public void SuspendHotkeys() => hotkeys.Apply([]);
+    public void RestoreHotkeys()
+    {
+        hotkeys.Apply(settings.Current.Hotkeys);
+        RefreshHotkeyWarnings();
+    }
+    public void RefreshHotkeyWarnings()
+    {
+        foreach (var row in Hotkeys) row.HasConflict = hotkeys.Failed.Any(h => h.Action == row.Action);
+    }
+
+    [RelayCommand]
+    private void OpenLogs()
+    {
+        try { shell.OpenLogsFolder(); }
+        catch (Exception) { ReportError("Impossible d’ouvrir le dossier des journaux."); }
+    }
+
+    [RelayCommand]
+    private void CopyDataPath()
+    {
+        try
+        {
+            var data = new DataPackage();
+            data.SetText(DataPath);
+            Clipboard.SetContent(data);
+            SaveStatus = "Emplacement copié dans le Presse-papiers.";
+        }
+        catch (Exception) { ReportError("Impossible de copier l’emplacement des données."); }
+    }
+}
+
+public sealed partial class HotkeyRowViewModel : ObservableObject
+{
+    private readonly SettingsPageViewModel owner;
+    private bool loading;
+    public HotkeyRowViewModel(HotkeyAction action, SettingsPageViewModel owner) { Action = action; this.owner = owner; }
+    public HotkeyAction Action { get; }
+    public MixerViewModel Mixer => owner.Mixer;
+    public HotkeyBinding? Binding { get; private set; }
+    public bool IsVolume => Action is HotkeyAction.VolumeUp or HotkeyAction.VolumeDown;
+    public bool HasBinding => Binding is not null;
+    public string Combination => Binding is null ? "Non attribué" : HotkeyFormatter.Format(Binding);
+    public string Name => Action switch
+    {
+        HotkeyAction.ToggleMic => "Couper / activer le micro",
+        HotkeyAction.PushToTalk => "Parler en maintenant la touche",
+        HotkeyAction.NextProfile => "Profil suivant",
+        HotkeyAction.PreviousProfile => "Profil précédent",
+        HotkeyAction.VolumeUp => "Volume +",
+        HotkeyAction.VolumeDown => "Volume −",
+        _ => "Ouvrir le panneau rapide",
+    };
+    public string EditLabel => "Modifier : " + Name;
+    public string ClearLabel => "Effacer : " + Name;
+    public string StepText => Converters.Db(StepDb);
+    public DecimalFormatter StepFormatter { get; } = new(["fr-FR"], "FR") { FractionDigits = 1, IntegerDigits = 1 };
+
+    [ObservableProperty]
+    public partial bool HasConflict { get; set; }
+    [ObservableProperty]
+    public partial int TargetBus { get; set; }
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(StepText))]
+    public partial double StepDb { get; set; } = 2;
+
+    partial void OnTargetBusChanged(int value) { if (!loading && value is >= 0 and < 5 && HasBinding) _ = owner.SaveHotkeyParameterAsync(this, b => b with { TargetBus = value }); }
+    partial void OnStepDbChanged(double value) { if (!loading && double.IsFinite(value) && value is >= 0.1 and <= 12 && HasBinding) _ = owner.SaveHotkeyParameterAsync(this, b => b with { StepDb = (float)value }); }
+
+    public void Refresh(HotkeyBinding? binding, IReadOnlyList<HotkeyBinding> failed)
+    {
+        loading = true;
+        Binding = binding;
+        TargetBus = binding?.TargetBus ?? 0;
+        StepDb = binding?.StepDb ?? 2;
+        HasConflict = failed.Any(h => h.Action == Action);
+        OnPropertyChanged(nameof(Combination));
+        OnPropertyChanged(nameof(HasBinding));
+        loading = false;
+    }
 }
