@@ -33,6 +33,21 @@ Les captures se déposent dans [`docs/images/`](docs/images/). Aucune capture n'
 
 ## Installation
 
+### En un clic, depuis les sources
+
+Double-cliquer sur **`Installer Mixdeck.cmd`** à la racine du dépôt. Aucun droit administrateur n'est demandé. Le script `build/install.ps1` :
+
+1. cherche un SDK .NET 10 (10.0.403 ou plus récent) ; s'il n'y en a pas, il l'installe pour l'utilisateur dans `%LOCALAPPDATA%\Microsoft\dotnet` avec le script officiel `dot.net/v1/dotnet-install.ps1` ;
+2. vérifie que Voicemeeter est installé ; sinon, il propose de l'installer avec `winget` (Voicemeeter Banana) ;
+3. compile une version Release autonome et l'empaquette avec Velopack, sans les tests ;
+4. installe Mixdeck comme une vraie version dans `%LOCALAPPDATA%\MixdeckApp`, avec des raccourcis dans le menu Démarrer et sur le Bureau et une entrée dans Paramètres > Applications. Si Mixdeck est déjà installé, il le ferme et applique une mise à jour Velopack. Les réglages sont conservés. Mixdeck est ensuite lancé.
+
+La version installée est `<version de Directory.Build.props>-local.<date>` : chaque nouvel essai est plus récent que le précédent, et la première version publiée sur GitHub (`0.1.0`) le remplacera par la mise à jour automatique. Pour mettre à jour, il suffit de relancer le script après un `git pull`.
+
+Options : `-RunTests` lance aussi les tests avant d'installer, et `-NoPrompt` ne pose aucune question. En cas d'échec, le journal de Velopack est dans `%LOCALAPPDATA%\velopack\velopack.log`.
+
+### Depuis une publication
+
 Les versions publiées sont attachées aux [publications GitHub](https://github.com/Anarchiejs/Mixdeck/releases) du dépôt `Anarchiejs/Mixdeck`, créées par le workflow `.github/workflows/release.yml` lorsqu'une étiquette `v*` est poussée.
 
 Aucune publication n'existe tant qu'une étiquette n'a pas été créée. L'installateur est celui produit par Velopack (identifiant de paquet `MixdeckApp`, installé dans `%LOCALAPPDATA%\MixdeckApp`). Les réglages et profils vivent à part, dans `%LOCALAPPDATA%\Mixdeck` : une désinstallation ne les efface pas. Les mises à jour suivantes sont des paquets delta calculés à partir de la publication précédente.

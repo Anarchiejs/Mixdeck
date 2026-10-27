@@ -7,7 +7,13 @@ param(
     [string]$Version,
 
     [Parameter(HelpMessage = 'Publie l''application mais n''appelle pas vpk pack.')]
-    [switch]$SkipPack
+    [switch]$SkipPack,
+
+    [Parameter(HelpMessage = 'Ne lance pas les tests avant la publication.')]
+    [switch]$SkipTests,
+
+    [Parameter(HelpMessage = 'Dossier de sortie du paquet Velopack (artifacts par defaut).')]
+    [string]$OutputDir
 )
 
 $ErrorActionPreference = 'Stop'
@@ -87,7 +93,11 @@ function Invoke-DotNet {
 }
 
 Invoke-DotNet -ArgumentList @('tool', 'restore')
-Invoke-DotNet -ArgumentList @('test', 'Mixdeck.slnx', '-c', 'Release', '-nologo')
+if ($SkipTests) {
+    Write-Step "Tests ignores (-SkipTests)."
+} else {
+    Invoke-DotNet -ArgumentList @('test', 'Mixdeck.slnx', '-c', 'Release', '-nologo')
+}
 
 $publishDir = Join-Path $repoRoot 'publish'
 if (Test-Path -LiteralPath $publishDir) {
@@ -122,7 +132,7 @@ if (-not (Test-Path -LiteralPath $icon)) {
     Fail "Icone introuvable : $icon. vpk pack l'exige (--icon)."
 }
 
-$artifacts = Join-Path $repoRoot 'artifacts'
+$artifacts = if ($OutputDir) { [System.IO.Path]::GetFullPath($OutputDir) } else { Join-Path $repoRoot 'artifacts' }
 if (-not (Test-Path -LiteralPath $artifacts)) {
     New-Item -ItemType Directory -Path $artifacts | Out-Null
 }
@@ -136,6 +146,7 @@ Invoke-DotNet -ArgumentList @(
     '--packDir', $publishDir,
     '--mainExe', 'Mixdeck.exe',
     '--packTitle', 'Mixdeck',
+    '--runtime', 'win-x64',
     '--icon', $icon,
     '--outputDir', $artifacts
 )

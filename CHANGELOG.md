@@ -24,6 +24,7 @@ et ce projet adhère au [versionnage sémantique](https://semver.org/lang/fr/).
 - Tests d'interface FlaUI en CI ; signature Azure Trusted Signing facultative à la publication (`docs/SIGNATURE.md`).
 - Prise en charge de Voicemeeter Standard et Potato (disposition détectée à la connexion ; démo `--demo=standard` / `--demo=potato`).
 - Interface en anglais : langue de Windows par défaut, ou choix Français / English dans Réglages.
+- Installation en un clic depuis les sources (`Installer Mixdeck.cmd`) : SDK .NET et Voicemeeter installés au besoin, paquet Velopack construit puis installé ou mis à jour ; options `-SkipTests` et `-OutputDir` dans `build/pack.ps1`.
 - `MIXDECK_DATA_DIR` pour choisir le dossier des données ; arguments de développement `--flyout` et `--page=<nom>`.
 
 - Intégration continue GitHub Actions : restauration, compilation Release et tests sur `windows-latest` et dépôt des résultats de tests.
