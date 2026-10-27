@@ -4,8 +4,9 @@ using Mixdeck.Core.Abstractions;
 using Mixdeck.Core.Model;
 namespace Mixdeck.Core.Automation;
 public sealed class ActionDispatcher(IMixer mixer, IProfileService profiles, ISettingsStore settings, IOsdService osd,
-    ILogger<ActionDispatcher> logger, AutomationCoordinator automation)
+    ILogger<ActionDispatcher> logger, AutomationCoordinator automation, ITextProvider? textProvider = null)
 {
+    private readonly ITextProvider text = textProvider ?? FrenchTextProvider.Instance;
     public event EventHandler? FlyoutRequested;
     public async Task HandleAsync(HotkeyEventArgs e)
     {
@@ -22,7 +23,7 @@ public sealed class ActionDispatcher(IMixer mixer, IProfileService profiles, ISe
                     if (strip is null) return;
                     var muted = binding.Action == HotkeyAction.ToggleMic ? !strip.Mute : !e.IsPressed;
                     mixer.SetFloat(VmParam.StripMute(strip.Index), VmParam.FromBool(muted));
-                    if (config.ShowOsd) osd.Show(muted ? "Micro coupé" : "Micro activé", muted ? "\uF781" : "\uE720", muted);
+                    if (config.ShowOsd) osd.Show(text.Get(muted ? "Core_MicMuted" : "Core_MicOn"), muted ? "\uF781" : "\uE720", muted);
                     break;
                 case HotkeyAction.NextProfile:
                 case HotkeyAction.PreviousProfile:
@@ -31,7 +32,7 @@ public sealed class ActionDispatcher(IMixer mixer, IProfileService profiles, ISe
                     var activeIndex = list.ToList().FindIndex(p => p.Id == profiles.Active?.Id);
                     var nextIndex = activeIndex < 0 ? 0 : (activeIndex + (binding.Action == HotkeyAction.NextProfile ? 1 : -1) + list.Count) % list.Count;
                     await automation.ApplyManualProfileAsync(list[nextIndex].Id);
-                    if (config.ShowOsd && profiles.Active is { } active) osd.Show("Profil : " + active.Name, active.Icon);
+                    if (config.ShowOsd && profiles.Active is { } active) osd.Show(string.Format(CultureInfo.CurrentCulture, text.Get("Core_Profile"), active.Name), active.Icon);
                     break;
                 case HotkeyAction.ApplyProfile:
                     if (binding.ProfileId is not { } id || !profiles.Profiles.Any(p => p.Id == id))
@@ -41,7 +42,7 @@ public sealed class ActionDispatcher(IMixer mixer, IProfileService profiles, ISe
                     }
                     await automation.ApplyManualProfileAsync(id);
                     if (config.ShowOsd && profiles.Active is { } applied && applied.Id == id)
-                        osd.Show("Profil : " + applied.Name, applied.Icon);
+                        osd.Show(string.Format(CultureInfo.CurrentCulture, text.Get("Core_Profile"), applied.Name), applied.Icon);
                     break;
                 case HotkeyAction.VolumeUp:
                 case HotkeyAction.VolumeDown:
@@ -49,7 +50,7 @@ public sealed class ActionDispatcher(IMixer mixer, IProfileService profiles, ISe
                     if (bus is null || !float.IsFinite(binding.StepDb)) return;
                     var gain = mixer.Layout.ClampGain(bus.Gain + (binding.Action == HotkeyAction.VolumeUp ? 1 : -1) * Math.Abs(binding.StepDb));
                     mixer.SetFloat(VmParam.BusGain(bus.Index), gain);
-                    if (config.ShowOsd) osd.Show($"{bus.Name} : {gain.ToString("0.##", CultureInfo.GetCultureInfo("fr-FR")).Replace("-", "−")} dB", "\uE767");
+                    if (config.ShowOsd) osd.Show(string.Format(CultureInfo.CurrentCulture, text.Get("Core_Gain"), bus.Name, gain.ToString("0.0", CultureInfo.CurrentCulture).Replace("-", "−")), "\uE767");
                     break;
                 case HotkeyAction.OpenFlyout: FlyoutRequested?.Invoke(this, EventArgs.Empty); break;
             }

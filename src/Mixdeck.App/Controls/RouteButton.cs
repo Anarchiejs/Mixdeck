@@ -1,3 +1,4 @@
+using Mixdeck.App.Localization;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Automation;
 using Microsoft.UI.Xaml.Controls.Primitives;
@@ -20,7 +21,7 @@ public sealed class RouteButton : ToggleButton
     private void UpdateBus()
     {
         string label = Content as string ?? Bus;
-        AutomationProperties.SetName(this, "Envoyer vers " + label);
+        AutomationProperties.SetName(this, Strings.Get("CS_005") + label);
         VisualStateManager.GoToState(this, label.StartsWith('B') ? "VirtualBus" : "PhysicalBus", false);
     }
     protected override void OnApplyTemplate() { base.OnApplyTemplate(); UpdateBus(); }

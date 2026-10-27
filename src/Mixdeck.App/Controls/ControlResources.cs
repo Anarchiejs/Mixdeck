@@ -1,3 +1,4 @@
+using Mixdeck.App.Localization;
 using Microsoft.UI.Xaml;
 
 namespace Mixdeck.App.Controls;
@@ -14,7 +15,7 @@ internal static class ControlResources
     }
 
     internal static string Db(double value) =>
-        value.ToString("0.0", System.Globalization.CultureInfo.GetCultureInfo("fr-FR")).Replace('-', '−') + " dB";
+        value.ToString("0.0", Strings.Culture).Replace('-', '−') + " dB";
 
     internal static object Get(FrameworkElement owner, string key) =>
         owner.Resources.TryGetValue(key, out var value) ? value : Application.Current.Resources[key];

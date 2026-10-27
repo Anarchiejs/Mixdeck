@@ -1,23 +1,23 @@
-﻿<UserControl x:Class="Mixdeck.App.Views.Pages.Settings.RuleEditor"
+<UserControl x:Class="Mixdeck.App.Views.Pages.Settings.RuleEditor"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Language="fr-FR">
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
     <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollMode="Disabled">
         <StackPanel Spacing="16" MinWidth="280" MaxWidth="480" Padding="0,0,4,4">
-            <InfoBar IsOpen="{x:Bind ViewModel.HasError, Mode=OneWay}" Severity="Error" IsClosable="False" Title="Enregistrement impossible" Message="Vérifiez l’accès au dossier de données et réessayez." />
-            <TextBox Header="Nom de la règle (facultatif)" PlaceholderText="Ex. Mon studio musical" Text="{x:Bind ViewModel.Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" MaxLength="120" />
-            <TextBlock Text="Quand…" Style="{StaticResource BodyStrongTextBlockStyle}" />
-            <AutoSuggestBox Header="Application ou processus" PlaceholderText="Ex. FL64.exe ou Discord" Text="{x:Bind ViewModel.ProcessName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" TextChanged="OnProcessChanged" SuggestionChosen="OnSuggestionChosen" QueryIcon="Find" AutomationProperties.Name="Application ou processus" />
-            <TextBlock Text="Choisissez une application en cours d’exécution ou saisissez son nom. L’extension .exe est facultative." Style="{StaticResource CaptionTextBlockStyle}" TextWrapping="Wrap" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
-            <ComboBox Header="Déclencheur" SelectedIndex="{x:Bind ViewModel.TriggerIndex, Mode=TwoWay}" HorizontalAlignment="Stretch">
-                <ComboBoxItem Content="Démarre (tant qu’elle est ouverte)" /><ComboBoxItem Content="Est au premier plan" />
+            <InfoBar x:Uid="RuleEditor001" IsOpen="{x:Bind ViewModel.HasError, Mode=OneWay}" Severity="Error" IsClosable="False"   />
+            <TextBox x:Uid="RuleEditor002"   Text="{x:Bind ViewModel.Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" MaxLength="120" />
+            <TextBlock x:Uid="RuleEditor003"  Style="{StaticResource BodyStrongTextBlockStyle}" />
+            <AutoSuggestBox x:Uid="RuleEditor004"   Text="{x:Bind ViewModel.ProcessName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" TextChanged="OnProcessChanged" SuggestionChosen="OnSuggestionChosen" QueryIcon="Find"  />
+            <TextBlock x:Uid="RuleEditor005"  Style="{StaticResource CaptionTextBlockStyle}" TextWrapping="Wrap" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+            <ComboBox x:Uid="RuleEditor006"  SelectedIndex="{x:Bind ViewModel.TriggerIndex, Mode=TwoWay}" HorizontalAlignment="Stretch">
+                <ComboBoxItem x:Uid="RuleEditor007"  /><ComboBoxItem x:Uid="RuleEditor008"  />
             </ComboBox>
-            <TextBlock Text="Alors…" Style="{StaticResource BodyStrongTextBlockStyle}" />
-            <ComboBox Header="Action" SelectedIndex="{x:Bind ViewModel.ActionIndex, Mode=TwoWay}" HorizontalAlignment="Stretch">
-                <ComboBoxItem Content="Passer au profil" /><ComboBoxItem Content="Couper le micro" /><ComboBoxItem Content="Activer le micro" />
+            <TextBlock x:Uid="RuleEditor009"  Style="{StaticResource BodyStrongTextBlockStyle}" />
+            <ComboBox x:Uid="RuleEditor010"  SelectedIndex="{x:Bind ViewModel.ActionIndex, Mode=TwoWay}" HorizontalAlignment="Stretch">
+                <ComboBoxItem x:Uid="RuleEditor011"  /><ComboBoxItem x:Uid="RuleEditor012"  /><ComboBoxItem x:Uid="RuleEditor013"  />
             </ComboBox>
-            <ComboBox Header="Profil à appliquer" PlaceholderText="Choisir un profil" ItemsSource="{x:Bind ViewModel.Mixer.Profiles}" DisplayMemberPath="Name" SelectedItem="{x:Bind ViewModel.SelectedProfile, Mode=TwoWay}" Visibility="{x:Bind ViewModel.IsProfileAction, Mode=OneWay}" HorizontalAlignment="Stretch" />
-            <TextBlock Text="Un processus et, pour l’action de profil, un profil sont nécessaires pour enregistrer." TextWrapping="Wrap" Style="{StaticResource CaptionTextBlockStyle}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
-            <CheckBox Content="Revenir à l’état d’avant ensuite" IsChecked="{x:Bind ViewModel.RevertWhenInactive, Mode=TwoWay}" />
+            <ComboBox x:Uid="RuleEditor014"   ItemsSource="{x:Bind ViewModel.Mixer.Profiles}" DisplayMemberPath="Name" SelectedItem="{x:Bind ViewModel.SelectedProfile, Mode=TwoWay}" Visibility="{x:Bind ViewModel.IsProfileAction, Mode=OneWay}" HorizontalAlignment="Stretch" />
+            <TextBlock x:Uid="RuleEditor015"  TextWrapping="Wrap" Style="{StaticResource CaptionTextBlockStyle}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+            <CheckBox x:Uid="RuleEditor016"  IsChecked="{x:Bind ViewModel.RevertWhenInactive, Mode=TwoWay}" />
         </StackPanel>
     </ScrollViewer>
 </UserControl>

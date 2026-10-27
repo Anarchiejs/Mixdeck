@@ -6,10 +6,10 @@
     xmlns:local="using:Mixdeck.App.Views.AppVolume"
     xmlns:vm="using:Mixdeck.App.ViewModels.AppVolume">
     <StackPanel>
-        <TextBlock Margin="4,10,0,2" Text="Applications" Style="{StaticResource CaptionTextBlockStyle}" />
-        <TextBlock
+        <TextBlock x:Uid="AppVolumeList001" Margin="4,10,0,2"  Style="{StaticResource CaptionTextBlockStyle}" />
+        <TextBlock x:Uid="AppVolumeList002"
             Margin="8,4"
-            Text="Aucune application ne joue de son."
+
             Foreground="{ThemeResource TextFillColorSecondaryBrush}"
             Style="{StaticResource CaptionTextBlockStyle}"
             Visibility="{x:Bind local:AppVolumeList.ToVisibility(ViewModel.IsEmpty), Mode=OneWay}" />

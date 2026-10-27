@@ -7,7 +7,7 @@
     xmlns:controls="using:Mixdeck.App.Controls"
     xmlns:local="using:Mixdeck.App.Views.Flyout"
     xmlns:shared="using:Mixdeck.App.ViewModels.Shared"
-    Title="Mixdeck">
+    >
     <Window.SystemBackdrop>
         <DesktopAcrylicBackdrop />
     </Window.SystemBackdrop>
@@ -30,27 +30,27 @@
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
-            <controls:ProfilePillList
+            <controls:ProfilePillList x:Uid="FlyoutWindow002"
                 x:Name="ProfilePills"
-                AutomationProperties.Name="Profils"
+
                 ItemsSource="{x:Bind Mixer.Profiles}"
                 SelectedItem="{x:Bind Mixer.ActiveProfile, Mode=OneWay}"
                 ItemInvoked="OnProfileInvoked" />
-            <TextBlock
+            <TextBlock x:Uid="FlyoutWindow003"
                 VerticalAlignment="Center"
                 Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                 Style="{StaticResource CaptionTextBlockStyle}"
-                Text="Aucun profil : + enregistre l'état actuel"
+
                 TextWrapping="Wrap"
                 Visibility="{x:Bind Mixer.ShowNoProfilesHint, Mode=OneWay}" />
-            <Button
+            <Button x:Uid="FlyoutWindow004"
                 Grid.Column="1"
                 Margin="8,0,0,0"
                 VerticalAlignment="Center"
-                AutomationProperties.Name="Enregistrer l'état actuel comme nouveau profil"
+
                 Command="{x:Bind Mixer.CaptureProfileCommand}"
                 Style="{StaticResource SubtleButtonStyle}"
-                ToolTipService.ToolTip="Nouveau profil depuis l'état actuel">
+                >
                 <FontIcon FontSize="14" Glyph="&#xE710;" />
             </Button>
         </Grid>
@@ -65,9 +65,9 @@
             Severity="Warning"
             Title="{x:Bind Mixer.ConnectionTitle, Mode=OneWay}">
             <InfoBar.ActionButton>
-                <Button
+                <Button x:Uid="FlyoutWindow005"
                     Command="{x:Bind Mixer.LaunchVoicemeeterCommand}"
-                    Content="Lancer Voicemeeter"
+
                     Visibility="{x:Bind Mixer.CanLaunchVoicemeeter, Mode=OneWay}" />
             </InfoBar.ActionButton>
         </InfoBar>
@@ -104,10 +104,10 @@
             HorizontalScrollMode="Disabled"
             VerticalScrollBarVisibility="Auto">
             <StackPanel Spacing="4">
-                <TextBlock
+                <TextBlock x:Uid="FlyoutWindow006"
                     Margin="4,4,0,2"
                     Style="{StaticResource CaptionTextBlockStyle}"
-                    Text="Entrées" />
+                     />
                 <ItemsControl ItemsSource="{x:Bind Mixer.Strips}">
                     <ItemsControl.ItemTemplate>
                         <DataTemplate x:DataType="shared:StripViewModel">
@@ -115,10 +115,10 @@
                         </DataTemplate>
                     </ItemsControl.ItemTemplate>
                 </ItemsControl>
-                <TextBlock
+                <TextBlock x:Uid="FlyoutWindow007"
                     Margin="4,10,0,2"
                     Style="{StaticResource CaptionTextBlockStyle}"
-                    Text="Sorties" />
+                     />
                 <ItemsControl ItemsSource="{x:Bind Mixer.Buses}">
                     <ItemsControl.ItemTemplate>
                         <DataTemplate x:DataType="shared:BusViewModel">
@@ -139,21 +139,21 @@
             BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
             BorderThickness="0,1,0,0">
             <Grid>
-                <Button
-                    AutomationProperties.Name="Ouvrir la console"
+                <Button x:Uid="FlyoutWindow008"
+
                     Click="OnOpenConsoleClick"
                     Style="{StaticResource SubtleButtonStyle}">
                     <StackPanel Orientation="Horizontal" Spacing="8">
                         <FontIcon FontSize="14" Glyph="&#xE9E9;" />
-                        <TextBlock Text="Console" />
+                        <TextBlock x:Uid="FlyoutWindow009"  />
                     </StackPanel>
                 </Button>
-                <Button
+                <Button x:Uid="FlyoutWindow010"
                     HorizontalAlignment="Right"
-                    AutomationProperties.Name="Réglages"
+
                     Click="OnOpenSettingsClick"
                     Style="{StaticResource SubtleButtonStyle}"
-                    ToolTipService.ToolTip="Réglages">
+                    >
                     <FontIcon FontSize="14" Glyph="&#xE713;" />
                 </Button>
             </Grid>

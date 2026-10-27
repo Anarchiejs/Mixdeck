@@ -1,3 +1,4 @@
+using Mixdeck.App.Localization;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using Microsoft.UI.Dispatching;
@@ -10,11 +11,11 @@ public sealed partial class ControlsGalleryWindow : Window
 {
     private readonly DispatcherQueueTimer timer;
     private readonly long started = System.Diagnostics.Stopwatch.GetTimestamp();
-    private readonly ObservableCollection<GalleryProfile> profiles = [new("Par défaut", "\uE8A5", null), new("Réunion", "\uE716", "#3FB950"), new("Musique", "\uE8D6", "#C586C0")];
+    private readonly ObservableCollection<GalleryProfile> profiles = [new(Strings.Get("CS_008"), "\uE8A5", null), new(Strings.Get("CS_009"), "\uE716", "#3FB950"), new(Strings.Get("CS_010"), "\uE8D6", "#C586C0")];
     private double leftPeak = -60, rightPeak = -60;
     public ControlsGalleryWindow()
     {
-        InitializeComponent();
+        InitializeComponent(); Title = Mixdeck.App.Localization.Strings.Get("ControlsGalleryWindow001.Title");
         AppWindow.Resize(new Windows.Graphics.SizeInt32(850, 850));
         Root.RequestedTheme = ElementTheme.Light;
         Profiles.ItemsSource = profiles; profiles[0].IsActive = true; Profiles.SelectedItem = profiles[0];
@@ -46,7 +47,7 @@ public sealed partial class ControlsGalleryWindow : Window
         foreach (var profile in profiles) profile.IsActive = ReferenceEquals(profile, args.Item);
         sender.SelectedItem = args.Item;
     }
-    private void NameCommitted(ChannelHeader sender, ChannelNameCommittedEventArgs args) => CommittedName.Text = "Nom validé : " + args.Name;
+    private void NameCommitted(ChannelHeader sender, ChannelNameCommittedEventArgs args) => CommittedName.Text = Strings.Get("CS_011") + args.Name;
 
     [Microsoft.UI.Xaml.Data.Bindable]
     public sealed class GalleryProfile(string name, string icon, string? color) : INotifyPropertyChanged

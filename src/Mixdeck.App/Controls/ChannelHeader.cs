@@ -1,3 +1,4 @@
+using Mixdeck.App.Localization;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Automation.Peers;
@@ -16,7 +17,7 @@ public sealed class ChannelHeader : Control
 {
     private TextBox? editor;
     private TextBlock? label;
-    public static readonly DependencyProperty ChannelNameProperty = DependencyProperty.Register(nameof(ChannelName), typeof(string), typeof(ChannelHeader), new PropertyMetadata("Canal"));
+    public static readonly DependencyProperty ChannelNameProperty = DependencyProperty.Register(nameof(ChannelName), typeof(string), typeof(ChannelHeader), new PropertyMetadata(Strings.Get("CS_001")));
     public static readonly DependencyProperty IconProperty = DependencyProperty.Register(nameof(Icon), typeof(string), typeof(ChannelHeader), new PropertyMetadata("\uE8D6"));
     public string ChannelName { get => (string)GetValue(ChannelNameProperty); set => SetValue(ChannelNameProperty, value); }
     public string Icon { get => (string)GetValue(IconProperty); set => SetValue(IconProperty, value); }
@@ -26,7 +27,7 @@ public sealed class ChannelHeader : Control
         DefaultStyleKey = typeof(ChannelHeader); ControlResources.Load(this); IsTabStop = true;
         DoubleTapped += (_, e) => { Edit(); e.Handled = true; };
         KeyDown += OnKeyDown;
-        Microsoft.UI.Xaml.Automation.AutomationProperties.SetHelpText(this, "F2 ou double-clic pour renommer le canal");
+        Microsoft.UI.Xaml.Automation.AutomationProperties.SetHelpText(this, Strings.Get("CS_002"));
     }
     protected override void OnApplyTemplate()
     {

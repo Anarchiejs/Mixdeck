@@ -1,3 +1,4 @@
+using Mixdeck.App.Localization;
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -90,13 +91,13 @@ public sealed partial class MixerViewModel : ObservableObject, IDisposable
     [ObservableProperty]
     public partial bool HasCustomizationError { get; set; }
 
-    public string CustomizationErrorMessage => "Le changement s'applique jusqu'à la fermeture de Mixdeck. Vérifiez l'accès au dossier de données, puis modifiez à nouveau le nom ou l'icône.";
+    public string CustomizationErrorMessage => Strings.Get("CS_069");
 
     public bool HasMic => _settings.Current.MicStripIndex >= 0 && _settings.Current.MicStripIndex < Strips.Count;
 
     public bool CanToggleMic => IsConnected && HasMic;
 
-    public string MicDisplayName => HasMic ? Mic.DisplayName : "Micro non configuré";
+    public string MicDisplayName => HasMic ? Mic.DisplayName : Strings.Get("CS_016");
 
     public bool IsMicMuted
     {
@@ -108,19 +109,19 @@ public sealed partial class MixerViewModel : ObservableObject, IDisposable
 
     public string ConnectionTitle => ConnectionState switch
     {
-        MixerConnectionState.Connected => "Connecté à Voicemeeter " + (Layout.VoicemeeterType switch { 1 => "Standard", 3 => "Potato", _ => "Banana" }),
-        MixerConnectionState.VoicemeeterNotRunning => "Voicemeeter n'est pas lancé",
-        MixerConnectionState.NotInstalled => "Voicemeeter est introuvable",
-        MixerConnectionState.UnsupportedType => "Version de Voicemeeter non prise en charge",
-        _ => "Connexion à Voicemeeter…",
+        MixerConnectionState.Connected => Strings.Get("CS_070") + (Layout.VoicemeeterType switch { 1 => "Standard", 3 => "Potato", _ => "Banana" }),
+        MixerConnectionState.VoicemeeterNotRunning => Strings.Get("CS_071"),
+        MixerConnectionState.NotInstalled => Strings.Get("CS_072"),
+        MixerConnectionState.UnsupportedType => Strings.Get("CS_073"),
+        _ => Strings.Get("CS_074"),
     };
 
     public string ConnectionMessage => ConnectionState switch
     {
         MixerConnectionState.Connected => string.Empty,
-        MixerConnectionState.VoicemeeterNotRunning => "Mixdeck se reconnectera tout seul dès que le moteur audio sera lancé.",
-        MixerConnectionState.NotInstalled => "Installez Voicemeeter depuis vb-audio.com, puis relancez Mixdeck.",
-        MixerConnectionState.UnsupportedType => "Mixdeck pilote Voicemeeter Standard, Banana et Potato. Cette version n’est pas prise en charge.",
+        MixerConnectionState.VoicemeeterNotRunning => Strings.Get("CS_075"),
+        MixerConnectionState.NotInstalled => Strings.Get("CS_076"),
+        MixerConnectionState.UnsupportedType => Strings.Get("CS_077"),
         _ => string.Empty,
     };
 
@@ -138,7 +139,7 @@ public sealed partial class MixerViewModel : ObservableObject, IDisposable
         Mic.IsMuted = !Mic.IsMuted;
         if (_settings.Current.ShowOsd)
         {
-            _osd.Show(IsMicMuted ? "Micro coupé" : "Micro activé", IsMicMuted ? "\uF781" : "\uE720", IsMicMuted);
+            _osd.Show(IsMicMuted ? Strings.Get("Core_MicMuted") : Strings.Get("Core_MicOn"), IsMicMuted ? "\uF781" : "\uE720", IsMicMuted);
         }
     }
 
@@ -382,7 +383,7 @@ public sealed partial class MixerViewModel : ObservableObject, IDisposable
     {
         for (var n = Profiles.Count + 1; ; n++)
         {
-            var name = $"Profil {n}";
+            var name = Strings.Format("CS_ProfileName", n);
             if (Profiles.All(p => p.Name != name))
             {
                 return name;

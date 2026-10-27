@@ -1,3 +1,4 @@
+using Mixdeck.App.Localization;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Mixdeck.App.ViewModels.Shared;
@@ -34,10 +35,10 @@ public sealed partial class ProfilesPageViewModel(MixerViewModel mixer, IProfile
         {
             ErrorMessage = ex switch
             {
-                UnauthorizedAccessException => "L’accès au fichier est refusé. Choisissez un dossier accessible ou vérifiez les droits d’accès, puis réessayez.",
-                System.Text.Json.JsonException => "Ce fichier n’est pas un profil Mixdeck valide. Choisissez un fichier .mixdeck-profile.json exporté depuis Mixdeck.",
-                IOException => "Impossible de lire ou d’enregistrer le profil. Vérifiez que le fichier est disponible et que le disque dispose d’espace libre.",
-                _ => "L’opération n’a pas abouti. Vérifiez le fichier et la connexion à Voicemeeter, puis réessayez.",
+                UnauthorizedAccessException => Strings.Get("CS_056"),
+                System.Text.Json.JsonException => Strings.Get("CS_057"),
+                IOException => Strings.Get("CS_058"),
+                _ => Strings.Get("CS_059"),
             };
             HasError = true;
         }
@@ -51,7 +52,7 @@ public sealed partial class ProfilesPageViewModel(MixerViewModel mixer, IProfile
     [RelayCommand]
     private Task DuplicateAsync(ProfileItemViewModel item) => RunAsync(async () =>
     {
-        var baseName = item.Name + " — copie";
+        var baseName = item.Name + Strings.Get("CS_060");
         var name = baseName;
         for (var n = 2; Mixer.Profiles.Any(p => p.Name == name); n++) name = $"{baseName} {n}";
         await Task.Run(() => profiles.DuplicateAsync(item.Id, name));

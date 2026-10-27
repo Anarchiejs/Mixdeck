@@ -1,30 +1,30 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Page x:Class="Mixdeck.App.Views.Pages.RulesPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:vm="using:Mixdeck.App.ViewModels.Pages"
-    Language="fr-FR" Loaded="OnLoaded">
+    Loaded="OnLoaded">
     <ScrollViewer HorizontalScrollMode="Disabled" VerticalScrollBarVisibility="Auto">
         <StackPanel Padding="{StaticResource MixdeckPagePadding}" Spacing="24" MaxWidth="1040">
             <StackPanel Spacing="8">
-                <TextBlock Style="{StaticResource TitleTextBlockStyle}" Text="Règles" />
-                <TextBlock Text="Adaptez votre mixage aux applications que vous utilisez." TextWrapping="Wrap" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                <TextBlock x:Uid="RulesPage001" Style="{StaticResource TitleTextBlockStyle}"  />
+                <TextBlock x:Uid="RulesPage002"  TextWrapping="Wrap" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
             </StackPanel>
-            <InfoBar x:Name="PageError" IsOpen="{x:Bind ViewModel.HasError, Mode=OneWay}" Visibility="{x:Bind ViewModel.HasError, Mode=OneWay}" Severity="Error" IsClosable="False" Title="Enregistrement impossible" Message="La modification n’a pas été enregistrée. Vérifiez l’accès au dossier de données et réessayez." />
-            <ProgressBar IsIndeterminate="True" Visibility="{x:Bind ViewModel.IsBusy, Mode=OneWay}" AutomationProperties.Name="Enregistrement des règles" />
+            <InfoBar x:Uid="RulesPage003" x:Name="PageError" IsOpen="{x:Bind ViewModel.HasError, Mode=OneWay}" Visibility="{x:Bind ViewModel.HasError, Mode=OneWay}" Severity="Error" IsClosable="False"   />
+            <ProgressBar x:Uid="RulesPage004" IsIndeterminate="True" Visibility="{x:Bind ViewModel.IsBusy, Mode=OneWay}"  />
             <StackPanel Spacing="16">
                 <Button Click="OnCreate" Style="{StaticResource AccentButtonStyle}" Visibility="{x:Bind ViewModel.HasRules, Mode=OneWay}">
-                    <StackPanel Orientation="Horizontal" Spacing="8"><FontIcon Glyph="&#xE710;" FontSize="16" /><TextBlock Text="Créer une règle" /></StackPanel>
+                    <StackPanel Orientation="Horizontal" Spacing="8"><FontIcon Glyph="&#xE710;" FontSize="16" /><TextBlock x:Uid="RulesPage005"  /></StackPanel>
                 </Button>
                 <Border Style="{StaticResource MixdeckCardStyle}" Padding="32" Visibility="{x:Bind ViewModel.IsEmpty, Mode=OneWay}">
                     <StackPanel Spacing="16" HorizontalAlignment="Center" MaxWidth="440">
                         <FontIcon Glyph="&#xE945;" FontSize="40" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
-                        <TextBlock Text="Votre mixage suit votre activité" Style="{StaticResource SubtitleTextBlockStyle}" TextWrapping="Wrap" TextAlignment="Center" />
-                        <TextBlock Text="Par exemple : quand FL64.exe démarre, passer au profil Musique. Ou activer le micro quand Discord.exe est au premier plan." TextWrapping="Wrap" TextAlignment="Center" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
-                        <Button Content="Créer une règle" Click="OnCreate" Style="{StaticResource AccentButtonStyle}" HorizontalAlignment="Center" />
+                        <TextBlock x:Uid="RulesPage006"  Style="{StaticResource SubtitleTextBlockStyle}" TextWrapping="Wrap" TextAlignment="Center" />
+                        <TextBlock x:Uid="RulesPage007"  TextWrapping="Wrap" TextAlignment="Center" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                        <Button x:Uid="RulesPage008"  Click="OnCreate" Style="{StaticResource AccentButtonStyle}" HorizontalAlignment="Center" />
                     </StackPanel>
                 </Border>
-                <TextBlock Text="Priorité de haut en bas : la première règle active l’emporte pour chaque action." TextWrapping="Wrap" Visibility="{x:Bind ViewModel.HasRules, Mode=OneWay}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                <TextBlock x:Uid="RulesPage009"  TextWrapping="Wrap" Visibility="{x:Bind ViewModel.HasRules, Mode=OneWay}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
                 <ItemsRepeater ItemsSource="{x:Bind ViewModel.Rules}">
                     <ItemsRepeater.Layout><StackLayout Spacing="8" /></ItemsRepeater.Layout>
                     <ItemsRepeater.ItemTemplate>
@@ -37,19 +37,19 @@
                                             <TextBlock Text="{x:Bind Name, Mode=OneWay}" Style="{StaticResource BodyStrongTextBlockStyle}" TextWrapping="Wrap" />
                                             <TextBlock Text="{x:Bind Position, Mode=OneWay}" Style="{StaticResource CaptionTextBlockStyle}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
                                         </StackPanel>
-                                        <ToggleSwitch Grid.Column="1" Header="Activée" OnContent="Oui" OffContent="Non" IsOn="{x:Bind Enabled, Mode=TwoWay}" AutomationProperties.Name="{x:Bind Name, Mode=OneWay}" />
+                                        <ToggleSwitch x:Uid="RulesPage010" Grid.Column="1"    IsOn="{x:Bind Enabled, Mode=TwoWay}" AutomationProperties.Name="{x:Bind Name, Mode=OneWay}" />
                                     </Grid>
-                                    <TextBlock TextWrapping="Wrap" AutomationProperties.Name="{x:Bind Sentence, Mode=OneWay}"><Run Text="Quand " /><Run Text="{x:Bind ProcessName, Mode=OneWay}" FontWeight="SemiBold" /><Run Text=" " /><Run Text="{x:Bind TriggerText, Mode=OneWay}" /><Run Text=" → " /><Run Text="{x:Bind ActionText, Mode=OneWay}" FontWeight="SemiBold" /></TextBlock>
-                                    <CheckBox Content="Revenir à l’état d’avant ensuite" IsChecked="{x:Bind RevertWhenInactive, Mode=TwoWay}" />
+                                    <TextBlock TextWrapping="Wrap" AutomationProperties.Name="{x:Bind Sentence, Mode=OneWay}"><Run x:Uid="RulesPage011"  /><Run Text="{x:Bind ProcessName, Mode=OneWay}" FontWeight="SemiBold" /><Run Text=" " /><Run Text="{x:Bind TriggerText, Mode=OneWay}" /><Run Text=" → " /><Run Text="{x:Bind ActionText, Mode=OneWay}" FontWeight="SemiBold" /></TextBlock>
+                                    <CheckBox x:Uid="RulesPage012"  IsChecked="{x:Bind RevertWhenInactive, Mode=TwoWay}" />
                                     <Grid ColumnSpacing="8">
                                         <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
                                         <StackPanel Orientation="Horizontal" Spacing="8">
-                                            <Button Content="Modifier" Click="OnEdit" />
-                                            <Button Content="Supprimer" Click="OnDelete" />
+                                            <Button x:Uid="RulesPage013"  Click="OnEdit" />
+                                            <Button x:Uid="RulesPage014"  Click="OnDelete" />
                                         </StackPanel>
                                         <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="4">
-                                            <Button Click="OnMoveUp" IsEnabled="{x:Bind CanMoveUp, Mode=OneWay}" AutomationProperties.Name="Monter la priorité" ToolTipService.ToolTip="Monter la priorité"><FontIcon FontSize="16" Glyph="&#xE74A;" /></Button>
-                                            <Button Click="OnMoveDown" IsEnabled="{x:Bind CanMoveDown, Mode=OneWay}" AutomationProperties.Name="Descendre la priorité" ToolTipService.ToolTip="Descendre la priorité"><FontIcon FontSize="16" Glyph="&#xE74B;" /></Button>
+                                            <Button x:Uid="RulesPage015" Click="OnMoveUp" IsEnabled="{x:Bind CanMoveUp, Mode=OneWay}"  ><FontIcon FontSize="16" Glyph="&#xE74A;" /></Button>
+                                            <Button x:Uid="RulesPage016" Click="OnMoveDown" IsEnabled="{x:Bind CanMoveDown, Mode=OneWay}"  ><FontIcon FontSize="16" Glyph="&#xE74B;" /></Button>
                                         </StackPanel>
                                     </Grid>
                                 </StackPanel>

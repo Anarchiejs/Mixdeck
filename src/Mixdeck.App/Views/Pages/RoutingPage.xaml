@@ -16,19 +16,19 @@
     </Page.Resources>
     <ScrollViewer HorizontalScrollMode="Disabled" VerticalScrollBarVisibility="Auto">
         <StackPanel Padding="{StaticResource MixdeckPagePadding}" Spacing="24">
-            <TextBlock Style="{StaticResource TitleTextBlockStyle}" Text="Routage" />
-            <TextBlock Text="Choisissez les sorties qui reçoivent chaque entrée. Une entrée peut alimenter plusieurs sorties."
+            <TextBlock x:Uid="RoutingPage001" Style="{StaticResource TitleTextBlockStyle}"  />
+            <TextBlock x:Uid="RoutingPage002"
                 Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" Margin="0,-16,0,0" />
-            <InfoBar IsOpen="{x:Bind IsDisconnected}" Visibility="{x:Bind IsDisconnected}" IsClosable="False" Severity="Informational"
-                     Title="{x:Bind ViewModel.Mixer.ConnectionTitle, Mode=OneWay}" Message="Les niveaux et les routes seront synchronisés à la reconnexion." />
+            <InfoBar x:Uid="RoutingPage003" IsOpen="{x:Bind IsDisconnected}" Visibility="{x:Bind IsDisconnected}" IsClosable="False" Severity="Informational"
+                     Title="{x:Bind ViewModel.Mixer.ConnectionTitle, Mode=OneWay}"  />
             <Border Style="{StaticResource MixdeckCardStyle}" Padding="16">
                 <ScrollViewer HorizontalScrollMode="Enabled" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled" HorizontalContentAlignment="Stretch">
                     <Grid x:Name="Matrix" ColumnSpacing="8" RowSpacing="8" MinWidth="600" Padding="4" />
                 </ScrollViewer>
             </Border>
             <StackPanel Spacing="8">
-                <TextBlock Text="A = sorties physiques, B = sorties virtuelles" Style="{StaticResource BodyStrongTextBlockStyle}" TextWrapping="Wrap" />
-                <TextBlock Text="Utilisez les flèches pour vous déplacer dans la grille et Espace pour activer ou désactiver une route."
+                <TextBlock x:Uid="RoutingPage004"  Style="{StaticResource BodyStrongTextBlockStyle}" TextWrapping="Wrap" />
+                <TextBlock x:Uid="RoutingPage005"
                     Style="{StaticResource CaptionTextBlockStyle}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" />
             </StackPanel>
         </StackPanel>

@@ -1,3 +1,4 @@
+using Mixdeck.App.Localization;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Media;
 
@@ -9,5 +10,5 @@ public static class ShellConverters
     public static Brush ConnectionBrush(bool connected) =>
         (Brush)Application.Current.Resources[connected ? "SystemFillColorSuccessBrush" : "SystemFillColorCautionBrush"];
 
-    public static string ConnectionShort(bool connected) => connected ? "Connecté" : "Hors ligne";
+    public static string ConnectionShort(bool connected) => connected ? Strings.Get("CS_078") : Strings.Get("CS_079");
 }
