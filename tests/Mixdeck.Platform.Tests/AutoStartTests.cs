@@ -3,6 +3,8 @@ using Mixdeck.Platform.Startup;
 
 namespace Mixdeck.Platform.Tests;
 
+// Les classes qui écrivent sous Software\Mixdeck.Tests ne tournent pas en parallèle : chacune retire la clé parente.
+[Collection("Registre")]
 public sealed class AutoStartTests : IDisposable
 {
     private readonly string _keyPath = @"Software\Mixdeck.Tests\" + Guid.NewGuid().ToString("N");

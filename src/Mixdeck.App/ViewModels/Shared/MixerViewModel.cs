@@ -62,6 +62,15 @@ public sealed partial class MixerViewModel : ObservableObject, IDisposable
 
     public ObservableCollection<BusViewModel> Buses { get; } = [];
 
+    /// <summary>Entrées affichées dans la console ; les autres s'ajoutent par le bouton +.</summary>
+    public ObservableCollection<StripViewModel> ConsoleStrips { get; } = [];
+
+    public ObservableCollection<BusViewModel> ConsoleBuses { get; } = [];
+
+    public bool HasHiddenStrips => ConsoleStrips.Count < Strips.Count;
+
+    public bool HasHiddenBuses => ConsoleBuses.Count < Buses.Count;
+
     public MixerLayout Layout { get; private set; } = MixerLayout.Banana;
 
     public ObservableCollection<ProfileItemViewModel> Profiles { get; } = [];
@@ -249,7 +258,11 @@ public sealed partial class MixerViewModel : ObservableObject, IDisposable
     }
 
     private void OnMixerStateChanged(object? sender, MixerConnectionState state) =>
-        _ui.Post(() => ConnectionState = state);
+        _ui.Post(() =>
+        {
+            ConnectionState = state;
+            if (state == MixerConnectionState.Connected) _ = RefreshDevicesAsync();
+        });
 
     private void OnMixerSnapshotChanged(object? sender, MixerSnapshot snapshot) =>
         _ui.Post(() => ApplySnapshot(snapshot));
@@ -294,15 +307,65 @@ public sealed partial class MixerViewModel : ObservableObject, IDisposable
     {
         if (Mic is not null) Mic.PropertyChanged -= OnMicPropertyChanged;
         foreach (var channel in Strips.Cast<ChannelViewModel>().Concat(Buses))
+        {
             channel.CustomizationChanged -= OnChannelCustomizationChanged;
+            channel.PropertyChanged -= OnChannelPropertyChanged;
+        }
         Layout = layout;
         Strips.Clear();
         Buses.Clear();
         foreach (var index in Enumerable.Range(0, layout.StripCount)) Strips.Add(new StripViewModel(_mixer, index, layout));
         foreach (var index in Enumerable.Range(0, layout.BusCount)) Buses.Add(new BusViewModel(_mixer, index, layout));
         foreach (var channel in Strips.Cast<ChannelViewModel>().Concat(Buses))
+        {
             channel.CustomizationChanged += OnChannelCustomizationChanged;
+            channel.PropertyChanged += OnChannelPropertyChanged;
+        }
         ApplySettings(_settings.Current);
+        RefreshConsole();
+        if (IsConnected) _ = RefreshDevicesAsync();
+    }
+
+    private void OnChannelPropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName == nameof(ChannelViewModel.IsInConsole)) RefreshConsole();
+    }
+
+    private void RefreshConsole()
+    {
+        Mirror(ConsoleStrips, Strips.Where(s => s.IsInConsole).ToList());
+        Mirror(ConsoleBuses, Buses.Where(b => b.IsInConsole).ToList());
+        OnPropertyChanged(nameof(HasHiddenStrips));
+        OnPropertyChanged(nameof(HasHiddenBuses));
+    }
+
+    // Retire et insère seulement ce qui change, pour ne pas recréer toutes les tranches de la console.
+    private static void Mirror<T>(ObservableCollection<T> target, List<T> wanted) where T : class
+    {
+        for (var i = target.Count - 1; i >= 0; i--)
+            if (!wanted.Contains(target[i])) target.RemoveAt(i);
+        for (var i = 0; i < wanted.Count; i++)
+            if (i >= target.Count || !ReferenceEquals(target[i], wanted[i])) target.Insert(i, wanted[i]);
+    }
+
+    /// <summary>Relit le périphérique de chaque canal physique : la console masque ceux qui n'en ont pas.</summary>
+    public async Task RefreshDevicesAsync()
+    {
+        try
+        {
+            foreach (var channel in Strips.Cast<ChannelViewModel>().Concat(Buses).Where(c => !c.IsVirtual).ToArray())
+            {
+                var name = await _mixer.GetStringAsync(channel is BusViewModel
+                    ? VmParam.BusDeviceName(channel.Index)
+                    : VmParam.StripDeviceName(channel.Index));
+                // null = lecture impossible (déconnecté) : on garde la tranche visible.
+                channel.HasDevice = name is null ? null : name.Length > 0;
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Impossible de lire les périphériques des tranches");
+        }
     }
 
     private void ApplySettings(AppSettings settings)
@@ -311,6 +374,7 @@ public sealed partial class MixerViewModel : ObservableObject, IDisposable
         {
             var c = settings.StripCustomization(strip.Index);
             strip.ApplyCustomization(c.DisplayName, c.Icon, c.ShowInFlyout);
+            strip.ApplyConsoleVisibility(c.ShowInConsole);
         }
 
         foreach (var bus in Buses)
@@ -319,6 +383,7 @@ public sealed partial class MixerViewModel : ObservableObject, IDisposable
             // Par défaut seul A1 est visible dans le panneau.
             var show = settings.Buses.Any(b => b.Index == bus.Index) ? c.ShowInFlyout : bus.Index == 0;
             bus.ApplyCustomization(c.DisplayName, c.Icon, show);
+            bus.ApplyConsoleVisibility(c.ShowInConsole);
         }
 
         var micIndex = Math.Clamp(settings.MicStripIndex, 0, Strips.Count - 1);
@@ -373,7 +438,7 @@ public sealed partial class MixerViewModel : ObservableObject, IDisposable
     private static ChannelCustomization ToCustomization(ChannelViewModel channel)
     {
         var (name, icon) = channel.GetCustomization();
-        return new ChannelCustomization(channel.Index, name, icon, channel.ShowInFlyout);
+        return new ChannelCustomization(channel.Index, name, icon, channel.ShowInFlyout, channel.ShowInConsole);
     }
 
     private void RefreshProfiles()
