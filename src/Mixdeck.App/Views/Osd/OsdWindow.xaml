@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Window
+    x:Class="Mixdeck.App.Views.Osd.OsdWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    Title="Mixdeck OSD">
+    <Window.SystemBackdrop>
+        <DesktopAcrylicBackdrop />
+    </Window.SystemBackdrop>
+
+    <Grid x:Name="Root" Padding="16,0,20,0" Opacity="0">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+        <FontIcon
+            x:Name="Glyph"
+            VerticalAlignment="Center"
+            FontFamily="{StaticResource MixdeckIconFont}"
+            FontSize="20" />
+        <TextBlock
+            x:Name="Message"
+            Grid.Column="1"
+            Margin="12,0,0,0"
+            VerticalAlignment="Center"
+            Style="{StaticResource BodyStrongTextBlockStyle}"
+            TextTrimming="CharacterEllipsis" />
+    </Grid>
+</Window>

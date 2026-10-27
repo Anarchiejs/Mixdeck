@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Window
+    x:Class="Mixdeck.App.Views.Flyout.FlyoutWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:controls="using:Mixdeck.App.Controls"
+    xmlns:local="using:Mixdeck.App.Views.Flyout"
+    xmlns:shared="using:Mixdeck.App.ViewModels.Shared"
+    Title="Mixdeck">
+    <Window.SystemBackdrop>
+        <DesktopAcrylicBackdrop />
+    </Window.SystemBackdrop>
+
+    <Grid x:Name="Root" KeyDown="OnRootKeyDown">
+        <Grid.RenderTransform>
+            <TranslateTransform x:Name="SlideTransform" />
+        </Grid.RenderTransform>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <!-- En-tête : profils en pastilles -->
+        <Grid Padding="16,14,12,8">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <controls:ProfilePillList
+                x:Name="ProfilePills"
+                AutomationProperties.Name="Profils"
+                ItemsSource="{x:Bind Mixer.Profiles}"
+                SelectedItem="{x:Bind Mixer.ActiveProfile, Mode=OneWay}"
+                ItemInvoked="OnProfileInvoked" />
+            <Button
+                Grid.Column="1"
+                Margin="8,0,0,0"
+                VerticalAlignment="Center"
+                AutomationProperties.Name="Enregistrer l'état actuel comme nouveau profil"
+                Command="{x:Bind Mixer.CaptureProfileCommand}"
+                Style="{StaticResource SubtleButtonStyle}"
+                ToolTipService.ToolTip="Nouveau profil depuis l'état actuel">
+                <FontIcon FontSize="14" Glyph="&#xE710;" />
+            </Button>
+        </Grid>
+
+        <!-- Voicemeeter absent ou arrêté -->
+        <InfoBar
+            Grid.Row="1"
+            Margin="12,0,12,8"
+            IsClosable="False"
+            IsOpen="{x:Bind shared:Converters.Not(Mixer.IsConnected), Mode=OneWay}"
+            Message="{x:Bind Mixer.ConnectionMessage, Mode=OneWay}"
+            Severity="Warning"
+            Title="{x:Bind Mixer.ConnectionTitle, Mode=OneWay}">
+            <InfoBar.ActionButton>
+                <Button
+                    Command="{x:Bind Mixer.LaunchVoicemeeterCommand}"
+                    Content="Lancer Voicemeeter"
+                    Visibility="{x:Bind Mixer.CanLaunchVoicemeeter, Mode=OneWay}" />
+            </InfoBar.ActionButton>
+        </InfoBar>
+
+        <!-- Gros bouton Micro -->
+        <ToggleButton
+            Grid.Row="2"
+            Margin="12,0,12,8"
+            HorizontalAlignment="Stretch"
+            AutomationProperties.Name="{x:Bind shared:Converters.MicLabel(Mixer.IsMicMuted), Mode=OneWay}"
+            IsChecked="{x:Bind Mixer.Mic.IsMuted, Mode=TwoWay}"
+            IsEnabled="{x:Bind Mixer.IsConnected, Mode=OneWay}"
+            Style="{StaticResource MicButtonStyle}">
+            <Grid ColumnSpacing="12">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <FontIcon FontSize="20" Glyph="{x:Bind shared:Converters.MicGlyph(Mixer.IsMicMuted), Mode=OneWay}" />
+                <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                    <TextBlock Style="{StaticResource BodyStrongTextBlockStyle}" Text="{x:Bind shared:Converters.MicLabel(Mixer.IsMicMuted), Mode=OneWay}" />
+                    <TextBlock
+                        Opacity="0.8"
+                        Style="{StaticResource CaptionTextBlockStyle}"
+                        Text="{x:Bind Mixer.Mic.DisplayName, Mode=OneWay}" />
+                </StackPanel>
+            </Grid>
+        </ToggleButton>
+
+        <!-- Entrées et sorties -->
+        <ScrollViewer
+            Grid.Row="3"
+            Padding="12,0,12,0"
+            HorizontalScrollMode="Disabled"
+            VerticalScrollBarVisibility="Auto">
+            <StackPanel Spacing="4">
+                <TextBlock
+                    Margin="4,4,0,2"
+                    Style="{StaticResource CaptionTextBlockStyle}"
+                    Text="Entrées" />
+                <ItemsRepeater ItemsSource="{x:Bind Mixer.Strips}">
+                    <ItemsRepeater.Layout>
+                        <StackLayout Spacing="4" />
+                    </ItemsRepeater.Layout>
+                    <ItemsRepeater.ItemTemplate>
+                        <DataTemplate x:DataType="shared:StripViewModel">
+                            <local:ChannelRow Channel="{x:Bind}" Visibility="{x:Bind ShowInFlyout, Mode=OneWay}" />
+                        </DataTemplate>
+                    </ItemsRepeater.ItemTemplate>
+                </ItemsRepeater>
+                <TextBlock
+                    Margin="4,10,0,2"
+                    Style="{StaticResource CaptionTextBlockStyle}"
+                    Text="Sorties" />
+                <ItemsRepeater ItemsSource="{x:Bind Mixer.Buses}">
+                    <ItemsRepeater.Layout>
+                        <StackLayout Spacing="4" />
+                    </ItemsRepeater.Layout>
+                    <ItemsRepeater.ItemTemplate>
+                        <DataTemplate x:DataType="shared:BusViewModel">
+                            <local:ChannelRow Channel="{x:Bind}" Visibility="{x:Bind ShowInFlyout, Mode=OneWay}" />
+                        </DataTemplate>
+                    </ItemsRepeater.ItemTemplate>
+                </ItemsRepeater>
+            </StackPanel>
+        </ScrollViewer>
+
+        <!-- Pied : console, réglages -->
+        <Border
+            Grid.Row="4"
+            Margin="0,8,0,0"
+            Padding="12,8"
+            Background="{ThemeResource LayerOnAcrylicFillColorDefaultBrush}"
+            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+            BorderThickness="0,1,0,0">
+            <Grid>
+                <Button
+                    AutomationProperties.Name="Ouvrir la console"
+                    Click="OnOpenConsoleClick"
+                    Style="{StaticResource SubtleButtonStyle}">
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <FontIcon FontSize="14" Glyph="&#xE9E9;" />
+                        <TextBlock Text="Console" />
+                    </StackPanel>
+                </Button>
+                <Button
+                    HorizontalAlignment="Right"
+                    AutomationProperties.Name="Réglages"
+                    Click="OnOpenSettingsClick"
+                    Style="{StaticResource SubtleButtonStyle}"
+                    ToolTipService.ToolTip="Réglages">
+                    <FontIcon FontSize="14" Glyph="&#xE713;" />
+                </Button>
+            </Grid>
+        </Border>
+    </Grid>
+</Window>

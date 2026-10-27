@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<UserControl
+    x:Class="Mixdeck.App.Views.Flyout.ChannelRow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:controls="using:Mixdeck.App.Controls"
+    xmlns:shared="using:Mixdeck.App.ViewModels.Shared">
+
+    <Grid
+        Padding="8,6,4,6"
+        Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+        BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+        BorderThickness="1"
+        ColumnSpacing="10"
+        CornerRadius="{StaticResource MixdeckCardCornerRadius}">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="Auto" />
+        </Grid.ColumnDefinitions>
+
+        <FontIcon
+            VerticalAlignment="Center"
+            FontFamily="{StaticResource MixdeckIconFont}"
+            FontSize="18"
+            Glyph="{x:Bind Channel.Icon, Mode=OneWay}" />
+
+        <StackPanel Grid.Column="1" Spacing="2">
+            <Grid>
+                <TextBlock
+                    Style="{StaticResource BodyTextBlockStyle}"
+                    Text="{x:Bind Channel.DisplayName, Mode=OneWay}"
+                    TextTrimming="CharacterEllipsis" />
+                <TextBlock
+                    HorizontalAlignment="Right"
+                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                    Style="{StaticResource CaptionTextBlockStyle}"
+                    Text="{x:Bind shared:Converters.Db(Channel.Gain), Mode=OneWay}" />
+            </Grid>
+            <controls:Fader
+                AutomationProperties.Name="{x:Bind Channel.DisplayName, Mode=OneWay}"
+                IsMuted="{x:Bind Channel.IsMuted, Mode=OneWay}"
+                Orientation="Horizontal"
+                Value="{x:Bind Channel.Gain, Mode=TwoWay}" />
+            <controls:VuMeter
+                Height="4"
+                IsClipped="{x:Bind Channel.IsClipped, Mode=OneWay}"
+                IsMuted="{x:Bind Channel.IsMuted, Mode=OneWay}"
+                IsStereo="False"
+                LeftDb="{x:Bind Channel.LeftDb, Mode=OneWay}"
+                LeftPeakDb="{x:Bind Channel.LeftPeakDb, Mode=OneWay}"
+                Orientation="Horizontal"
+                RightDb="{x:Bind Channel.RightDb, Mode=OneWay}"
+                RightPeakDb="{x:Bind Channel.RightPeakDb, Mode=OneWay}" />
+        </StackPanel>
+
+        <controls:MuteToggle
+            Grid.Column="2"
+            VerticalAlignment="Center"
+            AutomationProperties.Name="{x:Bind shared:Converters.MuteLabel(Channel.IsMuted), Mode=OneWay}"
+            IsChecked="{x:Bind Channel.IsMuted, Mode=TwoWay}" />
+    </Grid>
+</UserControl>
