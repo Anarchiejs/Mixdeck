@@ -19,14 +19,14 @@ public sealed partial class MixerPageViewModel(MixerViewModel mixer) : Observabl
     private async Task ApplyProfileAsync(ProfileItemViewModel? profile)
     {
         try { await Mixer.ApplyProfileCommand.ExecuteAsync(profile); }
-        catch (Exception) { ShowError("Impossible d’appliquer ce profil. Réessaie après avoir vérifié la connexion et l’accès aux fichiers."); }
+        catch (Exception) { ShowError("Impossible d’appliquer ce profil. Réessayez après avoir vérifié la connexion et l’accès aux fichiers."); }
     }
 
     [RelayCommand]
     private async Task LaunchVoicemeeterAsync()
     {
         try { await Mixer.LaunchVoicemeeterCommand.ExecuteAsync(null); }
-        catch (Exception) { ShowError("Impossible de lancer Voicemeeter. Vérifie son installation, puis réessaie."); }
+        catch (Exception) { ShowError("Impossible de lancer Voicemeeter. Vérifiez son installation, puis réessayez."); }
     }
 
     private void ShowError(string message)

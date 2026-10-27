@@ -9,11 +9,13 @@
     <ScrollViewer HorizontalScrollMode="Disabled" VerticalScrollBarVisibility="Auto">
         <StackPanel Padding="{StaticResource MixdeckPagePadding}" Spacing="24">
             <TextBlock Style="{StaticResource TitleTextBlockStyle}" Text="Console" />
-            <TextBlock Text="Un seul endroit pour régler tes entrées, tes sorties et ton mixage."
+            <TextBlock Text="Un seul endroit pour régler vos entrées, vos sorties et votre mixage."
                 Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" Margin="0,-16,0,0" />
-            <InfoBar IsOpen="{x:Bind ViewModel.HasError, Mode=TwoWay}" Severity="Error"
+            <InfoBar IsOpen="{x:Bind ViewModel.HasError, Mode=TwoWay}" Visibility="{x:Bind ViewModel.HasError, Mode=OneWay}" Severity="Error"
                 Title="Opération impossible" Message="{x:Bind ViewModel.ErrorMessage, Mode=OneWay}" />
-            <InfoBar IsOpen="{x:Bind shared:Converters.Not(ViewModel.Mixer.IsConnected), Mode=OneWay}"
+            <InfoBar IsOpen="{x:Bind ViewModel.Mixer.HasCustomizationError, Mode=TwoWay}" Visibility="{x:Bind ViewModel.Mixer.HasCustomizationError, Mode=OneWay}" Severity="Error"
+                Title="Personnalisation non enregistrée" Message="{x:Bind ViewModel.Mixer.CustomizationErrorMessage}" />
+            <InfoBar IsOpen="{x:Bind shared:Converters.Not(ViewModel.Mixer.IsConnected), Mode=OneWay}" Visibility="{x:Bind ViewModel.Mixer.IsDisconnected, Mode=OneWay}"
                 IsClosable="False" Severity="Warning" Title="{x:Bind ViewModel.Mixer.ConnectionTitle, Mode=OneWay}"
                 Message="{x:Bind ViewModel.Mixer.ConnectionMessage, Mode=OneWay}">
                 <InfoBar.ActionButton>
@@ -46,7 +48,7 @@
                     </StackPanel>
                 </StackPanel>
             </ScrollViewer>
-            <TextBlock Text="Double-clique sur un fader pour revenir à 0 dB, ou sur le panoramique pour le centrer. F2 sur un nom permet de le modifier."
+            <TextBlock Text="Double-cliquez sur un fader pour revenir à 0 dB, ou sur le panoramique pour le centrer. F2 sur un nom permet de le modifier."
                 TextWrapping="Wrap" Style="{StaticResource CaptionTextBlockStyle}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
         </StackPanel>
     </ScrollViewer>

@@ -20,4 +20,11 @@ et ce projet adhère au [versionnage sémantique](https://semver.org/lang/fr/).
 - Script local `build/pack.ps1` et manifeste de l'outil `vpk` 1.2.161.
 - Documentation, licence MIT et conventions d'éditeur.
 
+### Corrigé
+
+- Les règles déclenchées pendant que Voicemeeter est fermé sont appliquées dès qu'il revient.
+- Un fondu de profil ne retarde plus la coupure du micro ni les règles suivantes ; un nouveau profil interrompt le fondu en cours.
+- Les réglages restaurés depuis la copie de secours sont conservés même si le fichier principal ne peut pas être réécrit.
+- Textes harmonisés au vouvoiement, en-têtes du routage sans doublon, boutons de la page Profils côte à côte, erreur affichée si une personnalisation n'est pas enregistrée.
+
 [Non publié]: https://github.com/Anarchiejs/Mixdeck/commits/main

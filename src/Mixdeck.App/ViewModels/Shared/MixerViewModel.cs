@@ -74,7 +74,7 @@ public sealed partial class MixerViewModel : ObservableObject, IDisposable
     public bool ShowNoProfilesHint => Profiles.Count == 0;
 
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(IsConnected), nameof(ConnectionTitle), nameof(ConnectionMessage), nameof(CanLaunchVoicemeeter))]
+    [NotifyPropertyChangedFor(nameof(IsConnected), nameof(IsDisconnected), nameof(ConnectionTitle), nameof(ConnectionMessage), nameof(CanLaunchVoicemeeter))]
     public partial MixerConnectionState ConnectionState { get; set; }
 
     [ObservableProperty]
@@ -86,6 +86,14 @@ public sealed partial class MixerViewModel : ObservableObject, IDisposable
     public partial StripViewModel Mic { get; set; } = null!;
 
     public bool IsConnected => ConnectionState == MixerConnectionState.Connected;
+
+    public bool IsDisconnected => !IsConnected;
+
+    /// <summary>Vrai quand le dernier changement de nom, d'icône ou de visibilité n'a pas pu être enregistré.</summary>
+    [ObservableProperty]
+    public partial bool HasCustomizationError { get; set; }
+
+    public string CustomizationErrorMessage => "Le changement s'applique jusqu'à la fermeture de Mixdeck. Vérifiez l'accès au dossier de données, puis modifiez à nouveau le nom ou l'icône.";
 
     public bool IsMicMuted => Mic.IsMuted;
 
@@ -104,8 +112,8 @@ public sealed partial class MixerViewModel : ObservableObject, IDisposable
     {
         MixerConnectionState.Connected => string.Empty,
         MixerConnectionState.VoicemeeterNotRunning => "Mixdeck se reconnectera tout seul dès que le moteur audio sera lancé.",
-        MixerConnectionState.NotInstalled => "Installe Voicemeeter Banana depuis vb-audio.com, puis relance Mixdeck.",
-        MixerConnectionState.UnsupportedType => "Mixdeck pilote Voicemeeter Banana. Lance Banana à la place de Voicemeeter ou Potato.",
+        MixerConnectionState.NotInstalled => "Installez Voicemeeter Banana depuis vb-audio.com, puis relancez Mixdeck.",
+        MixerConnectionState.UnsupportedType => "Mixdeck pilote Voicemeeter Banana. Lancez Banana à la place de Voicemeeter ou Potato.",
         _ => string.Empty,
     };
 
@@ -263,15 +271,16 @@ public sealed partial class MixerViewModel : ObservableObject, IDisposable
         try
         {
             _savingCustomization = true;
-            await _settings.UpdateAsync(s => s with
-            {
-                Strips = [.. Strips.Select(ToCustomization)],
-                Buses = [.. Buses.Select(ToCustomization)],
-            });
+            ChannelCustomization[] strips = [.. Strips.Select(ToCustomization)];
+            ChannelCustomization[] buses = [.. Buses.Select(ToCustomization)];
+            await _settings.UpdateAsync(s => s with { Strips = strips, Buses = buses });
+            // Le magasin journalise ses échecs d'écriture sans lever d'exception : on vérifie ce qui a été retenu.
+            HasCustomizationError = !_settings.Current.Strips.SequenceEqual(strips) || !_settings.Current.Buses.SequenceEqual(buses);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Impossible d'enregistrer la personnalisation des tranches");
+            HasCustomizationError = true;
         }
         finally
         {

@@ -34,10 +34,10 @@ public sealed partial class ProfilesPageViewModel(MixerViewModel mixer, IProfile
         {
             ErrorMessage = ex switch
             {
-                UnauthorizedAccessException => "L’accès au fichier est refusé. Choisis un dossier accessible ou vérifie les droits d’accès, puis réessaie.",
-                System.Text.Json.JsonException => "Ce fichier n’est pas un profil Mixdeck valide. Choisis un fichier .mixdeck-profile.json exporté depuis Mixdeck.",
-                IOException => "Impossible de lire ou d’enregistrer le profil. Vérifie que le fichier est disponible et que le disque dispose d’espace libre.",
-                _ => "L’opération n’a pas abouti. Vérifie le fichier et la connexion à Voicemeeter, puis réessaie.",
+                UnauthorizedAccessException => "L’accès au fichier est refusé. Choisissez un dossier accessible ou vérifiez les droits d’accès, puis réessayez.",
+                System.Text.Json.JsonException => "Ce fichier n’est pas un profil Mixdeck valide. Choisissez un fichier .mixdeck-profile.json exporté depuis Mixdeck.",
+                IOException => "Impossible de lire ou d’enregistrer le profil. Vérifiez que le fichier est disponible et que le disque dispose d’espace libre.",
+                _ => "L’opération n’a pas abouti. Vérifiez le fichier et la connexion à Voicemeeter, puis réessayez.",
             };
             HasError = true;
         }
