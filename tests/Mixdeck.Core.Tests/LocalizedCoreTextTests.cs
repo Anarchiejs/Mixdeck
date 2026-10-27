@@ -50,12 +50,13 @@ public sealed class LocalizedCoreTextTests
         var previous = CultureInfo.CurrentCulture;
         try
         {
-            CultureInfo.CurrentCulture = CultureInfo.GetCultureInfo(language);
+            // La machine est volontairement dans l'autre langue : seule la culture du fournisseur de textes compte.
+            CultureInfo.CurrentCulture = CultureInfo.GetCultureInfo(language == "fr-FR" ? "en-US" : "fr-FR");
             using var rig = new TestRig();
             var osd = new FakeOsd();
             using var automation = Coordinator(rig);
             var dispatcher = new ActionDispatcher(rig.Mixer, rig.Profiles, rig.Settings, osd,
-                NullLogger<ActionDispatcher>.Instance, automation, new TestTexts());
+                NullLogger<ActionDispatcher>.Instance, automation, new TestTexts(CultureInfo.GetCultureInfo(language)));
 
             await dispatcher.HandleAsync(new(new(HotkeyAction.VolumeDown, HotkeyModifiers.None, 0, StepDb: 6), true));
 
@@ -83,8 +84,9 @@ public sealed class LocalizedCoreTextTests
     private static AutomationCoordinator Coordinator(TestRig rig) => new(new FakeProcesses(), new FakeForeground(),
         rig.Profiles, rig.Mixer, rig.Settings, new FakeOsd(), NullLogger<AutomationCoordinator>.Instance);
 
-    private sealed class TestTexts : ITextProvider
+    private sealed class TestTexts(CultureInfo? culture = null) : ITextProvider
     {
+        public CultureInfo Culture { get; } = culture ?? CultureInfo.GetCultureInfo("en-US");
         public string Get(string key) => key switch
         {
             "Core_Profile" => "Profile: {0}",

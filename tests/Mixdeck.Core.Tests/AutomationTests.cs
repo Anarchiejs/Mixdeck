@@ -8,6 +8,10 @@ public sealed class AutomationTests
     [Fact]
     public async Task TogglePttVolumeBoundsAndFrenchOsd()
     {
+        // La CI GitHub tourne en anglais : les textes français doivent garder la virgule décimale quelle que soit la machine.
+        var machineCulture = System.Globalization.CultureInfo.CurrentCulture;
+        System.Globalization.CultureInfo.CurrentCulture = System.Globalization.CultureInfo.GetCultureInfo("en-US");
+        using var restoreCulture = new CultureRestorer(machineCulture);
         using var rig = new TestRig();
         var osd = new FakeOsd();
         using var coordinator = new AutomationCoordinator(new FakeProcesses(), new FakeForeground(), rig.Profiles, rig.Mixer, rig.Settings, osd, NullLogger<AutomationCoordinator>.Instance);
@@ -116,5 +120,9 @@ public sealed class AutomationTests
         using var coordinator = new AutomationCoordinator(processes, new FakeForeground(), rig.Profiles, rig.Mixer, rig.Settings, new FakeOsd(), NullLogger<AutomationCoordinator>.Instance);
         coordinator.Start();
         await TestRig.UntilAsync(() => rig.Mixer.Snapshot.Strips[0].Mute);
+    }
+    private sealed class CultureRestorer(System.Globalization.CultureInfo culture) : IDisposable
+    {
+        public void Dispose() => System.Globalization.CultureInfo.CurrentCulture = culture;
     }
 }

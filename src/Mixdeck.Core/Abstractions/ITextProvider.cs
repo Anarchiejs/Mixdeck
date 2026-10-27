@@ -1,15 +1,19 @@
-﻿namespace Mixdeck.Core.Abstractions;
+namespace Mixdeck.Core.Abstractions;
 
 /// <summary>Fournit les textes de l'interface sans dépendance à Windows.</summary>
 public interface ITextProvider
 {
     string Get(string key);
+
+    /// <summary>Culture des nombres affichés avec ces textes (« −6,5 dB » / « −6.5 dB »), indépendante de la machine.</summary>
+    System.Globalization.CultureInfo Culture { get; }
 }
 
 /// <summary>Valeurs françaises de repli pour les consommateurs sans interface.</summary>
 public sealed class FrenchTextProvider : ITextProvider
 {
     public static FrenchTextProvider Instance { get; } = new();
+    public System.Globalization.CultureInfo Culture { get; } = System.Globalization.CultureInfo.GetCultureInfo("fr-FR");
     public string Get(string key) => key switch
     {
         "Core_MicMuted" => "Micro coupé",

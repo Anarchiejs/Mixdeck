@@ -33,4 +33,5 @@ public static class Strings
 internal sealed class AppTextProvider : ITextProvider
 {
     public string Get(string key) => Strings.Get(key);
+    public CultureInfo Culture => Strings.Culture;
 }
