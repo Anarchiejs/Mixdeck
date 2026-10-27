@@ -47,7 +47,15 @@ public sealed class SettingsStore(MixdeckPaths paths, ILogger<SettingsStore> log
     }
     private static AppSettings Migrate(AppSettings settings) => settings.SchemaVersion switch
     {
-        1 => settings,
+        // Fichier écrit à la main, par une ancienne version ou tronqué : sections absentes ou nulles = valeurs par défaut.
+        1 => settings with
+        {
+            Strips = settings.Strips ?? [],
+            Buses = settings.Buses ?? [],
+            Hotkeys = settings.Hotkeys ?? AppSettings.DefaultHotkeys,
+            Rules = settings.Rules ?? [],
+            Ducking = settings.Ducking ?? new(),
+        },
         _ => throw new JsonException("Version de réglages non prise en charge")
     };
     public Task SaveAsync(AppSettings settings, CancellationToken cancellationToken = default) => UpdateAsync(_ => settings, cancellationToken);
