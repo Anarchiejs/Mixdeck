@@ -8,7 +8,7 @@
         <DesktopAcrylicBackdrop />
     </Window.SystemBackdrop>
 
-    <Grid x:Name="Root" Padding="16,0,20,0" Opacity="0">
+    <Grid x:Name="Root" Padding="16,0,20,0">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="Auto" />
             <ColumnDefinition Width="*" />

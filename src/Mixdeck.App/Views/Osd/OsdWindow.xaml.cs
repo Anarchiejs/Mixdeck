@@ -21,6 +21,7 @@ public sealed partial class OsdWindow : Window
     private readonly ITaskbarLocator _taskbar;
     private readonly DispatcherQueueTimer _hideTimer;
     private bool _visible;
+    private Storyboard? _animation;
 
     public OsdWindow(ITaskbarLocator taskbar, ThemeService theme)
     {
@@ -47,10 +48,18 @@ public sealed partial class OsdWindow : Window
         if (!_visible)
         {
             PlaceOnScreen();
+            _animation?.Stop();
+            Root.Opacity = 0;
             WindowInterop.GetAppWindow(this).Show(activateWindow: false);
-            Animate(1, 120);
             _visible = true;
         }
+
+        // Toujours repartir vers l'opacité pleine depuis l'opacité actuelle : un fondu de sortie en cours (ou
+        // interrompu) ne doit jamais laisser la bulle transparente.
+        var current = Root.Opacity;
+        _animation?.Stop();
+        Root.Opacity = current;
+        _animation = Animate(1, 120);
 
         _hideTimer.Stop();
         _hideTimer.Start();
@@ -70,10 +79,15 @@ public sealed partial class OsdWindow : Window
 
     private void FadeOut()
     {
-        var storyboard = Animate(0, 220);
-        storyboard.Completed += (_, _) =>
+        // Une seule animation à la fois : sinon la fin d'un fondu précédent fige l'opacité et la bulle reste invisible.
+        var current = Root.Opacity;
+        _animation?.Stop();
+        Root.Opacity = current;
+        var fade = Animate(0, 220);
+        _animation = fade;
+        fade.Completed += (_, _) =>
         {
-            if (Root.Opacity == 0)
+            if (ReferenceEquals(_animation, fade))
             {
                 WindowInterop.GetAppWindow(this).Hide();
                 _visible = false;
@@ -85,6 +99,7 @@ public sealed partial class OsdWindow : Window
     {
         var animation = new DoubleAnimation
         {
+            From = Root.Opacity,
             To = to,
             Duration = TimeSpan.FromMilliseconds(milliseconds),
             EasingFunction = new CubicEase { EasingMode = EasingMode.EaseOut },

@@ -63,7 +63,8 @@ public sealed class TrayIconService : IDisposable
         _icon = new TaskbarIcon
         {
             Icon = _normalIcon,
-            ContextMenuMode = ContextMenuMode.SecondWindow,
+            // Menu Windows natif : le mode SecondWindow crée une fenêtre réduite visible dans la barre des tâches.
+            ContextMenuMode = ContextMenuMode.PopupMenu,
             ContextFlyout = menu,
             LeftClickCommand = new RelayCommand(_shell.ToggleFlyout),
             NoLeftClickDelay = true,

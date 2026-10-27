@@ -7,6 +7,7 @@
     xmlns:shared="using:Mixdeck.App.ViewModels.Shared">
 
     <Grid
+        Margin="0,0,0,4"
         Padding="8,6,4,6"
         Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
         BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
