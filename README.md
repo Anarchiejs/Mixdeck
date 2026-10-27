@@ -12,6 +12,7 @@ Le projet est en cours de construction vers la v1.0 : l'appli compile, démarre 
 - Page Appareils : micro, casque et enceintes de Voicemeeter, préréglages du micro (porte de bruit, compresseur, voix plus claire), redémarrage du moteur audio.
 - Atténuation automatique : la musique baisse quand quelqu'un parle sur Discord.
 - Badge permanent et son de confirmation quand le micro est coupé.
+- « M'écouter » (panneau et page Appareils) : le micro est envoyé dans A1, généralement le casque, pour s'entendre parler.
 - Console de mixage.
 - Matrice de routage.
 - Profils rappelés avec un fondu.

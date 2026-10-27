@@ -18,6 +18,7 @@ et ce projet adhère au [versionnage sémantique](https://semver.org/lang/fr/).
 - Volume par application dans le panneau et choix de la sortie d'une application (« Envoyer vers… », API de Windows non documentée : désactivé automatiquement si elle disparaît).
 - Page Appareils : appareils des entrées et sorties physiques (micros de Windows proposés quand Voicemeeter n'en liste aucun), préréglages du micro, redémarrage du moteur audio, fenêtre de Voicemeeter cachée quand Mixdeck le lance.
 - Atténuation automatique d'une entrée quand une autre a du signal (seuil, baisse, attaque, maintien, relâche réglables).
+- Interrupteur « M'écouter » dans le panneau et la page Appareils : envoie le micro vers A1 (le casque) pour s'entendre.
 - Badge permanent « micro coupé » et son de confirmation (facultatifs).
 - Raccourci « Appliquer un profil » et profil appliqué au démarrage.
 - Journal des plantages (`logs\crash-*.txt`) et relance automatique unique ; l'entrée de démarrage avec Windows est retirée à la désinstallation.
