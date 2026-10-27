@@ -57,4 +57,16 @@ public sealed class SettingsTests
         await store.SaveAsync(new() { ShowOsd = false });
         Assert.True(store.Current.ShowOsd);
     }
+    [Fact]
+    public async Task BackupIsKeptWhenMainFileCannotBeRewritten()
+    {
+        using var rig = new TestRig();
+        Directory.CreateDirectory(rig.Paths.Root);
+        await File.WriteAllTextAsync(rig.Paths.SettingsBackupFile, JsonSerializer.Serialize(new AppSettings { LastProfileId = "saved" }, MixdeckJsonContext.Default.AppSettings));
+        Directory.CreateDirectory(rig.Paths.SettingsFile);
+        var store = new SettingsStore(rig.Paths, NullLogger<SettingsStore>.Instance);
+        Assert.Equal("saved", (await store.LoadAsync()).LastProfileId);
+        Assert.Equal("saved", store.Current.LastProfileId);
+        Assert.Contains("saved", await File.ReadAllTextAsync(rig.Paths.SettingsBackupFile));
+    }
 }

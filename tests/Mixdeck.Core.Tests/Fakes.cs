@@ -9,18 +9,20 @@ using Mixdeck.Core.Settings;
 namespace Mixdeck.Core.Tests;
 internal sealed class FakeMixer : IMixer
 {
-    public MixerConnectionState State => MixerConnectionState.Connected;
+    public MixerConnectionState State { get; private set; } = MixerConnectionState.Connected;
     public MixerSnapshot Snapshot { get; set; } = MixerSnapshot.Empty;
     public LevelFrame Levels => LevelFrame.Silent;
     public bool LevelsEnabled { get; set; }
     public ConcurrentQueue<string> Scripts { get; } = new();
     public ConcurrentQueue<(string Parameter, float Value)> Floats { get; } = new();
-    public event EventHandler<MixerConnectionState>? StateChanged { add { } remove { } }
+    public event EventHandler<MixerConnectionState>? StateChanged;
     public event EventHandler<MixerSnapshot>? SnapshotChanged { add { } remove { } }
     public event EventHandler<LevelFrame>? LevelsUpdated { add { } remove { } }
     public Task StartAsync(CancellationToken cancellationToken = default) => Task.CompletedTask;
+    public void SetState(MixerConnectionState state) { State = state; StateChanged?.Invoke(this, state); }
     public void SetFloat(string parameter, float value)
     {
+        if (State != MixerConnectionState.Connected) return; // comme Voicemeeter : écritures ignorées hors connexion
         Floats.Enqueue((parameter, value));
         var index = int.Parse(parameter.AsSpan(parameter.IndexOf('[') + 1, 1), CultureInfo.InvariantCulture);
         if (parameter.StartsWith("Strip", StringComparison.Ordinal))
@@ -30,6 +32,7 @@ internal sealed class FakeMixer : IMixer
     public void SetString(string parameter, string value) { }
     public void ApplyScript(string script)
     {
+        if (State != MixerConnectionState.Connected) return;
         Scripts.Enqueue(script);
         foreach (var command in script.Split(';', StringSplitOptions.RemoveEmptyEntries))
         {

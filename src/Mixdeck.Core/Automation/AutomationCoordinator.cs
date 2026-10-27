@@ -15,6 +15,13 @@ public sealed class AutomationCoordinator(IProcessWatcher processes, IForeground
     private readonly object lifecycle = new();
     private Task? worker;
     private bool disposed;
+    // Voicemeeter ignore les écritures hors connexion : les décisions prises pendant ce temps sont rejouées à la reconnexion.
+    // Ces champs ne sont lus et écrits que depuis la file.
+    private string? pendingProfile;
+    private Rule? pendingProfileCause;
+    private bool? pendingMic;
+    private int micGeneration;
+    private bool micMuted;
     public void Start()
     {
         lock (lifecycle)
@@ -25,13 +32,14 @@ public sealed class AutomationCoordinator(IProcessWatcher processes, IForeground
             processes.ProcessExited += Exited;
             foreground.ForegroundProcessChanged += ForegroundChanged;
             settings.Changed += SettingsChanged;
-            queue.Writer.TryWrite(async () =>
+            mixer.StateChanged += MixerStateChanged;
+            Enqueue(() =>
             {
                 engine.SetRules(settings.Current.Rules);
                 engine.SetBaselineProfile(settings.Current.LastProfileId);
                 engine.SetBaselineMicMuted(mixer.Snapshot.Strips.FirstOrDefault(s => s.Index == settings.Current.MicStripIndex)?.Mute ?? false);
                 engine.Initialize(processes.GetRunningProcessNames(), foreground.Current);
-                await ApplyAsync(engine.Evaluate());
+                Apply(engine.Evaluate());
             });
             processes.Start();
             foreground.Start();
@@ -51,56 +59,97 @@ public sealed class AutomationCoordinator(IProcessWatcher processes, IForeground
         }
         catch (OperationCanceledException) when (lifetime.IsCancellationRequested) { }
     }
-    private void Started(object? sender, ProcessEventArgs e) => queue.Writer.TryWrite(() => ApplyAsync(engine.OnProcessStarted(e.ProcessName)));
-    private void Exited(object? sender, ProcessEventArgs e) => queue.Writer.TryWrite(() => ApplyAsync(engine.OnProcessExited(e.ProcessName)));
-    private void ForegroundChanged(object? sender, string? exe) => queue.Writer.TryWrite(() => ApplyAsync(engine.OnForegroundChanged(exe)));
-    private void SettingsChanged(object? sender, AppSettings value) => queue.Writer.TryWrite(() =>
+    private void Enqueue(Action action) => queue.Writer.TryWrite(() => { action(); return Task.CompletedTask; });
+    private void Started(object? sender, ProcessEventArgs e) => Enqueue(() => Apply(engine.OnProcessStarted(e.ProcessName)));
+    private void Exited(object? sender, ProcessEventArgs e) => Enqueue(() => Apply(engine.OnProcessExited(e.ProcessName)));
+    private void ForegroundChanged(object? sender, string? exe) => Enqueue(() => Apply(engine.OnForegroundChanged(exe)));
+    private void SettingsChanged(object? sender, AppSettings value) => Enqueue(() =>
     {
         engine.SetRules(settings.Current.Rules);
-        return ApplyAsync(engine.Evaluate());
+        Apply(engine.Evaluate());
     });
-    private async Task ApplyAsync(RuleDecision decision)
+    private void MixerStateChanged(object? sender, MixerConnectionState state)
     {
+        if (state == MixerConnectionState.Connected) Enqueue(Reconcile);
+    }
+    private void Reconcile()
+    {
+        if (mixer.State != MixerConnectionState.Connected || (pendingProfile is null && pendingMic is null)) return;
+        var decision = new RuleDecision(pendingProfile, pendingMic, pendingProfileCause, null);
+        (pendingProfile, pendingProfileCause, pendingMic) = (null, null, null);
+        Apply(decision);
+    }
+    // N'attend pas la fin des fondus : la file reste libre pour les décisions suivantes, et un nouveau profil
+    // interrompt le fondu en cours (ProfileService annule l'application précédente).
+    private void Apply(RuleDecision decision)
+    {
+        if (lifetime.IsCancellationRequested) return;
+        if (mixer.State != MixerConnectionState.Connected)
+        {
+            if (decision.ProfileId is not null) (pendingProfile, pendingProfileCause) = (decision.ProfileId, decision.ProfileCause);
+            if (decision.MicMuted is not null) pendingMic = decision.MicMuted;
+            return;
+        }
+        Task? fade = null;
         if (decision.ProfileId is { } id)
         {
-            try
-            {
-                await profiles.ApplyAsync(id, cancellationToken: lifetime.Token);
-                if (!lifetime.IsCancellationRequested && settings.Current.ShowOsd && profiles.Active is { } active)
-                {
-                    var cause = decision.ProfileCause;
-                    osd.Show("Profil : " + active.Name + (cause is null ? "" : " (" + cause.ProcessName + ")"), active.Icon);
-                }
-            }
-            catch (Exception ex) when (ex is not OperationCanceledException)
-            { logger.LogError(ex, "Impossible d'appliquer le profil {ProfileId}", id); }
+            (pendingProfile, pendingProfileCause) = (null, null);
+            fade = profiles.ApplyAsync(id, cancellationToken: lifetime.Token);
         }
-        if (!lifetime.IsCancellationRequested && decision.MicMuted is { } muted)
+        if (decision.MicMuted is { } muted)
+        {
+            pendingMic = null;
+            SetMic(muted);
+        }
+        if (fade is not null) _ = CompleteProfileAsync(fade, decision.ProfileId!, decision.ProfileCause, decision.MicMuted is null ? null : micGeneration);
+    }
+    private void SetMic(bool muted)
+    {
+        var index = settings.Current.MicStripIndex;
+        if (index is < 0 or >= BananaLayout.StripCount) return;
+        micGeneration++;
+        micMuted = muted;
+        mixer.SetFloat(VmParam.StripMute(index), VmParam.FromBool(muted));
+        if (settings.Current.ShowOsd) osd.Show(muted ? "Micro coupé" : "Micro activé", muted ? "" : "", muted);
+    }
+    private async Task CompleteProfileAsync(Task fade, string id, Rule? cause, int? micAfter)
+    {
+        try { await fade; }
+        catch (OperationCanceledException) { return; }
+        catch (Exception ex) { logger.LogError(ex, "Impossible d'appliquer le profil {ProfileId}", id); return; }
+        // Un autre profil a pu remplacer celui-ci pendant le fondu : seul le dernier est annoncé.
+        if (lifetime.IsCancellationRequested || profiles.Active?.Id != id) return;
+        // La fin du fondu remet les coupures du profil ; la décision micro prise en même temps reste prioritaire.
+        if (micAfter is { } generation) Enqueue(() =>
         {
             var index = settings.Current.MicStripIndex;
-            if (index is < 0 or >= BananaLayout.StripCount) return;
-            mixer.SetFloat(VmParam.StripMute(index), VmParam.FromBool(muted));
-            if (settings.Current.ShowOsd) osd.Show(muted ? "Micro coupé" : "Micro activé", muted ? "\uF781" : "\uE720", muted);
-        }
+            if (generation == micGeneration && mixer.State == MixerConnectionState.Connected && index is >= 0 and < BananaLayout.StripCount)
+                mixer.SetFloat(VmParam.StripMute(index), VmParam.FromBool(micMuted));
+        });
+        if (settings.Current.ShowOsd && profiles.Active is { } active)
+            osd.Show("Profil : " + active.Name + (cause is null ? "" : " (" + cause.ProcessName + ")"), active.Icon);
     }
     public Task ApplyManualProfileAsync(string profileId)
     {
         Start();
-        var completion = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        var started = new TaskCompletionSource<Task>(TaskCreationOptions.RunContinuationsAsynchronously);
         if (!queue.Writer.TryWrite(async () =>
         {
             try
             {
                 lifetime.Token.ThrowIfCancellationRequested();
-                await profiles.ApplyAsync(profileId, cancellationToken: lifetime.Token);
+                var fade = profiles.ApplyAsync(profileId, cancellationToken: lifetime.Token);
+                if (fade.IsFaulted) await fade;
+                (pendingProfile, pendingProfileCause) = mixer.State == MixerConnectionState.Connected ? (null, null) : (profileId, (Rule?)null);
                 engine.SetBaselineProfile(profileId);
                 await settings.UpdateAsync(s => s with { LastProfileId = profileId }, lifetime.Token);
-                completion.TrySetResult();
+                started.TrySetResult(fade);
             }
-            catch (Exception ex) { completion.TrySetException(ex); }
-        })) completion.TrySetException(new ObjectDisposedException(nameof(AutomationCoordinator)));
-        return completion.Task.WaitAsync(lifetime.Token);
+            catch (Exception ex) { started.TrySetException(ex); }
+        })) started.TrySetException(new ObjectDisposedException(nameof(AutomationCoordinator)));
+        return WaitManualAsync(started.Task);
     }
+    private async Task WaitManualAsync(Task<Task> started) => await (await started.WaitAsync(lifetime.Token)).WaitAsync(lifetime.Token);
     public void Dispose()
     {
         lock (lifecycle)
@@ -111,6 +160,7 @@ public sealed class AutomationCoordinator(IProcessWatcher processes, IForeground
             processes.ProcessExited -= Exited;
             foreground.ForegroundProcessChanged -= ForegroundChanged;
             settings.Changed -= SettingsChanged;
+            mixer.StateChanged -= MixerStateChanged;
             queue.Writer.TryComplete();
             lifetime.Cancel();
         }
