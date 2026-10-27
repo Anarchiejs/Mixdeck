@@ -22,6 +22,8 @@ et ce projet adhère au [versionnage sémantique](https://semver.org/lang/fr/).
 - Raccourci « Appliquer un profil » et profil appliqué au démarrage.
 - Journal des plantages (`logs\crash-*.txt`) et relance automatique unique ; l'entrée de démarrage avec Windows est retirée à la désinstallation.
 - Tests d'interface FlaUI en CI ; signature Azure Trusted Signing facultative à la publication (`docs/SIGNATURE.md`).
+- Prise en charge de Voicemeeter Standard et Potato (disposition détectée à la connexion ; démo `--demo=standard` / `--demo=potato`).
+- Interface en anglais : langue de Windows par défaut, ou choix Français / English dans Réglages.
 - `MIXDECK_DATA_DIR` pour choisir le dossier des données ; arguments de développement `--flyout` et `--page=<nom>`.
 
 - Intégration continue GitHub Actions : restauration, compilation Release et tests sur `windows-latest` et dépôt des résultats de tests.
@@ -36,6 +38,7 @@ et ce projet adhère au [versionnage sémantique](https://semver.org/lang/fr/).
 - Les réglages restaurés depuis la copie de secours sont conservés même si le fichier principal ne peut pas être réécrit.
 - Plus léger au repos : la console n'est créée qu'à la première ouverture et ses pages sont déchargées à la fermeture (≈ 115 Mo au démarrage au lieu de 208 Mo).
 - Fermer la console n'arrête plus l'application ; une console réduite par Windows au lancement est remise à l'écran.
+- Quitter Mixdeck pendant une atténuation automatique ne laisse plus la musique baissée ; après une reconnexion, la musique n'est plus baissée deux fois.
 - Un fichier de réglages incomplet (sections absentes ou nulles) n'empêche plus le démarrage.
 - Textes harmonisés au vouvoiement, en-têtes du routage sans doublon, boutons de la page Profils côte à côte, erreur affichée si une personnalisation n'est pas enregistrée.
 
