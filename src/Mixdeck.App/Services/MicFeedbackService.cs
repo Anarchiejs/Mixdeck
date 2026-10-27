@@ -30,7 +30,7 @@ internal sealed partial class MicFeedbackService : IDisposable
         _taskbar = taskbar;
         _theme = theme;
         _lastMuted = mixer.IsMicMuted;
-        _wasConnected = mixer.IsConnected;
+        _wasConnected = mixer.CanToggleMic;
         mixer.PropertyChanged += OnMixerChanged;
         settings.Changed += OnSettingsChanged;
         Refresh();
@@ -39,16 +39,17 @@ internal sealed partial class MicFeedbackService : IDisposable
     private void OnMixerChanged(object? sender, PropertyChangedEventArgs e)
     {
         if (e.PropertyName is not (nameof(MixerViewModel.IsMicMuted) or nameof(MixerViewModel.Mic)
-            or nameof(MixerViewModel.ConnectionState))) return;
+            or nameof(MixerViewModel.ConnectionState) or nameof(MixerViewModel.HasMic)
+            or nameof(MixerViewModel.CanToggleMic))) return;
 
         var muted = _mixer.IsMicMuted;
-        if (_mixer.IsConnected && _wasConnected && muted != _lastMuted && _settings.Current.PlayMicSounds)
+        if (_mixer.CanToggleMic && _wasConnected && muted != _lastMuted && _settings.Current.PlayMicSounds)
         {
             // SND_ASYNC | SND_NODEFAULT | SND_ALIAS : lecture Windows sans bloquer l'interface.
             _ = PlaySoundW(muted ? "SystemHand" : "SystemAsterisk", 0, 0x00010003);
         }
         _lastMuted = muted;
-        _wasConnected = _mixer.IsConnected;
+        _wasConnected = _mixer.CanToggleMic;
         Refresh();
     }
 
@@ -59,7 +60,7 @@ internal sealed partial class MicFeedbackService : IDisposable
 
     private void Refresh()
     {
-        if (_settings.Current.ShowMicBadge && _mixer.IsConnected && _mixer.IsMicMuted)
+        if (_settings.Current.ShowMicBadge && _mixer.CanToggleMic && _mixer.IsMicMuted)
         {
             _badge ??= new OsdWindow(_taskbar, _theme);
             _badge.ShowMicBadge();

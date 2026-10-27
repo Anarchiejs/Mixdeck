@@ -9,6 +9,7 @@ using Mixdeck.Core.Settings;
 namespace Mixdeck.Core.Tests;
 internal sealed class FakeMixer : IMixer
 {
+    public MixerLayout Layout => Snapshot.Layout;
     public MixerConnectionState State { get; private set; } = MixerConnectionState.Connected;
     public MixerSnapshot Snapshot { get; set; } = MixerSnapshot.Empty;
     public LevelFrame Levels { get; private set; } = LevelFrame.Silent;

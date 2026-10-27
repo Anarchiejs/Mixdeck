@@ -117,8 +117,8 @@ public sealed partial class SettingsPageViewModel : ObservableObject
         PlayMicSounds = current.PlayMicSounds;
         ShowAppVolumes = current.ShowAppVolumes;
         DuckingEnabled = current.Ducking.Enabled;
-        DuckingSourceStrip = Math.Clamp(current.Ducking.SourceStrip, 0, Mixer.Strips.Count - 1);
-        DuckingTargetStrip = Math.Clamp(current.Ducking.TargetStrip, 0, Mixer.Strips.Count - 1);
+        DuckingSourceStrip = current.Ducking.SourceStrip >= 0 && current.Ducking.SourceStrip < Mixer.Strips.Count ? current.Ducking.SourceStrip : -1;
+        DuckingTargetStrip = current.Ducking.TargetStrip >= 0 && current.Ducking.TargetStrip < Mixer.Strips.Count ? current.Ducking.TargetStrip : -1;
         DuckingThresholdDb = Math.Clamp(current.Ducking.ThresholdDb, -60, -6);
         DuckingAmountDb = Math.Clamp(current.Ducking.AmountDb, -40, -1);
         DuckingHoldMilliseconds = Math.Clamp(current.Ducking.HoldMilliseconds, 100, 3000);
@@ -127,7 +127,7 @@ public sealed partial class SettingsPageViewModel : ObservableObject
         ShowOsd = current.ShowOsd;
         CheckForUpdates = current.CheckForUpdates;
         ThemeIndex = (int)current.Theme;
-        MicStripIndex = Math.Clamp(current.MicStripIndex, 0, Mixer.Strips.Count - 1);
+        MicStripIndex = current.MicStripIndex >= 0 && current.MicStripIndex < Mixer.Strips.Count ? current.MicStripIndex : -1;
         FadeMilliseconds = Math.Clamp(current.FadeMilliseconds, 0, 2000);
         foreach (var row in Hotkeys) row.Refresh(current.Hotkeys.FirstOrDefault(h => h.Action == row.Action), hotkeys.Failed);
         OnPropertyChanged(nameof(AccentSummary));
@@ -159,6 +159,7 @@ public sealed partial class SettingsPageViewModel : ObservableObject
         }
         var source = DuckingSourceStrip;
         var target = DuckingTargetStrip;
+        if (source < 0 || source >= Mixer.Strips.Count || target < 0 || target >= Mixer.Strips.Count) return;
         QueueSave(s => s with { Ducking = s.Ducking with { SourceStrip = source, TargetStrip = target } });
     }
     partial void OnDuckingThresholdDbChanged(double value) { if (double.IsFinite(value) && value is >= -60 and <= -6) QueueDuckingSave(); }
@@ -348,7 +349,7 @@ public sealed partial class HotkeyRowViewModel : ObservableObject
             _ = owner.SaveHotkeyParameterAsync(this, b => b with { ProfileId = id });
     }
 
-    partial void OnTargetBusChanged(int value) { if (!loading && value is >= 0 and < 5 && HasBinding) _ = owner.SaveHotkeyParameterAsync(this, b => b with { TargetBus = value }); }
+    partial void OnTargetBusChanged(int value) { if (!loading && value >= 0 && value < Mixer.Buses.Count && HasBinding) _ = owner.SaveHotkeyParameterAsync(this, b => b with { TargetBus = value }); }
     partial void OnStepDbChanged(double value) { if (!loading && double.IsFinite(value) && value is >= 0.1 and <= 12 && HasBinding) _ = owner.SaveHotkeyParameterAsync(this, b => b with { StepDb = (float)value }); }
 
     public void Refresh(HotkeyBinding? binding, IReadOnlyList<HotkeyBinding> failed)
@@ -356,7 +357,7 @@ public sealed partial class HotkeyRowViewModel : ObservableObject
         loading = true;
         Binding = binding;
         TargetProfile = ProfileChoices.FirstOrDefault(p => p.Id == binding?.ProfileId);
-        TargetBus = binding?.TargetBus ?? 0;
+        TargetBus = binding is null ? 0 : binding.TargetBus >= 0 && binding.TargetBus < Mixer.Buses.Count ? binding.TargetBus : -1;
         StepDb = binding?.StepDb ?? 2;
         HasConflict = failed.Any(h => h.Action == Action);
         OnPropertyChanged(nameof(Combination));

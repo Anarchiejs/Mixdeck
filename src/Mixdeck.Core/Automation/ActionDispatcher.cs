@@ -47,7 +47,7 @@ public sealed class ActionDispatcher(IMixer mixer, IProfileService profiles, ISe
                 case HotkeyAction.VolumeDown:
                     var bus = mixer.Snapshot.Buses.FirstOrDefault(b => b.Index == binding.TargetBus);
                     if (bus is null || !float.IsFinite(binding.StepDb)) return;
-                    var gain = BananaLayout.ClampGain(bus.Gain + (binding.Action == HotkeyAction.VolumeUp ? 1 : -1) * Math.Abs(binding.StepDb));
+                    var gain = mixer.Layout.ClampGain(bus.Gain + (binding.Action == HotkeyAction.VolumeUp ? 1 : -1) * Math.Abs(binding.StepDb));
                     mixer.SetFloat(VmParam.BusGain(bus.Index), gain);
                     if (config.ShowOsd) osd.Show($"{bus.Name} : {gain.ToString("0.##", CultureInfo.GetCultureInfo("fr-FR")).Replace("-", "−")} dB", "\uE767");
                     break;

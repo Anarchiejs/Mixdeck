@@ -78,8 +78,8 @@
             Margin="12,0,12,8"
             HorizontalAlignment="Stretch"
             AutomationProperties.Name="{x:Bind shared:Converters.MicLabel(Mixer.IsMicMuted), Mode=OneWay}"
-            IsChecked="{x:Bind Mixer.Mic.IsMuted, Mode=TwoWay}"
-            IsEnabled="{x:Bind Mixer.IsConnected, Mode=OneWay}"
+            IsChecked="{x:Bind Mixer.IsMicMuted, Mode=TwoWay}"
+            IsEnabled="{x:Bind Mixer.CanToggleMic, Mode=OneWay}"
             Style="{StaticResource MicButtonStyle}">
             <Grid ColumnSpacing="12">
                 <Grid.ColumnDefinitions>
@@ -92,7 +92,7 @@
                     <TextBlock
                         Opacity="0.8"
                         Style="{StaticResource CaptionTextBlockStyle}"
-                        Text="{x:Bind Mixer.Mic.DisplayName, Mode=OneWay}" />
+                        Text="{x:Bind Mixer.MicDisplayName, Mode=OneWay}" />
                 </StackPanel>
             </Grid>
         </ToggleButton>

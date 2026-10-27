@@ -42,7 +42,7 @@ internal static class ServiceRegistration
         services.AddSingleton<IMixer>(sp =>
         {
             var loggers = sp.GetRequiredService<ILoggerFactory>();
-            return options.Demo ? VoicemeeterMixer.CreateSimulated(loggers) : VoicemeeterMixer.CreateDefault(loggers);
+            return options.Demo ? VoicemeeterMixer.CreateSimulated(loggers, options.DemoLayout) : VoicemeeterMixer.CreateDefault(loggers);
         });
 
         // Cœur

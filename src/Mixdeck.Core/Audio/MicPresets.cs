@@ -7,7 +7,7 @@ namespace Mixdeck.Core.Audio;
 public sealed record MicPresetDefinition(MicPreset Preset, string Name, string Description,
     float Gate, float Comp, float ColorX, float ColorY);
 
-/// <summary>Valeurs communes à l’interface et aux scripts Remote de Banana 2.x.</summary>
+/// <summary>Valeurs communes à l’interface et aux scripts Remote de Voicemeeter.</summary>
 public static class MicPresets
 {
     // Intellipan « Voice Color » est disponible sur les entrées physiques de Banana 2.x.
@@ -22,10 +22,15 @@ public static class MicPresets
         new(MicPreset.Strong, "Fort", "Pour une pièce bruyante : porte de bruit marquée et voix plus présente.", 4, 5, 0.2f, 0),
     ]);
 
-    public static string CreateScript(int strip, MicPreset preset)
+    public static string CreateScript(int strip, MicPreset preset, MixerLayout? layout = null)
     {
-        if (strip is < 0 or >= BananaLayout.PhysicalStripCount) throw new ArgumentOutOfRangeException(nameof(strip));
+        layout ??= MixerLayout.Banana;
+        if (strip < 0 || strip >= layout.PhysicalStripCount) throw new ArgumentOutOfRangeException(nameof(strip));
         var definition = All.FirstOrDefault(p => p.Preset == preset) ?? throw new ArgumentOutOfRangeException(nameof(preset));
+        // Standard expose la couleur Intellipan, mais ni porte de bruit ni compresseur.
+        if (layout.VoicemeeterType == 1)
+            return string.Create(CultureInfo.InvariantCulture,
+                $"{VmParam.StripColorX(strip)}={definition.ColorX};{VmParam.StripColorY(strip)}={definition.ColorY};");
         return string.Create(CultureInfo.InvariantCulture,
             $"{VmParam.StripGate(strip)}={definition.Gate};{VmParam.StripComp(strip)}={definition.Comp};{VmParam.StripColorX(strip)}={definition.ColorX};{VmParam.StripColorY(strip)}={definition.ColorY};");
     }

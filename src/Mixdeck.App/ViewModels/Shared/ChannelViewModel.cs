@@ -21,9 +21,10 @@ public abstract partial class ChannelViewModel : ObservableObject
     private long _lastGainEdit;
     private bool _syncing;
 
-    protected ChannelViewModel(IMixer mixer, int index)
+    protected ChannelViewModel(IMixer mixer, int index, MixerLayout? layout = null)
     {
         Mixer = mixer;
+        Layout = layout ?? mixer.Layout;
         Index = index;
         DisplayName = string.Empty;
         Icon = string.Empty;
@@ -31,6 +32,8 @@ public abstract partial class ChannelViewModel : ObservableObject
     }
 
     protected IMixer Mixer { get; }
+
+    protected MixerLayout Layout { get; }
 
     public int Index { get; }
 
@@ -98,7 +101,7 @@ public abstract partial class ChannelViewModel : ObservableObject
         }
 
         _lastGainEdit = Environment.TickCount64;
-        Mixer.SetFloat(GainParameter, BananaLayout.ClampGain((float)value));
+        Mixer.SetFloat(GainParameter, Layout.ClampGain((float)value));
     }
 
     partial void OnIsMutedChanged(bool value)

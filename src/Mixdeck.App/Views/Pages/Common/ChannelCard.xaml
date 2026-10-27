@@ -65,7 +65,7 @@
             </StackPanel>
             <StackPanel Spacing="8" Visibility="{x:Bind IsBus}">
                 <ToggleButton Content="Mono" IsChecked="{x:Bind Bus.IsMono, Mode=TwoWay}" HorizontalAlignment="Stretch" />
-                <ToggleButton Content="EQ activé" IsChecked="{x:Bind Bus.EqOn, Mode=TwoWay}" HorizontalAlignment="Stretch" />
+                <ToggleButton Content="EQ activé" IsChecked="{x:Bind Bus.EqOn, Mode=TwoWay}" Visibility="{x:Bind Bus.HasEq}" HorizontalAlignment="Stretch" />
             </StackPanel>
         </StackPanel>
     </Border>
