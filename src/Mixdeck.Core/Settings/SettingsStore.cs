@@ -25,13 +25,16 @@ public sealed class SettingsStore(MixdeckPaths paths, ILogger<SettingsStore> log
             }
             if (File.Exists(paths.SettingsBackupFile))
             {
-                try
-                {
-                    Current = await ReadAsync(paths.SettingsBackupFile, cancellationToken);
-                    await AtomicJson.WriteAsync(paths.SettingsFile, Current, MixdeckJsonContext.Default.AppSettings, cancellationToken);
-                    return Current;
-                }
+                AppSettings? restored = null;
+                try { restored = await ReadAsync(paths.SettingsBackupFile, cancellationToken); }
                 catch (Exception ex) when (ex is not OperationCanceledException) { logger.LogWarning(ex, "Sauvegarde illisible"); }
+                if (restored is not null)
+                {
+                    // Les réglages récupérés restent valables même si le fichier principal ne peut pas être réécrit.
+                    try { await AtomicJson.WriteAsync(paths.SettingsFile, restored, MixdeckJsonContext.Default.AppSettings, cancellationToken); }
+                    catch (Exception ex) when (ex is not OperationCanceledException) { logger.LogWarning(ex, "Impossible de réécrire les réglages restaurés"); }
+                    return Current = restored;
+                }
             }
             return Current = new();
         }
