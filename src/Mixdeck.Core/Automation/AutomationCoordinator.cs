@@ -144,7 +144,7 @@ public sealed class AutomationCoordinator(IProcessWatcher processes, IForeground
     private void SetMic(bool muted)
     {
         var index = settings.Current.MicStripIndex;
-        if (index is < 0 or >= BananaLayout.StripCount) return;
+        if (index < 0 || index >= mixer.Layout.StripCount) return;
         micGeneration++;
         micMuted = muted;
         mixer.SetFloat(VmParam.StripMute(index), VmParam.FromBool(muted));
@@ -161,7 +161,7 @@ public sealed class AutomationCoordinator(IProcessWatcher processes, IForeground
         if (micAfter is { } generation) Enqueue(() =>
         {
             var index = settings.Current.MicStripIndex;
-            if (generation == micGeneration && mixer.State == MixerConnectionState.Connected && index is >= 0 and < BananaLayout.StripCount)
+            if (generation == micGeneration && mixer.State == MixerConnectionState.Connected && index >= 0 && index < mixer.Layout.StripCount)
                 mixer.SetFloat(VmParam.StripMute(index), VmParam.FromBool(micMuted));
         });
         if (settings.Current.ShowOsd && profiles.Active is { } active)

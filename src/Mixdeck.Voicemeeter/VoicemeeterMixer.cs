@@ -42,10 +42,11 @@ public sealed class VoicemeeterMixer : IMixer
 
     public static VoicemeeterMixer CreateDefault(ILoggerFactory factory) =>
         new(new VoicemeeterApi(), factory.CreateLogger<VoicemeeterMixer>(), TimeProvider.System);
-    public static VoicemeeterMixer CreateSimulated(ILoggerFactory factory) =>
-        new(new SimulatedVoicemeeterApi(), factory.CreateLogger<VoicemeeterMixer>(), TimeProvider.System);
+    public static VoicemeeterMixer CreateSimulated(ILoggerFactory factory, MixerLayout? layout = null) =>
+        new(new SimulatedVoicemeeterApi(layout: layout), factory.CreateLogger<VoicemeeterMixer>(), TimeProvider.System);
 
     public MixerConnectionState State => (MixerConnectionState)Volatile.Read(ref _state);
+    public MixerLayout Layout => Snapshot.Layout;
     public MixerSnapshot Snapshot => Volatile.Read(ref _snapshot);
     public LevelFrame Levels => Volatile.Read(ref _levels);
     public int VoicemeeterType => Volatile.Read(ref _type);
@@ -242,7 +243,7 @@ public sealed class VoicemeeterMixer : IMixer
             if (ShouldReadLevels && now >= _nextLevel)
             {
                 _nextLevel = now + _options.LevelInterval;
-                var frame = _sampler.Sample(_time.GetTimestamp());
+                var frame = _sampler.Sample(_time.GetTimestamp(), Layout);
                 Volatile.Write(ref _levels, frame);
                 Raise(LevelsUpdated, frame);
             }
@@ -281,12 +282,14 @@ public sealed class VoicemeeterMixer : IMixer
         }
         Volatile.Write(ref _type, type);
         if (_api.GetVoicemeeterVersion(out var version) == 0) Volatile.Write(ref _version, version);
-        if (type != BananaLayout.VoicemeeterType) { ChangeState(MixerConnectionState.UnsupportedType); return; }
-        var snapshot = ReadSnapshot();
+        if (type is < 1 or > 3) { ChangeState(MixerConnectionState.UnsupportedType); return; }
+        var layout = MixerLayout.ForType(type);
+        var snapshot = ReadSnapshot(layout);
+        Volatile.Write(ref _levels, LevelFrame.SilentFor(layout));
         _nextDirty = now + _options.DirtyPollInterval;
         _nextLevel = now;
-        ChangeState(MixerConnectionState.Connected);
         PublishSnapshot(snapshot);
+        ChangeState(MixerConnectionState.Connected);
     }
 
     private void ConnectionLost(DateTimeOffset now)
@@ -395,7 +398,8 @@ public sealed class VoicemeeterMixer : IMixer
         if (command.Cancellation.IsCancellationRequested) { command.Completion!.TrySetCanceled(command.Cancellation); return; }
         try
         {
-            var accepted = _api.RunVoicemeeter(5) == 0 || _api.RunVoicemeeter(2) == 0;
+            var type = Layout.VoicemeeterType;
+            var accepted = _api.RunVoicemeeter(type + 3) == 0 || _api.RunVoicemeeter(type) == 0;
             command.Completion!.TrySetResult(accepted);
             if (accepted && State != MixerConnectionState.Connected) _nextConnect = _time.GetUtcNow();
         }
@@ -418,23 +422,24 @@ public sealed class VoicemeeterMixer : IMixer
         while (_commands.TryDequeue(out var command)) CompletePending(command);
     }
 
-    private MixerSnapshot ReadSnapshot()
+    private MixerSnapshot ReadSnapshot(MixerLayout? requestedLayout = null)
     {
-        var strips = new StripState[BananaLayout.StripCount];
-        var buses = new BusState[BananaLayout.BusCount];
+        var layout = requestedLayout ?? Layout;
+        var strips = new StripState[layout.StripCount];
+        var buses = new BusState[layout.BusCount];
         for (var i = 0; i < strips.Length; i++)
         {
-            var routes = Enumerable.Range(0, BananaLayout.BusCount).Select(bus => ReadFloat(VmParam.StripRoute(i, bus)) != 0).ToArray();
-            var eq = BananaLayout.IsVirtualStrip(i)
-                ? Enumerable.Range(0, BananaLayout.VirtualStripEqBands).Select(band => ReadFloat(VmParam.StripEqGain(i, band))).ToArray() : [];
+            var routes = Enumerable.Range(0, layout.BusCount).Select(bus => ReadFloat(VmParam.StripRoute(i, bus, layout)) != 0).ToArray();
+            var eq = layout.IsVirtualStrip(i)
+                ? Enumerable.Range(0, MixerLayout.VirtualStripEqBands).Select(band => ReadFloat(VmParam.StripEqGain(i, band))).ToArray() : [];
             strips[i] = new(i, ReadString(VmParam.StripLabel(i)), ReadFloat(VmParam.StripGain(i)),
                 ReadFloat(VmParam.StripMute(i)) != 0, ReadFloat(VmParam.StripSolo(i)) != 0,
-                ReadFloat(VmParam.StripPanX(i)), Array.AsReadOnly(routes), Array.AsReadOnly(eq));
+                ReadFloat(VmParam.StripPanX(i)), Array.AsReadOnly(routes), Array.AsReadOnly(eq)) { Layout = layout };
         }
         for (var i = 0; i < buses.Length; i++)
             buses[i] = new(i, ReadString(VmParam.BusLabel(i)), ReadFloat(VmParam.BusGain(i)),
-                ReadFloat(VmParam.BusMute(i)) != 0, ReadFloat(VmParam.BusMono(i)) != 0, ReadFloat(VmParam.BusEqOn(i)) != 0);
-        return new(Array.AsReadOnly(strips), Array.AsReadOnly(buses), Snapshot.Revision + 1);
+                ReadFloat(VmParam.BusMute(i)) != 0, ReadFloat(VmParam.BusMono(i)) != 0, layout.VoicemeeterType != 1 && ReadFloat(VmParam.BusEqOn(i)) != 0) { Layout = layout };
+        return new(Array.AsReadOnly(strips), Array.AsReadOnly(buses), Snapshot.Revision + 1) { Layout = layout };
     }
     private float ReadFloat(string parameter)
     {
@@ -451,7 +456,7 @@ public sealed class VoicemeeterMixer : IMixer
     private void PublishSnapshot(MixerSnapshot next)
     {
         var previous = Snapshot;
-        var same = previous.Buses.SequenceEqual(next.Buses) && previous.Strips.Zip(next.Strips).All(pair =>
+        var same = previous.Layout == next.Layout && previous.Strips.Count == next.Strips.Count && previous.Buses.SequenceEqual(next.Buses) && previous.Strips.Zip(next.Strips).All(pair =>
             pair.First.Index == pair.Second.Index && pair.First.Label == pair.Second.Label &&
             pair.First.Gain == pair.Second.Gain && pair.First.Mute == pair.Second.Mute &&
             pair.First.Solo == pair.Second.Solo && pair.First.PanX == pair.Second.PanX &&

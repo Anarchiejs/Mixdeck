@@ -3,13 +3,16 @@ using Mixdeck.Core.Model;
 namespace Mixdeck.Core.Abstractions;
 
 /// <summary>
-/// Accès au moteur audio (Voicemeeter Banana). Toutes les écritures sont mises en file et appliquées sur un
+/// Accès au moteur audio Voicemeeter. Toutes les écritures sont mises en file et appliquées sur un
 /// thread dédié ; aucune méthode ne bloque l'appelant. Les événements sont levés sur ce thread dédié :
 /// l'interface doit repasser sur son propre thread (DispatcherQueue) avant de toucher aux contrôles.
 /// </summary>
 public interface IMixer : IAsyncDisposable
 {
     MixerConnectionState State { get; }
+
+    /// <summary>Disposition détectée à la connexion. SnapshotChanged publie la nouvelle disposition.</summary>
+    MixerLayout Layout { get; }
 
     /// <summary>Dernier état connu (relu dès que Voicemeeter signale un changement).</summary>
     MixerSnapshot Snapshot { get; }

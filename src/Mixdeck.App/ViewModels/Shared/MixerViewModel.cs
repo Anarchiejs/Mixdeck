@@ -46,15 +46,7 @@ public sealed partial class MixerViewModel : ObservableObject, IDisposable
         _logger = logger;
         _osd = osd;
 
-        Strips = [.. Enumerable.Range(0, BananaLayout.StripCount).Select(i => new StripViewModel(mixer, i))];
-        Buses = [.. Enumerable.Range(0, BananaLayout.BusCount).Select(i => new BusViewModel(mixer, i))];
-        foreach (var channel in Strips.Cast<ChannelViewModel>().Concat(Buses))
-        {
-            channel.CustomizationChanged += OnChannelCustomizationChanged;
-        }
-
         ConnectionState = mixer.State;
-        ApplySettings(settings.Current);
         ApplySnapshot(mixer.Snapshot);
         RefreshProfiles();
 
@@ -65,9 +57,11 @@ public sealed partial class MixerViewModel : ObservableObject, IDisposable
         _settings.Changed += OnSettingsChanged;
     }
 
-    public ObservableCollection<StripViewModel> Strips { get; }
+    public ObservableCollection<StripViewModel> Strips { get; } = [];
 
-    public ObservableCollection<BusViewModel> Buses { get; }
+    public ObservableCollection<BusViewModel> Buses { get; } = [];
+
+    public MixerLayout Layout { get; private set; } = MixerLayout.Banana;
 
     public ObservableCollection<ProfileItemViewModel> Profiles { get; } = [];
 
@@ -77,7 +71,7 @@ public sealed partial class MixerViewModel : ObservableObject, IDisposable
     public bool ShowNoProfilesHint => Profiles.Count == 0;
 
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(IsConnected), nameof(IsDisconnected), nameof(ConnectionTitle), nameof(ConnectionMessage), nameof(CanLaunchVoicemeeter))]
+    [NotifyPropertyChangedFor(nameof(IsConnected), nameof(IsDisconnected), nameof(ConnectionTitle), nameof(ConnectionMessage), nameof(CanLaunchVoicemeeter), nameof(CanToggleMic))]
     public partial MixerConnectionState ConnectionState { get; set; }
 
     [ObservableProperty]
@@ -85,7 +79,7 @@ public sealed partial class MixerViewModel : ObservableObject, IDisposable
 
     /// <summary>Tranche pilotée par le gros bouton « Micro ».</summary>
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(IsMicMuted))]
+    [NotifyPropertyChangedFor(nameof(IsMicMuted), nameof(MicDisplayName))]
     public partial StripViewModel Mic { get; set; } = null!;
 
     public bool IsConnected => ConnectionState == MixerConnectionState.Connected;
@@ -98,13 +92,23 @@ public sealed partial class MixerViewModel : ObservableObject, IDisposable
 
     public string CustomizationErrorMessage => "Le changement s'applique jusqu'à la fermeture de Mixdeck. Vérifiez l'accès au dossier de données, puis modifiez à nouveau le nom ou l'icône.";
 
-    public bool IsMicMuted => Mic.IsMuted;
+    public bool HasMic => _settings.Current.MicStripIndex >= 0 && _settings.Current.MicStripIndex < Strips.Count;
+
+    public bool CanToggleMic => IsConnected && HasMic;
+
+    public string MicDisplayName => HasMic ? Mic.DisplayName : "Micro non configuré";
+
+    public bool IsMicMuted
+    {
+        get => HasMic && Mic.IsMuted;
+        set { if (CanToggleMic) Mic.IsMuted = value; }
+    }
 
     public bool CanLaunchVoicemeeter => ConnectionState == MixerConnectionState.VoicemeeterNotRunning;
 
     public string ConnectionTitle => ConnectionState switch
     {
-        MixerConnectionState.Connected => "Connecté à Voicemeeter Banana",
+        MixerConnectionState.Connected => "Connecté à Voicemeeter " + (Layout.VoicemeeterType switch { 1 => "Standard", 3 => "Potato", _ => "Banana" }),
         MixerConnectionState.VoicemeeterNotRunning => "Voicemeeter n'est pas lancé",
         MixerConnectionState.NotInstalled => "Voicemeeter est introuvable",
         MixerConnectionState.UnsupportedType => "Version de Voicemeeter non prise en charge",
@@ -115,22 +119,22 @@ public sealed partial class MixerViewModel : ObservableObject, IDisposable
     {
         MixerConnectionState.Connected => string.Empty,
         MixerConnectionState.VoicemeeterNotRunning => "Mixdeck se reconnectera tout seul dès que le moteur audio sera lancé.",
-        MixerConnectionState.NotInstalled => "Installez Voicemeeter Banana depuis vb-audio.com, puis relancez Mixdeck.",
-        MixerConnectionState.UnsupportedType => "Mixdeck pilote Voicemeeter Banana. Lancez Banana à la place de Voicemeeter ou Potato.",
+        MixerConnectionState.NotInstalled => "Installez Voicemeeter depuis vb-audio.com, puis relancez Mixdeck.",
+        MixerConnectionState.UnsupportedType => "Mixdeck pilote Voicemeeter Standard, Banana et Potato. Cette version n’est pas prise en charge.",
         _ => string.Empty,
     };
 
     [RelayCommand]
     private void ToggleMic()
     {
-        if (IsConnected) Mic.IsMuted = !Mic.IsMuted;
+        if (CanToggleMic) Mic.IsMuted = !Mic.IsMuted;
     }
 
     /// <summary>Clic milieu sur l'icône : même retour à l'écran que le raccourci clavier (le panneau, lui, montre déjà l'état).</summary>
     [RelayCommand]
     private void ToggleMicFromTray()
     {
-        if (!IsConnected) return;
+        if (!CanToggleMic) return;
         Mic.IsMuted = !Mic.IsMuted;
         if (_settings.Current.ShowOsd)
         {
@@ -206,6 +210,7 @@ public sealed partial class MixerViewModel : ObservableObject, IDisposable
 
         _lastRender = now;
         var frame = _mixer.Levels;
+        if (frame.Layout != Layout) return;
         for (var i = 0; i < Strips.Count && i < frame.Strips.Count; i++)
         {
             Strips[i].UpdateMeter(frame.Strips[i], elapsed);
@@ -237,6 +242,8 @@ public sealed partial class MixerViewModel : ObservableObject, IDisposable
 
     private void ApplySnapshot(MixerSnapshot snapshot)
     {
+        var layoutChanged = Layout != snapshot.Layout || Strips.Count != snapshot.Layout.StripCount;
+        if (layoutChanged) RebuildChannels(snapshot.Layout);
         for (var i = 0; i < Strips.Count && i < snapshot.Strips.Count; i++)
         {
             Strips[i].Apply(snapshot.Strips[i]);
@@ -247,7 +254,27 @@ public sealed partial class MixerViewModel : ObservableObject, IDisposable
             Buses[i].Apply(snapshot.Buses[i]);
         }
 
+        if (layoutChanged)
+        {
+            OnPropertyChanged(nameof(Layout));
+            OnPropertyChanged(nameof(ConnectionTitle));
+        }
         OnPropertyChanged(nameof(IsMicMuted));
+    }
+
+    private void RebuildChannels(MixerLayout layout)
+    {
+        if (Mic is not null) Mic.PropertyChanged -= OnMicPropertyChanged;
+        foreach (var channel in Strips.Cast<ChannelViewModel>().Concat(Buses))
+            channel.CustomizationChanged -= OnChannelCustomizationChanged;
+        Layout = layout;
+        Strips.Clear();
+        Buses.Clear();
+        foreach (var index in Enumerable.Range(0, layout.StripCount)) Strips.Add(new StripViewModel(_mixer, index, layout));
+        foreach (var index in Enumerable.Range(0, layout.BusCount)) Buses.Add(new BusViewModel(_mixer, index, layout));
+        foreach (var channel in Strips.Cast<ChannelViewModel>().Concat(Buses))
+            channel.CustomizationChanged += OnChannelCustomizationChanged;
+        ApplySettings(_settings.Current);
     }
 
     private void ApplySettings(AppSettings settings)
@@ -266,7 +293,7 @@ public sealed partial class MixerViewModel : ObservableObject, IDisposable
             bus.ApplyCustomization(c.DisplayName, c.Icon, show);
         }
 
-        var micIndex = Math.Clamp(settings.MicStripIndex, 0, BananaLayout.StripCount - 1);
+        var micIndex = Math.Clamp(settings.MicStripIndex, 0, Strips.Count - 1);
         if (Mic is not null)
         {
             Mic.PropertyChanged -= OnMicPropertyChanged;
@@ -274,6 +301,10 @@ public sealed partial class MixerViewModel : ObservableObject, IDisposable
 
         Mic = Strips[micIndex];
         Mic.PropertyChanged += OnMicPropertyChanged;
+        OnPropertyChanged(nameof(HasMic));
+        OnPropertyChanged(nameof(CanToggleMic));
+        OnPropertyChanged(nameof(IsMicMuted));
+        OnPropertyChanged(nameof(MicDisplayName));
     }
 
     private void OnMicPropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
@@ -282,6 +313,7 @@ public sealed partial class MixerViewModel : ObservableObject, IDisposable
         {
             OnPropertyChanged(nameof(IsMicMuted));
         }
+        if (e.PropertyName == nameof(StripViewModel.DisplayName)) OnPropertyChanged(nameof(MicDisplayName));
     }
 
     private async void OnChannelCustomizationChanged(object? sender, EventArgs e)
@@ -289,8 +321,9 @@ public sealed partial class MixerViewModel : ObservableObject, IDisposable
         try
         {
             _savingCustomization = true;
-            ChannelCustomization[] strips = [.. Strips.Select(ToCustomization)];
-            ChannelCustomization[] buses = [.. Buses.Select(ToCustomization)];
+            // Garder les personnalisations des canaux absents pour une prochaine connexion à une autre édition.
+            ChannelCustomization[] strips = [.. Strips.Select(ToCustomization), .. _settings.Current.Strips.Where(s => s.Index >= Strips.Count)];
+            ChannelCustomization[] buses = [.. Buses.Select(ToCustomization), .. _settings.Current.Buses.Where(b => b.Index >= Buses.Count)];
             await _settings.UpdateAsync(s => s with { Strips = strips, Buses = buses });
             // Le magasin journalise ses échecs d'écriture sans lever d'exception : on vérifie ce qui a été retenu.
             HasCustomizationError = !_settings.Current.Strips.SequenceEqual(strips) || !_settings.Current.Buses.SequenceEqual(buses);

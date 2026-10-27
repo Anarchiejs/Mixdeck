@@ -95,4 +95,27 @@ public sealed class CoordinatorRobustnessTests
         await TestRig.UntilAsync(() => rig.Mixer.Floats.Last() == ("Strip[0].Mute", 0f));
         Assert.False(rig.Mixer.Snapshot.Strips[0].Mute);
     }
+
+    [Theory]
+    [InlineData(3, 7, true)]
+    [InlineData(1, 4, false)]
+    public async Task MicrophoneRulesRespectTheCurrentLayout(int type, int micIndex, bool expectedWrite)
+    {
+        using var rig = new TestRig();
+        rig.Mixer.Snapshot = MixerSnapshot.EmptyFor(MixerLayout.ForType(type));
+        await rig.Profiles.SaveAsync(new() { Id = "barrier", Name = "Vide" });
+        await rig.Settings.UpdateAsync(s => s with { MicStripIndex = micIndex, Rules = [
+            new() { Id = "m", Name = "Micro", ProcessName = "mic", Action = RuleActionKind.SetMicMuted, MicMuted = true }] });
+        var processes = new FakeProcesses { Running = ["mic"] };
+        using var coordinator = Coordinator(rig, processes);
+        coordinator.Start();
+        // L'action manuelle passe après l'initialisation dans la même file.
+        await coordinator.ApplyManualProfileAsync("barrier");
+        if (expectedWrite)
+        {
+            Assert.Equal(($"Strip[{micIndex}].Mute", 1f), Assert.Single(rig.Mixer.Floats));
+            Assert.True(rig.Mixer.Snapshot.Strips[micIndex].Mute);
+        }
+        else Assert.Empty(rig.Mixer.Floats);
+    }
 }

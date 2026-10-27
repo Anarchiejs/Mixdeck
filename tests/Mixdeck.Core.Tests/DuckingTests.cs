@@ -212,4 +212,62 @@ public sealed class DuckingTests
         r.Controller.Dispose();
         Assert.Equal(-5, r.Gain);
     }
+
+    [Fact]
+    public async Task PotatoCanAttenuateTheLastStripAndStandardReleasesItsLevelLease()
+    {
+        using var core = new TestRig();
+        core.Mixer.Snapshot = MixerSnapshot.EmptyFor(MixerLayout.Potato);
+        await core.Settings.UpdateAsync(s => s with { Ducking = new()
+        {
+            Enabled = true, SourceStrip = 6, TargetStrip = 7, ThresholdDb = -20,
+            AmountDb = -12, AttackMilliseconds = 0,
+        } });
+        using var controller = new DuckingController(core.Mixer, core.Settings, core.Time, NullLogger<DuckingController>.Instance);
+        controller.Start();
+        Assert.Equal(1, core.Mixer.LevelRequests);
+        core.Mixer.PublishLevels(LevelFrame.SilentFor(MixerLayout.Potato) with
+        {
+            Strips = [default, default, default, default, default, default, new(1, 1), default],
+        });
+        Assert.Equal(-12, core.Mixer.Snapshot.Strips[7].Gain);
+        Assert.Equal(("Strip[7].Gain", -12f), Assert.Single(core.Mixer.Floats));
+
+        core.Mixer.SetState(MixerConnectionState.Disconnected);
+        core.Mixer.Snapshot = MixerSnapshot.EmptyFor(MixerLayout.Standard);
+        core.Mixer.SetState(MixerConnectionState.Connected);
+        core.Mixer.PublishSnapshot(core.Mixer.Snapshot);
+        core.Time.Advance(TimeSpan.FromMilliseconds(50));
+        core.Mixer.PublishLevels(LevelFrame.SilentFor(MixerLayout.Standard));
+        Assert.Equal(0, core.Mixer.LevelRequests);
+        Assert.Single(core.Mixer.Floats); // Pas de restauration de Strip[7] sur Standard.
+        Assert.All(core.Mixer.Snapshot.Strips, s => Assert.Equal(0, s.Gain));
+
+        core.Mixer.SetState(MixerConnectionState.Disconnected);
+        core.Mixer.Snapshot = MixerSnapshot.EmptyFor(MixerLayout.Potato);
+        core.Mixer.SetState(MixerConnectionState.Connected);
+        core.Mixer.PublishSnapshot(core.Mixer.Snapshot);
+        Assert.Equal(1, core.Mixer.LevelRequests); // Réévaluation sans changer les réglages.
+    }
+
+    [Fact]
+    public async Task LayoutChangeDoesNotRestoreAnOldBaseOnAnExistingIndex()
+    {
+        using var r = new Rig();
+        r.Attenuate();
+        r.Core.Mixer.SetState(MixerConnectionState.Disconnected);
+        r.Core.Mixer.Snapshot = MixerSnapshot.EmptyFor(MixerLayout.Standard) with
+        {
+            Strips = MixerSnapshot.EmptyFor(MixerLayout.Standard).Strips
+                .Select(s => s.Index == 1 ? s with { Gain = -6 } : s).ToArray(),
+        };
+        var writes = r.Core.Mixer.Floats.Count;
+        r.Core.Mixer.SetState(MixerConnectionState.Connected);
+        r.Core.Mixer.PublishSnapshot(r.Core.Mixer.Snapshot);
+        Assert.Equal(writes, r.Core.Mixer.Floats.Count);
+        Assert.Equal(-6, r.Gain);
+        await r.Core.Settings.UpdateAsync(s => s with { Ducking = s.Ducking with { Enabled = false } });
+        Assert.Equal(-6, r.Gain);
+        Assert.Equal(0, r.Core.Mixer.LevelRequests);
+    }
 }
