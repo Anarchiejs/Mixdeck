@@ -80,8 +80,28 @@ jobs:
         shell: pwsh
         run: Write-Host "Aucune release précédente utilisable. Le paquet sera complet, sans delta."
 
+      # Signature Azure Trusted Signing (docs/SIGNATURE.md) : active seulement si la variable de dépôt
+      # AZURE_SIGNING vaut "true" et que les secrets AZURE_* existent. Sinon, paquet non signé (avertissement SmartScreen).
+      - name: Préparer la signature
+        id: signing
+        if: vars.AZURE_SIGNING == 'true'
+        shell: pwsh
+        run: |
+          $metadata = @{
+            Endpoint = '${{ vars.AZURE_SIGNING_ENDPOINT }}'
+            CodeSigningAccountName = '${{ vars.AZURE_SIGNING_ACCOUNT }}'
+            CertificateProfileName = '${{ vars.AZURE_SIGNING_PROFILE }}'
+          } | ConvertTo-Json
+          $path = Join-Path $env:RUNNER_TEMP 'signing.json'
+          Set-Content -LiteralPath $path -Value $metadata -Encoding utf8
+          Add-Content -Path $env:GITHUB_OUTPUT -Value "args=--azureTrustedSignFile `"$path`"" -Encoding utf8NoBOM
+
       - name: Empaqueter
-        run: dotnet tool run vpk -- pack --packId MixdeckApp --packVersion ${{ steps.version.outputs.version }} --packDir publish --mainExe Mixdeck.exe --packTitle Mixdeck --icon src/Mixdeck.App/Assets/Mixdeck.ico
+        env:
+          AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+          AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+        run: dotnet tool run vpk -- pack --packId MixdeckApp --packVersion ${{ steps.version.outputs.version }} --packDir publish --mainExe Mixdeck.exe --packTitle Mixdeck --icon src/Mixdeck.App/Assets/Mixdeck.ico ${{ steps.signing.outputs.args }}
 
       - name: Envoyer sur GitHub Releases
         run: dotnet tool run vpk -- upload github --repoUrl https://github.com/Anarchiejs/Mixdeck --publish --releaseName "Mixdeck ${{ steps.version.outputs.version }}" --tag v${{ steps.version.outputs.version }} --releaseNotes "${{ steps.version.outputs.notes }}" --token "${{ secrets.GITHUB_TOKEN }}"
