@@ -7,7 +7,6 @@ using Microsoft.UI.Xaml.Media;
 using Mixdeck.App.Services;
 using Mixdeck.App.ViewModels.Pages;
 using Mixdeck.App.ViewModels.Shared;
-using Mixdeck.App.Views.Shell;
 using Windows.Storage.Pickers;
 using Windows.System;
 
@@ -122,7 +121,7 @@ public sealed partial class ProfileCard : UserControl
     {
         var picker = new FileSavePicker { SuggestedFileName = SafeFileName(Item.Name), SuggestedStartLocation = PickerLocationId.DocumentsLibrary };
         picker.FileTypeChoices.Add("Profil Mixdeck", new List<string> { ".mixdeck-profile.json" });
-        WinRT.Interop.InitializeWithWindow.Initialize(picker, WinRT.Interop.WindowNative.GetWindowHandle(App.GetService<MainWindow>()));
+        WinRT.Interop.InitializeWithWindow.Initialize(picker, App.GetService<IShellService>().MainWindowHandle);
         var file = await picker.PickSaveFileAsync();
         if (file is null) return;
         await using var stream = await file.OpenStreamForWriteAsync();

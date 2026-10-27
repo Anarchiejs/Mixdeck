@@ -17,6 +17,12 @@ public interface IShellService
 {
     void ShowMainWindow(ShellPage? page = null);
 
+    /// <summary>
+    /// Handle de la console ouverte (sélecteurs de fichiers), 0 si elle est fermée. La console est réellement
+    /// fermée quand on la quitte : ne gardez jamais de référence à la fenêtre elle-même.
+    /// </summary>
+    nint MainWindowHandle { get; }
+
     void ToggleFlyout();
 
     void HideFlyout();
