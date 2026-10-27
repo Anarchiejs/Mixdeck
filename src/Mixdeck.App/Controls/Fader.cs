@@ -42,7 +42,8 @@ public sealed class Fader : Slider
     }
     protected override void OnPointerWheelChanged(PointerRoutedEventArgs e)
     {
-        if (!IsEnabled) return;
+        // Seul un fader cliqué au préalable suit la molette : en passant dessus, la page défile sans changer de gain.
+        if (!IsEnabled || FocusState == FocusState.Unfocused) return;
         bool shift = InputKeyboardSource.GetKeyStateForCurrentThread(VirtualKey.Shift).HasFlag(CoreVirtualKeyStates.Down);
         Value = Math.Clamp(Math.Round(Value + e.GetCurrentPoint(this).Properties.MouseWheelDelta / 120d * (shift ? .1 : .5), 1), Minimum, Maximum);
         e.Handled = true;

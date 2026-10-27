@@ -29,25 +29,34 @@
                     SelectedItem="{x:Bind ViewModel.Mixer.ActiveProfile, Mode=OneWay}" ItemInvoked="OnProfileInvoked"
                      />
             </StackPanel>
-            <ScrollViewer HorizontalScrollBarVisibility="Auto" HorizontalScrollMode="Enabled" VerticalScrollBarVisibility="Disabled" VerticalScrollMode="Disabled">
-                <StackPanel Orientation="Horizontal" Spacing="16">
-                    <StackPanel Spacing="12">
-                        <TextBlock x:Uid="MixerPage008"  Style="{StaticResource SubtitleTextBlockStyle}" />
-                        <ItemsRepeater ItemsSource="{x:Bind ViewModel.Mixer.Strips}">
-                            <ItemsRepeater.Layout><StackLayout Orientation="Horizontal" Spacing="8" /></ItemsRepeater.Layout>
-                            <ItemsRepeater.ItemTemplate><DataTemplate x:DataType="shared:StripViewModel"><common:ChannelCard Model="{x:Bind}" /></DataTemplate></ItemsRepeater.ItemTemplate>
-                        </ItemsRepeater>
-                    </StackPanel>
-                    <Border Width="1" Background="{ThemeResource DividerStrokeColorDefaultBrush}" Margin="0,44,0,0" />
-                    <StackPanel Spacing="12">
-                        <TextBlock x:Uid="MixerPage009"  Style="{StaticResource SubtitleTextBlockStyle}" />
-                        <ItemsRepeater ItemsSource="{x:Bind ViewModel.Mixer.Buses}">
-                            <ItemsRepeater.Layout><StackLayout Orientation="Horizontal" Spacing="8" /></ItemsRepeater.Layout>
-                            <ItemsRepeater.ItemTemplate><DataTemplate x:DataType="shared:BusViewModel"><common:ChannelCard Model="{x:Bind}" /></DataTemplate></ItemsRepeater.ItemTemplate>
-                        </ItemsRepeater>
-                    </StackPanel>
+            <!-- Entrées puis sorties utilisées : les tranches passent à la ligne, la page ne défile que verticalement.
+                 Le bouton + rajoute une tranche masquée (sans périphérique ou masquée par l’utilisateur). -->
+            <StackPanel Spacing="12">
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                    <TextBlock x:Uid="MixerPage008" Style="{StaticResource SubtitleTextBlockStyle}" VerticalAlignment="Center" />
+                    <Button x:Uid="MixerPage011" Width="32" Height="32" Padding="0" VerticalAlignment="Center" Click="OnAddStripClick"
+                        Style="{StaticResource SubtleButtonStyle}" Visibility="{x:Bind ViewModel.Mixer.HasHiddenStrips, Mode=OneWay}">
+                        <FontIcon Glyph="&#xE710;" FontSize="14" />
+                    </Button>
                 </StackPanel>
-            </ScrollViewer>
+                <ItemsControl ItemsSource="{x:Bind ViewModel.Mixer.ConsoleStrips}" IsTabStop="False">
+                    <ItemsControl.ItemsPanel><ItemsPanelTemplate><controls:WrapPanel Spacing="12" /></ItemsPanelTemplate></ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate><DataTemplate x:DataType="shared:StripViewModel"><common:ChannelCard Model="{x:Bind}" /></DataTemplate></ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </StackPanel>
+            <StackPanel Spacing="12">
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                    <TextBlock x:Uid="MixerPage009" Style="{StaticResource SubtitleTextBlockStyle}" VerticalAlignment="Center" />
+                    <Button x:Uid="MixerPage012" Width="32" Height="32" Padding="0" VerticalAlignment="Center" Click="OnAddBusClick"
+                        Style="{StaticResource SubtleButtonStyle}" Visibility="{x:Bind ViewModel.Mixer.HasHiddenBuses, Mode=OneWay}">
+                        <FontIcon Glyph="&#xE710;" FontSize="14" />
+                    </Button>
+                </StackPanel>
+                <ItemsControl ItemsSource="{x:Bind ViewModel.Mixer.ConsoleBuses}" IsTabStop="False">
+                    <ItemsControl.ItemsPanel><ItemsPanelTemplate><controls:WrapPanel Spacing="12" /></ItemsPanelTemplate></ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate><DataTemplate x:DataType="shared:BusViewModel"><common:ChannelCard Model="{x:Bind}" /></DataTemplate></ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </StackPanel>
             <TextBlock x:Uid="MixerPage010"
                 TextWrapping="Wrap" Style="{StaticResource CaptionTextBlockStyle}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
         </StackPanel>

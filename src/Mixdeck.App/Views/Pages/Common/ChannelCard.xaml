@@ -4,68 +4,122 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:controls="using:Mixdeck.App.Controls"
     xmlns:shared="using:Mixdeck.App.ViewModels.Shared">
-    <Border x:Name="Card" Style="{StaticResource MixdeckCardStyle}" Padding="12" Width="136">
+    <UserControl.Resources>
+        <Style x:Key="CardCaption" TargetType="TextBlock" BasedOn="{StaticResource CaptionTextBlockStyle}">
+            <Setter Property="Foreground" Value="{ThemeResource TextFillColorSecondaryBrush}" />
+        </Style>
+    </UserControl.Resources>
+    <Border x:Name="Card" Style="{StaticResource MixdeckCardStyle}" Padding="12" Width="176">
         <StackPanel Spacing="12">
-            <Grid>
-                <Button x:Uid="ChannelCard001" HorizontalAlignment="Left" Click="OnIconClick" Style="{StaticResource SubtleButtonStyle}"
-                         >
-                    <FontIcon Glyph="{x:Bind Model.Icon, Mode=OneWay}" FontSize="20" />
-                </Button>
-                <Button x:Uid="ChannelCard002" HorizontalAlignment="Right" Click="OnMenuClick" Style="{StaticResource SubtleButtonStyle}"
-                         >
-                    <FontIcon Glyph="&#xE712;" FontSize="16" />
-                </Button>
-            </Grid>
-            <controls:ChannelHeader x:Uid="ChannelCard003" x:Name="Header" ChannelName="{x:Bind Model.DisplayName, Mode=OneWay}"
-                Icon="" NameCommitted="OnNameCommitted"  />
-            <TextBlock Text="{x:Bind KindText}" Style="{StaticResource CaptionTextBlockStyle}"
-                       Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
-            <Grid Height="192" ColumnSpacing="4">
-                <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="48" /></Grid.ColumnDefinitions>
+            <!-- En-tête : icône et options, puis le nom et le type sur toute la largeur -->
+            <StackPanel Spacing="4">
+                <Grid>
+                    <Button x:Uid="ChannelCard001" Width="36" Height="36" Padding="0" HorizontalAlignment="Left"
+                            Click="OnIconClick" Style="{StaticResource SubtleButtonStyle}">
+                        <FontIcon Glyph="{x:Bind Model.Icon, Mode=OneWay}" FontSize="20" />
+                    </Button>
+                    <Button x:Uid="ChannelCard002" Width="32" Height="32" Padding="0" HorizontalAlignment="Right"
+                            Click="OnMenuClick" Style="{StaticResource SubtleButtonStyle}">
+                        <FontIcon Glyph="&#xE712;" FontSize="16" />
+                    </Button>
+                </Grid>
+                <controls:ChannelHeader x:Uid="ChannelCard003" x:Name="Header" ChannelName="{x:Bind Model.DisplayName, Mode=OneWay}"
+                    Icon="" NameCommitted="OnNameCommitted" FontWeight="SemiBold" />
+                <TextBlock Text="{x:Bind KindText}" Style="{StaticResource CardCaption}" TextWrapping="NoWrap" TextTrimming="CharacterEllipsis" />
+            </StackPanel>
+
+            <!-- Vumètre et fader -->
+            <Grid Height="220" ColumnSpacing="8">
+                <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="40" /></Grid.ColumnDefinitions>
                 <controls:VuMeter x:Uid="ChannelCard004" LeftDb="{x:Bind Model.LeftDb, Mode=OneWay}" RightDb="{x:Bind Model.RightDb, Mode=OneWay}"
                     LeftPeakDb="{x:Bind Model.LeftPeakDb, Mode=OneWay}" RightPeakDb="{x:Bind Model.RightPeakDb, Mode=OneWay}"
                     IsMuted="{x:Bind Model.IsMuted, Mode=OneWay}" IsClipped="{x:Bind Model.IsClipped, Mode=OneWay}"
-                    ShowScale="True" IsStereo="True"  />
+                    ShowScale="True" IsStereo="True" />
                 <controls:Fader x:Uid="ChannelCard005" Grid.Column="1" Orientation="Vertical" HorizontalAlignment="Center"
-                    Value="{x:Bind Model.Gain, Mode=TwoWay}" IsMuted="{x:Bind Model.IsMuted, Mode=OneWay}"
-                      />
+                    Value="{x:Bind Model.Gain, Mode=TwoWay}" IsMuted="{x:Bind Model.IsMuted, Mode=OneWay}" />
             </Grid>
             <TextBlock Text="{x:Bind shared:Converters.Db(Model.Gain), Mode=OneWay}" HorizontalAlignment="Center"
                        Style="{StaticResource BodyStrongTextBlockStyle}" />
-            <controls:MuteToggle x:Uid="ChannelCard006" IsChecked="{x:Bind Model.IsMuted, Mode=TwoWay}" HorizontalAlignment="Stretch"
-                AutomationProperties.Name="{x:Bind shared:Converters.MuteLabel(Model.IsMuted), Mode=OneWay}"  />
-            <StackPanel Spacing="8" Visibility="{x:Bind IsStrip}">
-                <ToggleButton x:Uid="ChannelCard007"  IsChecked="{x:Bind Strip.IsSolo, Mode=TwoWay}" HorizontalAlignment="Stretch" />
-                <TextBlock x:Uid="ChannelCard008"  Style="{StaticResource CaptionTextBlockStyle}" />
-                <Slider x:Uid="ChannelCard009" Minimum="-0.5" Maximum="0.5" StepFrequency="0.01" SmallChange="0.01" LargeChange="0.1"
-                    Value="{x:Bind Strip.PanX, Mode=TwoWay}" DoubleTapped="OnPanDoubleTapped" IsThumbToolTipEnabled="False"
-                      />
-                <Grid><TextBlock x:Uid="ChannelCard010"  Style="{StaticResource CaptionTextBlockStyle}" /><TextBlock x:Uid="ChannelCard011"  HorizontalAlignment="Right" Style="{StaticResource CaptionTextBlockStyle}" /></Grid>
-                <TextBlock x:Uid="ChannelCard012"  Style="{StaticResource CaptionTextBlockStyle}" />
-                <ItemsRepeater ItemsSource="{x:Bind Strip.Routes, Mode=OneWay}">
-                    <ItemsRepeater.Layout><UniformGridLayout MinItemWidth="32" MinItemHeight="32" MaximumRowsOrColumns="3" MinColumnSpacing="4" MinRowSpacing="4" /></ItemsRepeater.Layout>
-                    <ItemsRepeater.ItemTemplate>
-                        <DataTemplate x:DataType="shared:RouteViewModel">
-                            <controls:RouteButton Bus="{x:Bind BusName}" IsChecked="{x:Bind IsOn, Mode=TwoWay}" MinWidth="32" Padding="4" />
-                        </DataTemplate>
-                    </ItemsRepeater.ItemTemplate>
-                </ItemsRepeater>
-                <StackPanel Spacing="4" Visibility="{x:Bind HasEq}">
-                    <TextBlock x:Uid="ChannelCard013"  Style="{StaticResource BodyStrongTextBlockStyle}" Margin="0,8,0,4" />
-                    <TextBlock x:Uid="ChannelCard014"  Style="{StaticResource CaptionTextBlockStyle}" />
-                    <Slider x:Uid="ChannelCard015" Minimum="-12" Maximum="12" StepFrequency="0.5" Value="{x:Bind Strip.EqLow, Mode=TwoWay}" IsThumbToolTipEnabled="False"  />
-                    <TextBlock Text="{x:Bind shared:Converters.Db(Strip.EqLow), Mode=OneWay}" Style="{StaticResource CaptionTextBlockStyle}" />
-                    <TextBlock x:Uid="ChannelCard016"  Style="{StaticResource CaptionTextBlockStyle}" />
-                    <Slider x:Uid="ChannelCard017" Minimum="-12" Maximum="12" StepFrequency="0.5" Value="{x:Bind Strip.EqMid, Mode=TwoWay}" IsThumbToolTipEnabled="False"  />
-                    <TextBlock Text="{x:Bind shared:Converters.Db(Strip.EqMid), Mode=OneWay}" Style="{StaticResource CaptionTextBlockStyle}" />
-                    <TextBlock x:Uid="ChannelCard018"  Style="{StaticResource CaptionTextBlockStyle}" />
-                    <Slider x:Uid="ChannelCard019" Minimum="-12" Maximum="12" StepFrequency="0.5" Value="{x:Bind Strip.EqHigh, Mode=TwoWay}" IsThumbToolTipEnabled="False"  />
-                    <TextBlock Text="{x:Bind shared:Converters.Db(Strip.EqHigh), Mode=OneWay}" Style="{StaticResource CaptionTextBlockStyle}" />
+
+            <!-- Muet, puis Solo (entrée) ou Mono et EQ (sortie) -->
+            <Grid ColumnSpacing="6">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="40" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <controls:MuteToggle x:Uid="ChannelCard006" IsChecked="{x:Bind Model.IsMuted, Mode=TwoWay}" Width="40" Padding="0"
+                    AutomationProperties.Name="{x:Bind shared:Converters.MuteLabel(Model.IsMuted), Mode=OneWay}" />
+                <ToggleButton x:Uid="ChannelCard007" Grid.Column="1" Grid.ColumnSpan="2" HorizontalAlignment="Stretch"
+                    IsChecked="{x:Bind Strip.IsSolo, Mode=TwoWay}" Visibility="{x:Bind IsStrip}" />
+                <ToggleButton x:Uid="ChannelCard020" Grid.Column="1" Grid.ColumnSpan="{x:Bind MonoSpan}" HorizontalAlignment="Stretch" Padding="2,5" MinWidth="0"
+                    IsChecked="{x:Bind Bus.IsMono, Mode=TwoWay}" Visibility="{x:Bind IsBus}" />
+                <ToggleButton x:Uid="ChannelCard021" Grid.Column="2" Padding="8,5" MinWidth="0"
+                    IsChecked="{x:Bind Bus.EqOn, Mode=TwoWay}" Visibility="{x:Bind BusHasEq}" />
+            </Grid>
+
+            <StackPanel Spacing="12" Visibility="{x:Bind IsStrip}">
+                <!-- Panoramique : G [curseur] D -->
+                <StackPanel Spacing="2">
+                    <TextBlock x:Uid="ChannelCard008" Style="{StaticResource CardCaption}" />
+                    <Grid ColumnSpacing="8">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock x:Uid="ChannelCard010" VerticalAlignment="Center" Style="{StaticResource CardCaption}" />
+                        <Slider x:Uid="ChannelCard009" Grid.Column="1" Minimum="-0.5" Maximum="0.5" StepFrequency="0.01" SmallChange="0.01" LargeChange="0.1"
+                            Value="{x:Bind Strip.PanX, Mode=TwoWay}" DoubleTapped="OnPanDoubleTapped" IsThumbToolTipEnabled="False" />
+                        <TextBlock x:Uid="ChannelCard011" Grid.Column="2" VerticalAlignment="Center" Style="{StaticResource CardCaption}" />
+                    </Grid>
                 </StackPanel>
-            </StackPanel>
-            <StackPanel Spacing="8" Visibility="{x:Bind IsBus}">
-                <ToggleButton x:Uid="ChannelCard020"  IsChecked="{x:Bind Bus.IsMono, Mode=TwoWay}" HorizontalAlignment="Stretch" />
-                <ToggleButton x:Uid="ChannelCard021"  IsChecked="{x:Bind Bus.EqOn, Mode=TwoWay}" Visibility="{x:Bind Bus.HasEq}" HorizontalAlignment="Stretch" />
+
+                <!-- Envois vers les bus -->
+                <StackPanel Spacing="6">
+                    <TextBlock x:Uid="ChannelCard012" Style="{StaticResource CardCaption}" />
+                    <ItemsRepeater ItemsSource="{x:Bind Strip.Routes, Mode=OneWay}">
+                        <ItemsRepeater.Layout>
+                            <UniformGridLayout MinItemWidth="40" MinItemHeight="30" MaximumRowsOrColumns="3"
+                                MinColumnSpacing="4" MinRowSpacing="4" ItemsStretch="Fill" />
+                        </ItemsRepeater.Layout>
+                        <ItemsRepeater.ItemTemplate>
+                            <DataTemplate x:DataType="shared:RouteViewModel">
+                                <controls:RouteButton Bus="{x:Bind BusName}" IsChecked="{x:Bind IsOn, Mode=TwoWay}" HorizontalAlignment="Stretch" />
+                            </DataTemplate>
+                        </ItemsRepeater.ItemTemplate>
+                    </ItemsRepeater>
+                </StackPanel>
+
+                <!-- Égaliseur des entrées virtuelles, replié par défaut -->
+                <Expander HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" Padding="12,8" Visibility="{x:Bind HasEq}">
+                    <Expander.Header>
+                        <TextBlock x:Uid="ChannelCard013" />
+                    </Expander.Header>
+                    <StackPanel Spacing="8">
+                        <StackPanel>
+                            <Grid>
+                                <TextBlock x:Uid="ChannelCard014" Style="{StaticResource CardCaption}" />
+                                <TextBlock HorizontalAlignment="Right" Style="{StaticResource CaptionTextBlockStyle}" Text="{x:Bind shared:Converters.Db(Strip.EqLow), Mode=OneWay}" />
+                            </Grid>
+                            <Slider x:Uid="ChannelCard015" Minimum="-12" Maximum="12" StepFrequency="0.5" Value="{x:Bind Strip.EqLow, Mode=TwoWay}" IsThumbToolTipEnabled="False" />
+                        </StackPanel>
+                        <StackPanel>
+                            <Grid>
+                                <TextBlock x:Uid="ChannelCard016" Style="{StaticResource CardCaption}" />
+                                <TextBlock HorizontalAlignment="Right" Style="{StaticResource CaptionTextBlockStyle}" Text="{x:Bind shared:Converters.Db(Strip.EqMid), Mode=OneWay}" />
+                            </Grid>
+                            <Slider x:Uid="ChannelCard017" Minimum="-12" Maximum="12" StepFrequency="0.5" Value="{x:Bind Strip.EqMid, Mode=TwoWay}" IsThumbToolTipEnabled="False" />
+                        </StackPanel>
+                        <StackPanel>
+                            <Grid>
+                                <TextBlock x:Uid="ChannelCard018" Style="{StaticResource CardCaption}" />
+                                <TextBlock HorizontalAlignment="Right" Style="{StaticResource CaptionTextBlockStyle}" Text="{x:Bind shared:Converters.Db(Strip.EqHigh), Mode=OneWay}" />
+                            </Grid>
+                            <Slider x:Uid="ChannelCard019" Minimum="-12" Maximum="12" StepFrequency="0.5" Value="{x:Bind Strip.EqHigh, Mode=TwoWay}" IsThumbToolTipEnabled="False" />
+                        </StackPanel>
+                    </StackPanel>
+                </Expander>
             </StackPanel>
         </StackPanel>
     </Border>

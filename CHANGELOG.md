@@ -18,6 +18,9 @@ et ce projet adhère au [versionnage sémantique](https://semver.org/lang/fr/).
 - Volume par application dans le panneau et choix de la sortie d'une application (« Envoyer vers… », API de Windows non documentée : désactivé automatiquement si elle disparaît).
 - Page Appareils : appareils des entrées et sorties physiques (micros de Windows proposés quand Voicemeeter n'en liste aucun), préréglages du micro, redémarrage du moteur audio, fenêtre de Voicemeeter cachée quand Mixdeck le lance.
 - Atténuation automatique d'une entrée quand une autre a du signal (seuil, baisse, attaque, maintien, relâche réglables).
+- Console refaite : les tranches passent à la ligne (plus de défilement horizontal), en-tête lisible (nom et type sur toute la largeur), Muet et Solo côte à côte, panoramique G/D sur une ligne, boutons d'envoi A1…B3 lisibles, égaliseur repliable avec la valeur à côté de chaque bande, icônes entières dans le sélecteur.
+- La console n'affiche que les entrées et sorties reliées à un périphérique (plus les entrées et sorties virtuelles) ; le bouton + à côté de « Entrées » ou « Sorties » rajoute une tranche masquée, et « Masquer de la console » dans le menu d'une tranche la retire.
+- La molette ne règle un fader de la console qu'après un clic dessus : en passant la souris, la page défile sans changer de gain.
 - Interrupteur « M'écouter » dans le panneau et la page Appareils : envoie le micro vers A1 (le casque) pour s'entendre.
 - Badge permanent « micro coupé » et son de confirmation (facultatifs).
 - Raccourci « Appliquer un profil » et profil appliqué au démarrage.

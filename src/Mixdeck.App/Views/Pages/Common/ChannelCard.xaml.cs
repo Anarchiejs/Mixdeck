@@ -19,6 +19,9 @@ public sealed partial class ChannelCard : UserControl
     public bool IsStrip => Model is StripViewModel;
     public bool IsBus => Model is BusViewModel;
     public bool HasEq => Strip?.HasEq == true;
+    public bool BusHasEq => Bus?.HasEq == true;
+    /// <summary>Sans EQ (certaines éditions), Mono prend toute la place à côté du bouton Muet.</summary>
+    public int MonoSpan => BusHasEq ? 1 : 2;
     public string KindText => Model switch { StripViewModel s => s.KindText, BusViewModel b => b.BusName + " · " + (b.IsVirtual ? Strings.Get("CS_098") : Strings.Get("CS_092")), _ => string.Empty };
 
     public ChannelCard() { InitializeComponent(); }
@@ -49,6 +52,9 @@ public sealed partial class ChannelCard : UserControl
         menu.Opening += (_, _) => show.IsChecked = Model.ShowInFlyout;
         show.Click += (_, _) => Model.ShowInFlyout = show.IsChecked;
         menu.Items.Add(show);
+        var hide = new MenuFlyoutItem { Text = Strings.Get("CS_ConsoleHide"), Icon = new FontIcon { Glyph = "\uED1A" } };
+        hide.Click += (_, _) => Model.ShowInConsole = false;
+        menu.Items.Add(hide);
         menu.Items.Add(new MenuFlyoutSeparator());
         var reset = new MenuFlyoutItem { Text = Strings.Get("CS_102") };
         reset.Click += (_, _) => Model.DisplayName = string.Empty;

@@ -5,12 +5,12 @@
     <Setter Property="Template">
       <Setter.Value>
         <ControlTemplate TargetType="local:ChannelHeader">
-          <Grid ColumnSpacing="8" Background="Transparent" MinHeight="32">
+          <Grid Background="Transparent" MinHeight="24">
             <Grid.ColumnDefinitions>
               <ColumnDefinition Width="Auto" />
               <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
-            <FontIcon FontFamily="{StaticResource MixdeckIconFont}" Glyph="{TemplateBinding Icon}" FontSize="18" />
+            <FontIcon x:Name="PART_Icon" Margin="0,0,8,0" FontFamily="{StaticResource MixdeckIconFont}" Glyph="{TemplateBinding Icon}" FontSize="18" />
             <TextBlock x:Name="PART_Label" Grid.Column="1" VerticalAlignment="Center" Text="{TemplateBinding ChannelName}" TextTrimming="CharacterEllipsis" />
             <TextBox x:Uid="ChannelHeader001" x:Name="PART_Editor" Grid.Column="1" Visibility="Collapsed"  />
           </Grid>
