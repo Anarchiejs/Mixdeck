@@ -37,11 +37,11 @@ public partial class App : Application
     protected override async void OnLaunched(LaunchActivatedEventArgs args)
     {
         var paths = MixdeckPaths.Default;
-        paths.EnsureCreated();
-        ConfigureLogging(paths);
 
         try
         {
+            paths.EnsureCreated();
+            ConfigureLogging(paths);
             var isFirstRun = !File.Exists(paths.SettingsFile);
             using var bootstrapLoggers = LoggerFactory.Create(b => b.AddSerilog());
             var settingsStore = new SettingsStore(paths, bootstrapLoggers.CreateLogger<SettingsStore>());

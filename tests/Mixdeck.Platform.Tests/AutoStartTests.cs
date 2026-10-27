@@ -40,5 +40,16 @@ public sealed class AutoStartTests : IDisposable
         new AutoStart(_keyPath, Executable).IsEnabled.Should().Be(enabled);
     }
 
-    public void Dispose() => Registry.CurrentUser.DeleteSubKeyTree(_keyPath, throwOnMissingSubKey: false);
+    public void Dispose()
+    {
+        Registry.CurrentUser.DeleteSubKeyTree(_keyPath, throwOnMissingSubKey: false);
+
+        // Retire aussi la clé parente si plus aucun test ne l'utilise : rien ne doit rester dans le registre.
+        using var parent = Registry.CurrentUser.OpenSubKey(@"Software\Mixdeck.Tests");
+        if (parent is { SubKeyCount: 0, ValueCount: 0 })
+        {
+            parent.Close();
+            Registry.CurrentUser.DeleteSubKey(@"Software\Mixdeck.Tests", throwOnMissingSubKey: false);
+        }
+    }
 }
