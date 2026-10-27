@@ -21,14 +21,18 @@ public enum HotkeyAction
     VolumeUp,
     VolumeDown,
     OpenFlyout,
+    /// <summary>Applique le profil <see cref="HotkeyBinding.ProfileId"/>.</summary>
+    ApplyProfile,
 }
 
 /// <param name="VirtualKey">Code de touche virtuelle Win32 (VK_*).</param>
 /// <param name="TargetBus">Pour VolumeUp/VolumeDown : bus visé (0 = A1).</param>
 /// <param name="StepDb">Pas de volume en dB pour VolumeUp/VolumeDown.</param>
+/// <param name="ProfileId">Pour ApplyProfile : identifiant du profil à appliquer.</param>
 public sealed record HotkeyBinding(
     HotkeyAction Action,
     HotkeyModifiers Modifiers,
     int VirtualKey,
     int TargetBus = 0,
-    float StepDb = 2f);
+    float StepDb = 2f,
+    string? ProfileId = null);

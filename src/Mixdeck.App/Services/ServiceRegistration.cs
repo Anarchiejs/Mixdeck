@@ -71,6 +71,7 @@ internal static class ServiceRegistration
         // Pages de la console : une instance par navigation.
         services.AddTransient<MixerPageViewModel>();
         services.AddTransient<RoutingPageViewModel>();
+        services.AddTransient<DevicesPageViewModel>();
         services.AddTransient<ProfilesPageViewModel>();
         services.AddTransient<RulesPageViewModel>();
         services.AddTransient<SettingsPageViewModel>();

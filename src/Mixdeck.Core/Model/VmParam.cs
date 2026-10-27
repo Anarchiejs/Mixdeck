@@ -21,5 +21,25 @@ public static class VmParam
     public static string BusEqOn(int bus) => $"Bus[{bus}].EQ.on";
     public static string BusLabel(int bus) => $"Bus[{bus}].Label";
 
+    /// <summary>Appareil d'une entrée physique, ex. Strip[0].device.wdm = "Micro (USB)" ; "" pour le retirer.</summary>
+    public static string StripDevice(int strip, AudioDeviceDriver driver) => $"Strip[{strip}].device.{DriverKey(driver)}";
+    public static string StripDeviceName(int strip) => $"Strip[{strip}].device.name";
+
+    /// <summary>Appareil d'un bus physique, ex. Bus[0].device.wdm = "Casque (Realtek)".</summary>
+    public static string BusDevice(int bus, AudioDeviceDriver driver) => $"Bus[{bus}].device.{DriverKey(driver)}";
+    public static string BusDeviceName(int bus) => $"Bus[{bus}].device.name";
+
+    public const string CommandRestart = "Command.Restart";
+    public const string CommandShow = "Command.Show";
+
+    public static string DriverKey(AudioDeviceDriver driver) => driver switch
+    {
+        AudioDeviceDriver.Mme => "mme",
+        AudioDeviceDriver.Wdm => "wdm",
+        AudioDeviceDriver.Ks => "ks",
+        AudioDeviceDriver.Asio => "asio",
+        _ => throw new ArgumentOutOfRangeException(nameof(driver)),
+    };
+
     public static float FromBool(bool value) => value ? 1f : 0f;
 }
