@@ -212,12 +212,33 @@ public sealed class VoicemeeterMixer : IMixer
         }
         finally
         {
+            FlushWritesOnStop();
             Logout();
             CancelPending();
             ChangeState(MixerConnectionState.Disconnected);
             _started.TrySetResult();
             _stopped.TrySetResult();
         }
+    }
+
+    // Les écritures déjà acceptées partent avant la déconnexion : sinon, quitter Mixdeck pendant une atténuation
+    // automatique laisserait la musique baissée dans Voicemeeter.
+    private void FlushWritesOnStop()
+    {
+        try
+        {
+            if (State != MixerConnectionState.Connected) return;
+            var pending = new Dictionary<string, Command>(StringComparer.OrdinalIgnoreCase);
+            var count = _commands.Count;
+            for (var i = 0; i < count && _commands.TryDequeue(out var command); i++)
+            {
+                if (command.Kind is CommandKind.Float or CommandKind.String) pending[command.Parameter] = command;
+                else if (command.Kind == CommandKind.Script) { Flush(pending); CheckWrite(_api.SetParameters(command.Text!), "script"); }
+                else CompletePending(command);
+            }
+            Flush(pending);
+        }
+        catch (Exception exception) { _logger.LogDebug(exception, "Écritures finales non transmises."); }
     }
 
     // Les tests pilotent cette même boucle sans démarrer de thread.
