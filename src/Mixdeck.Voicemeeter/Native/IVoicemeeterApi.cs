@@ -14,4 +14,8 @@ public interface IVoicemeeterApi
     int SetParameterString(string name, string value);
     int SetParameters(string script);
     int GetLevel(int type, int channel, out float value);
+    int InputGetDeviceNumber();
+    int OutputGetDeviceNumber();
+    int InputGetDeviceDesc(int index, out int type, out string name, out string hardwareId);
+    int OutputGetDeviceDesc(int index, out int type, out string name, out string hardwareId);
 }

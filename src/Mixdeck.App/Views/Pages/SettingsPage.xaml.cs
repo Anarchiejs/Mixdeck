@@ -95,7 +95,7 @@ public sealed partial class SettingsPage : Page
         try
         {
             await ViewModel.FlushAsync();
-            var recorder = new HotkeyRecorder(row.Action, row.TargetBus, (float)row.StepDb, ViewModel.Conflicts);
+            var recorder = new HotkeyRecorder(row.Action, row.TargetBus, (float)row.StepDb, ViewModel.Conflicts, ViewModel.ProfileChoices, row.TargetProfile?.Id);
             var dialog = new ContentDialog
             {
                 XamlRoot = XamlRoot,

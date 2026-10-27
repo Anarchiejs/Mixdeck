@@ -3,6 +3,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Language="fr-FR" Loaded="OnLoaded">
     <StackPanel Spacing="16" MinWidth="280" MaxWidth="440">
         <TextBlock Text="Appuyez sur la combinaison souhaitée. Utilisez Ctrl, Alt, Maj ou Windows avec une touche." TextWrapping="Wrap" />
+        <ComboBox x:Name="ProfilePicker" Header="Profil à appliquer" DisplayMemberPath="Name" HorizontalAlignment="Stretch" SelectionChanged="OnProfileChanged" AutomationProperties.Name="Profil à appliquer par le raccourci" />
         <Button x:Name="CaptureButton" HorizontalAlignment="Stretch" MinHeight="80" PreviewKeyDown="OnCaptureKeyDown" AutomationProperties.Name="Enregistrer la prochaine combinaison de touches">
             <TextBlock x:Name="CombinationText" Text="En attente d’une combinaison…" TextWrapping="Wrap" TextAlignment="Center" Style="{StaticResource BodyStrongTextBlockStyle}" />
         </Button>
