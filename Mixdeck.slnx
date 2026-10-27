@@ -9,6 +9,11 @@
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/Mixdeck.Core.Tests/Mixdeck.Core.Tests.csproj" />
+    <Project Path="tests/Mixdeck.Platform.Tests/Mixdeck.Platform.Tests.csproj" />
     <Project Path="tests/Mixdeck.Voicemeeter.Tests/Mixdeck.Voicemeeter.Tests.csproj" />
+  </Folder>
+  <Folder Name="/tools/">
+    <Project Path="tools/Mixdeck.PlatformProbe/Mixdeck.PlatformProbe.csproj" />
+    <Project Path="tools/Mixdeck.Probe/Mixdeck.Probe.csproj" />
   </Folder>
 </Solution>

@@ -8,8 +8,13 @@ public sealed class MixdeckPaths
         Root = root;
     }
 
+    /// <summary>Variable d'environnement qui remplace la racine (tests, recette sur une autre machine).</summary>
+    public const string RootVariable = "MIXDECK_DATA_DIR";
+
     public static MixdeckPaths Default { get; } = new(
-        Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Mixdeck"));
+        Environment.GetEnvironmentVariable(RootVariable) is { Length: > 0 } custom
+            ? custom
+            : Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Mixdeck"));
 
     public string Root { get; }
     public string SettingsFile => Path.Combine(Root, "settings.json");
