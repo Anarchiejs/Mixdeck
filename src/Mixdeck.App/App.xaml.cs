@@ -102,9 +102,11 @@ public partial class App : Application
 
         var mixer = GetService<IMixer>();
         await mixer.StartAsync();
-        if (settings.AutoLaunchVoicemeeter && !_options.Demo)
+        if (settings.AutoLaunchVoicemeeter && !_options.Demo
+            && await mixer.LaunchVoicemeeterAsync() && mixer is Mixdeck.Voicemeeter.VoicemeeterMixer remote)
         {
-            await mixer.LaunchVoicemeeterAsync();
+            // Sans attendre : la connexion peut prendre quelques secondes, l'icône doit apparaître tout de suite.
+            _ = remote.HideWindowWhenConnectedAsync(settings.HideVoicemeeterWindow);
         }
 
         await GetService<IProfileService>().LoadAsync();
