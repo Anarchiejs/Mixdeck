@@ -113,6 +113,13 @@ public sealed partial class DevicesPageViewModel : ObservableObject
         try
         {
             var inputs = await mixer.GetDevicesAsync(AudioDeviceDirection.Input);
+            if (inputs.Count == 0 && mixer.State == MixerConnectionState.Connected)
+            {
+                // Certaines versions de Voicemeeter ne listent aucune entrée : on propose les micros actifs de Windows,
+                // dont le nom est celui qu'attend Voicemeeter en WDM.
+                inputs = await Task.Run(() => Mixdeck.Platform.Audio.WindowsAudioDevices.GetCaptureEndpoints()
+                    .Select(e => new AudioDevice(AudioDeviceDriver.Wdm, e.Name, e.Id)).ToList());
+            }
             var outputs = await mixer.GetDevicesAsync(AudioDeviceDirection.Output);
             var rows = Inputs.Concat(Outputs).ToArray();
             var names = new List<string?>();

@@ -6,10 +6,12 @@ using Mixdeck.Core.Abstractions;
 namespace Mixdeck.App.ViewModels.AppVolume;
 
 /// <summary>Suivi actif uniquement pendant l'affichage. Activate/Deactivate sont appelés sur le thread UI.</summary>
-public sealed partial class AppVolumeListViewModel(Func<IAppAudioSessions> createSessions, IUiDispatcher dispatcher)
+public sealed partial class AppVolumeListViewModel(Func<IAppAudioSessions> createSessions, IUiDispatcher dispatcher,
+    IAppAudioRouter router)
     : ObservableObject, IDisposable
 {
     private IAppAudioSessions? _source;
+    private IAppAudioRouter? _routerSupported;
     public ObservableCollection<AppVolumeRowViewModel> Sessions { get; } = [];
 
     [ObservableProperty]
@@ -63,7 +65,7 @@ public sealed partial class AppVolumeListViewModel(Func<IAppAudioSessions> creat
             var row = Sessions.FirstOrDefault(item => item.Id == session.Id);
             if (row is null)
             {
-                row = new AppVolumeRowViewModel(source, session);
+                row = new AppVolumeRowViewModel(source, session, _routerSupported ??= router.IsSupported ? router : null);
                 Sessions.Insert(i, row);
             }
             else

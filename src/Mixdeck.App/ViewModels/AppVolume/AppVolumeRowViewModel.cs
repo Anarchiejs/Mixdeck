@@ -14,14 +14,23 @@ public sealed partial class AppVolumeRowViewModel : ObservableObject, IDisposabl
     private long? _muteEdited;
     private string? _iconPath;
 
-    public AppVolumeRowViewModel(IAppAudioSessions source, AppAudioSession session)
+    public AppVolumeRowViewModel(IAppAudioSessions source, AppAudioSession session, IAppAudioRouter? router = null)
     {
         _source = source;
         Id = session.Id;
+        ProcessId = session.ProcessId;
+        Router = router;
+        // Sons système et processus inconnus : Windows ne permet pas de leur choisir une sortie.
+        CanRoute = router is not null && session.ProcessId != 0 && !session.IsSystemSounds;
         Synchronize(session);
     }
 
     public string Id { get; }
+
+    public int ProcessId { get; }
+
+    /// <summary>Choix de la sortie de cette application (« Envoyer vers… ») ; null si indisponible.</summary>
+    public IAppAudioRouter? Router { get; }
 
     [ObservableProperty]
     public partial string DisplayName { get; private set; } = string.Empty;
