@@ -1,4 +1,5 @@
-﻿using System.Collections.ObjectModel;
+using Mixdeck.App.Localization;
+using System.Collections.ObjectModel;
 using System.Globalization;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -39,16 +40,43 @@ public sealed partial class SettingsPageViewModel : ObservableObject
         Refresh();
     }
 
+    [ObservableProperty]
+    public partial int LanguageIndex { get; set; }
+
+    partial void OnLanguageIndexChanged(int value)
+    {
+        if (value is >= 0 and <= 2)
+            QueueSave(s => s with { Language = value == 1 ? "fr-FR" : value == 2 ? "en-US" : null });
+    }
+
+    [RelayCommand]
+    private async Task RestartAsync()
+    {
+        try
+        {
+            await FlushAsync();
+            if (HasError) return;
+            if (Environment.ProcessPath is not { } executable) throw new InvalidOperationException();
+            var start = new System.Diagnostics.ProcessStartInfo(executable) { UseShellExecute = false };
+            foreach (var argument in Environment.GetCommandLineArgs().Skip(1).Where(a => a != "--restart" && a != "--after-crash"))
+                start.ArgumentList.Add(argument);
+            start.ArgumentList.Add("--restart");
+            using var process = System.Diagnostics.Process.Start(start) ?? throw new InvalidOperationException();
+            shell.Exit();
+        }
+        catch (Exception) { ReportError(Strings.Get("Settings_RestartError")); }
+    }
+
     public MixerViewModel Mixer { get; }
     public string DataPath { get; }
     public ObservableCollection<SettingsProfileChoice> ProfileChoices { get; } = [];
     public ObservableCollection<SettingsProfileChoice> HotkeyProfileChoices { get; } = [];
-    public string DuckingThresholdText => DuckingThresholdDb.ToString("0", CultureInfo.GetCultureInfo("fr-FR")) + " dBFS";
-    public string DuckingAmountText => DuckingAmountDb.ToString("0", CultureInfo.GetCultureInfo("fr-FR")) + " dB";
-    public string DuckingHoldText => DuckingHoldMilliseconds.ToString("0", CultureInfo.GetCultureInfo("fr-FR")) + " ms";
+    public string DuckingThresholdText => DuckingThresholdDb.ToString("0", Strings.Culture) + " dBFS";
+    public string DuckingAmountText => DuckingAmountDb.ToString("0", Strings.Culture) + " dB";
+    public string DuckingHoldText => DuckingHoldMilliseconds.ToString("0", Strings.Culture) + " ms";
     public ObservableCollection<HotkeyRowViewModel> Hotkeys { get; } = [];
-    public string FadeText => Math.Round(FadeMilliseconds).ToString("0", CultureInfo.GetCultureInfo("fr-FR")) + " ms";
-    public string AccentSummary => settings.Current.AccentColor is { } color ? "Couleur personnalisée : " + color : "Couleur de Windows";
+    public string FadeText => Math.Round(FadeMilliseconds).ToString("0", Strings.Culture) + " ms";
+    public string AccentSummary => settings.Current.AccentColor is { } color ? Strings.Get("Settings_AccentCustom") + color : Strings.Get("Settings_AccentWindows");
     public string? AccentColor => settings.Current.AccentColor;
 
     [ObservableProperty]
@@ -94,7 +122,7 @@ public sealed partial class SettingsPageViewModel : ObservableObject
     [ObservableProperty]
     public partial string ErrorMessage { get; set; } = string.Empty;
     [ObservableProperty]
-    public partial string SaveStatus { get; set; } = "Les modifications sont enregistrées automatiquement.";
+    public partial string SaveStatus { get; set; } = Strings.Get("Settings_AutoSave");
 
     public void Refresh()
     {
@@ -102,7 +130,7 @@ public sealed partial class SettingsPageViewModel : ObservableObject
         var current = settings.Current;
         ProfileChoices.Clear();
         HotkeyProfileChoices.Clear();
-        ProfileChoices.Add(new(null, "Aucun"));
+        ProfileChoices.Add(new(null, Strings.Get("Settings_None")));
         foreach (var profile in Mixer.Profiles)
         {
             var choice = new SettingsProfileChoice(profile.Id, profile.Name);
@@ -110,7 +138,7 @@ public sealed partial class SettingsPageViewModel : ObservableObject
             HotkeyProfileChoices.Add(choice);
         }
         if (current.StartupProfileId is { } missing && ProfileChoices.All(p => p.Id != missing))
-            ProfileChoices.Add(new(missing, "Profil indisponible"));
+            ProfileChoices.Add(new(missing, Strings.Get("Settings_MissingProfile")));
         StartupProfile = ProfileChoices.First(p => p.Id == current.StartupProfileId);
         AlwaysShowTrayIcon = current.AlwaysShowTrayIcon;
         ShowMicBadge = current.ShowMicBadge;
@@ -127,6 +155,7 @@ public sealed partial class SettingsPageViewModel : ObservableObject
         ShowOsd = current.ShowOsd;
         CheckForUpdates = current.CheckForUpdates;
         ThemeIndex = (int)current.Theme;
+        LanguageIndex = current.Language == "fr-FR" ? 1 : current.Language == "en-US" ? 2 : 0;
         MicStripIndex = current.MicStripIndex >= 0 && current.MicStripIndex < Mixer.Strips.Count ? current.MicStripIndex : -1;
         FadeMilliseconds = Math.Clamp(current.FadeMilliseconds, 0, 2000);
         foreach (var row in Hotkeys) row.Refresh(current.Hotkeys.FirstOrDefault(h => h.Action == row.Action), hotkeys.Failed);
@@ -214,11 +243,11 @@ public sealed partial class SettingsPageViewModel : ObservableObject
         await saveGate.WaitAsync();
         try
         {
-            SaveStatus = "Enregistrement…";
+            SaveStatus = Strings.Get("Settings_Saving");
             var success = await SettingsWriter.UpdateAsync(settings, change);
             HasError = !success;
-            ErrorMessage = success ? string.Empty : "La modification n’a pas été enregistrée. Vérifiez l’accès au dossier de données et réessayez.";
-            SaveStatus = success ? "Modifications enregistrées." : "Échec de l’enregistrement.";
+            ErrorMessage = success ? string.Empty : Strings.Get("Settings_SaveError");
+            SaveStatus = success ? Strings.Get("Settings_Saved") : Strings.Get("Settings_SaveFailed");
             if (!success) refreshAfterFailure = true;
             OnPropertyChanged(nameof(AccentSummary));
             RefreshHotkeyWarnings();
@@ -260,7 +289,7 @@ public sealed partial class SettingsPageViewModel : ObservableObject
     {
         if (binding is { Action: HotkeyAction.ApplyProfile } && !Mixer.Profiles.Any(p => p.Id == binding.ProfileId))
         {
-            ReportError("Choisissez un profil existant pour ce raccourci.");
+            ReportError(Strings.Get("Settings_ChooseProfile"));
             return false;
         }
         var success = await SaveAsync(s => s with
@@ -287,7 +316,7 @@ public sealed partial class SettingsPageViewModel : ObservableObject
     private void OpenLogs()
     {
         try { shell.OpenLogsFolder(); }
-        catch (Exception) { ReportError("Impossible d’ouvrir le dossier des journaux."); }
+        catch (Exception) { ReportError(Strings.Get("Settings_OpenLogsError")); }
     }
 
     [RelayCommand]
@@ -298,9 +327,9 @@ public sealed partial class SettingsPageViewModel : ObservableObject
             var data = new DataPackage();
             data.SetText(DataPath);
             Clipboard.SetContent(data);
-            SaveStatus = "Emplacement copié dans le Presse-papiers.";
+            SaveStatus = Strings.Get("Settings_Copied");
         }
-        catch (Exception) { ReportError("Impossible de copier l’emplacement des données."); }
+        catch (Exception) { ReportError(Strings.Get("Settings_CopyError")); }
     }
 }
 
@@ -316,22 +345,22 @@ public sealed partial class HotkeyRowViewModel : ObservableObject
     public ObservableCollection<SettingsProfileChoice> ProfileChoices => owner.HotkeyProfileChoices;
     public bool IsVolume => Action is HotkeyAction.VolumeUp or HotkeyAction.VolumeDown;
     public bool HasBinding => Binding is not null;
-    public string Combination => Binding is null ? "Non attribué" : HotkeyFormatter.Format(Binding);
+    public string Combination => Binding is null ? Strings.Get("Settings_Unassigned") : LocalizedHotkeyFormatter.Format(Binding);
     public string Name => Action switch
     {
-        HotkeyAction.ToggleMic => "Couper / activer le micro",
-        HotkeyAction.PushToTalk => "Parler en maintenant la touche",
-        HotkeyAction.NextProfile => "Profil suivant",
-        HotkeyAction.PreviousProfile => "Profil précédent",
-        HotkeyAction.ApplyProfile => "Appliquer un profil",
-        HotkeyAction.VolumeUp => "Volume +",
-        HotkeyAction.VolumeDown => "Volume −",
-        _ => "Ouvrir le panneau rapide",
+        HotkeyAction.ToggleMic => Strings.Get("Settings_ToggleMic"),
+        HotkeyAction.PushToTalk => Strings.Get("Settings_PushToTalk"),
+        HotkeyAction.NextProfile => Strings.Get("Settings_NextProfile"),
+        HotkeyAction.PreviousProfile => Strings.Get("Settings_PreviousProfile"),
+        HotkeyAction.ApplyProfile => Strings.Get("Settings_ApplyProfile"),
+        HotkeyAction.VolumeUp => Strings.Get("Settings_VolumeUp"),
+        HotkeyAction.VolumeDown => Strings.Get("Settings_VolumeDown"),
+        _ => Strings.Get("Settings_OpenFlyout"),
     };
-    public string EditLabel => "Modifier : " + Name;
-    public string ClearLabel => "Effacer : " + Name;
+    public string EditLabel => Strings.Get("Settings_Edit") + Name;
+    public string ClearLabel => Strings.Get("Settings_Clear") + Name;
     public string StepText => Converters.Db(StepDb);
-    public DecimalFormatter StepFormatter { get; } = new(["fr-FR"], "FR") { FractionDigits = 1, IntegerDigits = 1 };
+    public DecimalFormatter StepFormatter { get; } = new([Strings.Language], new RegionInfo(Strings.Language).TwoLetterISORegionName) { FractionDigits = 1, IntegerDigits = 1 };
 
     [ObservableProperty]
     public partial bool HasConflict { get; set; }

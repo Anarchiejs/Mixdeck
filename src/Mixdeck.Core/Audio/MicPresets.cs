@@ -1,3 +1,4 @@
+using Mixdeck.Core.Abstractions;
 using System.Globalization;
 using Mixdeck.Core.Model;
 using Mixdeck.Core.Settings;
@@ -14,14 +15,15 @@ public static class MicPresets
     // Color_x positif éclaircit la voix ; Color_y reste à zéro pour éviter l’effet spatial.
     // Denoiser et les réglages détaillés du compresseur appartiennent à Potato (version 3).
     // Référence : https://download.vb-audio.com/Download_CABLE/VoicemeeterRemoteAPI.pdf, liste des paramètres.
-    public static IReadOnlyList<MicPresetDefinition> All { get; } = Array.AsReadOnly<MicPresetDefinition>(
-    [
-        new(MicPreset.Off, "Aucun", "Désactive la porte de bruit, la compression et la couleur de la voix.", 0, 0, 0, 0),
-        new(MicPreset.Light, "Léger", "Réduit doucement les bruits faibles et lisse les écarts de voix.", 1, 1.5f, 0, 0),
-        new(MicPreset.Voice, "Voix", "Atténue les bruits entre les phrases et rend la voix plus claire et régulière.", 2, 3, 0.15f, 0),
-        new(MicPreset.Strong, "Fort", "Pour une pièce bruyante : porte de bruit marquée et voix plus présente.", 4, 5, 0.2f, 0),
-    ]);
+    public static IReadOnlyList<MicPresetDefinition> All { get; } = GetAll(FrenchTextProvider.Instance);
 
+    public static IReadOnlyList<MicPresetDefinition> GetAll(ITextProvider texts) => Array.AsReadOnly<MicPresetDefinition>(
+    [
+        new(MicPreset.Off, texts.Get("Core_PresetOffName"), texts.Get("Core_PresetOffDescription"), 0, 0, 0, 0),
+        new(MicPreset.Light, texts.Get("Core_PresetLightName"), texts.Get("Core_PresetLightDescription"), 1, 1.5f, 0, 0),
+        new(MicPreset.Voice, texts.Get("Core_PresetVoiceName"), texts.Get("Core_PresetVoiceDescription"), 2, 3, 0.15f, 0),
+        new(MicPreset.Strong, texts.Get("Core_PresetStrongName"), texts.Get("Core_PresetStrongDescription"), 4, 5, 0.2f, 0),
+    ]);
     public static string CreateScript(int strip, MicPreset preset, MixerLayout? layout = null)
     {
         layout ??= MixerLayout.Banana;

@@ -1,3 +1,4 @@
+using Mixdeck.App.Localization;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Controls.Primitives;
@@ -15,7 +16,7 @@ public sealed class MuteToggle : ToggleButton
         DefaultStyleKey = typeof(MuteToggle);
         ControlResources.Load(this);
         RegisterPropertyChangedCallback(IsCheckedProperty, (_, _) => UpdateGlyph());
-        Microsoft.UI.Xaml.Automation.AutomationProperties.SetName(this, "Couper le son");
+        Microsoft.UI.Xaml.Automation.AutomationProperties.SetName(this, Strings.Get("CS_003"));
     }
     private static void Changed(DependencyObject d, DependencyPropertyChangedEventArgs e) => ((MuteToggle)d).UpdateGlyph();
     protected override void OnApplyTemplate() { base.OnApplyTemplate(); UpdateGlyph(); }

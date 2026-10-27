@@ -1,13 +1,13 @@
-﻿<UserControl x:Class="Mixdeck.App.Views.Pages.Settings.HotkeyRecorder"
+<UserControl x:Class="Mixdeck.App.Views.Pages.Settings.HotkeyRecorder"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Language="fr-FR" Loaded="OnLoaded">
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Loaded="OnLoaded">
     <StackPanel Spacing="16" MinWidth="280" MaxWidth="440">
-        <TextBlock Text="Appuyez sur la combinaison souhaitée. Utilisez Ctrl, Alt, Maj ou Windows avec une touche." TextWrapping="Wrap" />
-        <ComboBox x:Name="ProfilePicker" Header="Profil à appliquer" DisplayMemberPath="Name" HorizontalAlignment="Stretch" SelectionChanged="OnProfileChanged" AutomationProperties.Name="Profil à appliquer par le raccourci" />
-        <Button x:Name="CaptureButton" HorizontalAlignment="Stretch" MinHeight="80" PreviewKeyDown="OnCaptureKeyDown" AutomationProperties.Name="Enregistrer la prochaine combinaison de touches">
-            <TextBlock x:Name="CombinationText" Text="En attente d’une combinaison…" TextWrapping="Wrap" TextAlignment="Center" Style="{StaticResource BodyStrongTextBlockStyle}" />
+        <TextBlock x:Uid="HotkeyRecorder001"  TextWrapping="Wrap" />
+        <ComboBox x:Uid="HotkeyRecorder002" x:Name="ProfilePicker"  DisplayMemberPath="Name" HorizontalAlignment="Stretch" SelectionChanged="OnProfileChanged"  />
+        <Button x:Uid="HotkeyRecorder003" x:Name="CaptureButton" HorizontalAlignment="Stretch" MinHeight="80" PreviewKeyDown="OnCaptureKeyDown" >
+            <TextBlock x:Uid="HotkeyRecorder004" x:Name="CombinationText"  TextWrapping="Wrap" TextAlignment="Center" Style="{StaticResource BodyStrongTextBlockStyle}" />
         </Button>
-        <InfoBar x:Name="ValidationError" Severity="Warning" IsClosable="False" Title="Combinaison indisponible" />
-        <TextBlock Text="Échap annule. Tab permet de rejoindre les boutons. Cliquez sur la zone de capture pour recommencer." TextWrapping="Wrap" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Style="{StaticResource CaptionTextBlockStyle}" />
+        <InfoBar x:Uid="HotkeyRecorder005" x:Name="ValidationError" Severity="Warning" IsClosable="False"  />
+        <TextBlock x:Uid="HotkeyRecorder006"  TextWrapping="Wrap" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Style="{StaticResource CaptionTextBlockStyle}" />
     </StackPanel>
 </UserControl>

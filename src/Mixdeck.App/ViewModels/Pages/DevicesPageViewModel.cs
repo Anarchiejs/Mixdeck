@@ -1,3 +1,4 @@
+using Mixdeck.App.Localization;
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -32,7 +33,7 @@ public sealed partial class DevicesPageViewModel : ObservableObject
     public ObservableCollection<DeviceRowViewModel> Inputs { get; } = [];
     public ObservableCollection<DeviceRowViewModel> Outputs { get; } = [];
     public MixerLayout Layout => layout;
-    public IReadOnlyList<MicPresetDefinition> Presets => MicPresets.All;
+    public IReadOnlyList<MicPresetDefinition> Presets { get; } = MicPresets.GetAll(new AppTextProvider());
     public bool CanEdit => IsConnected && !IsRefreshing;
     public bool CanApplyPreset => CanEdit && IsPhysicalMic;
 
@@ -81,7 +82,7 @@ public sealed partial class DevicesPageViewModel : ObservableObject
         RefreshSettings();
         refreshVersion++;
         IsRefreshing = false;
-        if (!IsConnected) Report("Le moteur audio est hors connexion. Les appareils seront relus à la reconnexion.", true);
+        if (!IsConnected) Report(Strings.Get("CS_036"), true);
         else _ = RefreshDevicesAsync();
     });
     private void OnSettingsChanged(object? sender, AppSettings value) => ui.Post(() => { if (active) RefreshSettings(); });
@@ -99,7 +100,7 @@ public sealed partial class DevicesPageViewModel : ObservableObject
         if (!string.IsNullOrWhiteSpace(custom.DisplayName)) return custom.DisplayName;
         var snapshot = mixer.Snapshot;
         var label = bus ? snapshot.Buses.ElementAtOrDefault(index)?.Label : snapshot.Strips.ElementAtOrDefault(index)?.Label;
-        return string.IsNullOrWhiteSpace(label) ? (bus ? layout.BusNames[index] : layout.DefaultStripLabels[index]) : label;
+        return string.IsNullOrWhiteSpace(label) ? (bus ? layout.BusNames[index] : (index < layout.PhysicalStripCount ? Strings.Format("Core_InputName", index + 1) : layout.DefaultStripLabels[index])) : label;
     }
     private void RefreshSettings()
     {
@@ -118,7 +119,7 @@ public sealed partial class DevicesPageViewModel : ObservableObject
         foreach (var row in Inputs.Concat(Outputs)) row.Name = ChannelName(row.Index, row.IsBus);
         var index = settings.Current.MicStripIndex;
         IsPhysicalMic = index >= 0 && index < layout.PhysicalStripCount;
-        MicName = index >= 0 && index < layout.StripCount ? ChannelName(index, false) : "Micro non configuré";
+        MicName = index >= 0 && index < layout.StripCount ? ChannelName(index, false) : Strings.Get("CS_016");
         SelectedPreset = Presets.FirstOrDefault(p => p.Preset == settings.Current.MicPreset) ?? Presets[0];
         HideVoicemeeterWindow = settings.Current.HideVoicemeeterWindow;
         loading = false;
@@ -147,9 +148,9 @@ public sealed partial class DevicesPageViewModel : ObservableObject
             if (!active || version != refreshVersion) return;
             for (var i = 0; i < rows.Length; i++) rows[i].Populate(rows[i].IsBus ? outputs : inputs, names[i]);
             IsConnected = mixer.State == MixerConnectionState.Connected;
-            Report(IsConnected ? "Liste des appareils actualisée. WDM est recommandé pour sa faible latence." : "Connectez Voicemeeter pour choisir vos appareils.", !IsConnected);
+            Report(IsConnected ? Strings.Get("CS_037") : Strings.Get("CS_038"), !IsConnected);
         }
-        catch (Exception) { if (active && version == refreshVersion) Report("Impossible de lire les appareils. Réessayez après la connexion au moteur.", true); }
+        catch (Exception) { if (active && version == refreshVersion) Report(Strings.Get("CS_039"), true); }
         finally { if (version == refreshVersion) IsRefreshing = false; }
     }
 
@@ -160,9 +161,9 @@ public sealed partial class DevicesPageViewModel : ObservableObject
         {
             var driver = choice.Device?.Driver ?? AudioDeviceDriver.Wdm;
             mixer.SetString(row.IsBus ? VmParam.BusDevice(row.Index, driver) : VmParam.StripDevice(row.Index, driver), choice.Device?.Name ?? "");
-            Report("Changement d’appareil transmis au moteur. Actualisez la liste pour relire son état.");
+            Report(Strings.Get("CS_040"));
         }
-        catch (Exception) { Report("Impossible de changer cet appareil. Vérifiez la connexion au moteur.", true); }
+        catch (Exception) { Report(Strings.Get("CS_041"), true); }
     }
 
     [RelayCommand]
@@ -170,17 +171,17 @@ public sealed partial class DevicesPageViewModel : ObservableObject
     {
         var preset = SelectedPreset;
         var strip = settings.Current.MicStripIndex;
-        if (!CanApplyPreset || preset is null) { Report("Choisissez une entrée micro physique dans Réglages et connectez le moteur.", true); return; }
+        if (!CanApplyPreset || preset is null) { Report(Strings.Get("CS_042"), true); return; }
         await saveGate.WaitAsync();
         try
         {
-            if (mixer.State != MixerConnectionState.Connected) { Report("Le moteur audio est hors connexion.", true); return; }
+            if (mixer.State != MixerConnectionState.Connected) { Report(Strings.Get("CS_043"), true); return; }
             if (strip < 0 || strip >= mixer.Layout.PhysicalStripCount) return;
             mixer.ApplyScript(MicPresets.CreateScript(strip, preset.Preset, mixer.Layout));
             var saved = await SettingsWriter.UpdateAsync(settings, s => s with { MicPreset = preset.Preset });
-            Report(saved ? "Préréglage « " + preset.Name + " » transmis au micro." : "Le traitement a été transmis, mais le choix n’a pas pu être enregistré.", !saved);
+            Report(saved ? Strings.Format("CS_PresetApplied", preset.Name) : Strings.Get("CS_044"), !saved);
         }
-        catch (Exception) { Report("Impossible d’appliquer le préréglage du micro.", true); }
+        catch (Exception) { Report(Strings.Get("CS_045"), true); }
         finally { saveGate.Release(); }
     }
 
@@ -193,16 +194,16 @@ public sealed partial class DevicesPageViewModel : ObservableObject
             if (!await SettingsWriter.UpdateAsync(settings, s => s with { HideVoicemeeterWindow = value }))
             {
                 RefreshSettings();
-                Report("Le réglage de la fenêtre n’a pas pu être enregistré.", true);
+                Report(Strings.Get("CS_046"), true);
             }
         }
         finally { saveGate.Release(); }
     }
     public void RestartEngine()
     {
-        if (!CanEdit) { Report("Le moteur audio est hors connexion.", true); return; }
-        try { mixer.SetFloat(VmParam.CommandRestart, 1); Report("Demande de redémarrage transmise. Une brève interruption audio est normale."); }
-        catch (Exception) { Report("Impossible de demander le redémarrage du moteur audio.", true); }
+        if (!CanEdit) { Report(Strings.Get("CS_043"), true); return; }
+        try { mixer.SetFloat(VmParam.CommandRestart, 1); Report(Strings.Get("CS_047")); }
+        catch (Exception) { Report(Strings.Get("CS_048"), true); }
     }
     public void Report(string text, bool error = false)
     {
@@ -217,7 +218,7 @@ public sealed record DeviceChoice(AudioDevice? Device, string Name, bool IsCurre
 public sealed partial class DeviceRowViewModel(DevicesPageViewModel owner, int index, bool isBus) : ObservableObject
 {
     private bool loading;
-    private readonly string kind = isBus ? owner.Layout.BusNames[index] + " · Sortie physique" : "Entrée physique " + (index + 1);
+    private readonly string kind = isBus ? owner.Layout.BusNames[index] + Strings.Get("CS_049") : Strings.Get("CS_050") + (index + 1);
     public DevicesPageViewModel Owner => owner;
     public int Index => index;
     public bool IsBus => isBus;
@@ -229,26 +230,26 @@ public sealed partial class DeviceRowViewModel(DevicesPageViewModel owner, int i
     [ObservableProperty]
     public partial DeviceChoice? SelectedDevice { get; set; }
     [ObservableProperty]
-    public partial string CurrentName { get; set; } = "Aucun";
+    public partial string CurrentName { get; set; } = Strings.Get("CS_051");
     partial void OnSelectedDeviceChanged(DeviceChoice? value) { if (!loading && value is not null) owner.SelectDevice(this, value); }
     public void Populate(IReadOnlyList<AudioDevice> devices, string? current)
     {
         loading = true;
-        var none = new DeviceChoice(null, "Aucun");
+        var none = new DeviceChoice(null, Strings.Get("CS_051"));
         Choices.Clear();
         Choices.Add(none);
-        CurrentName = string.IsNullOrWhiteSpace(current) ? "Aucun" : current;
+        CurrentName = string.IsNullOrWhiteSpace(current) ? Strings.Get("CS_051") : current;
         DeviceChoice selected = none;
         if (!string.IsNullOrWhiteSpace(current))
         {
             // Le nom seul ne permet pas de déduire le pilote : ne pas prétendre que l’appareil courant utilise WDM.
-            selected = new(null, current + " (actuel)", true);
+            selected = new(null, current + Strings.Get("CS_052"), true);
             Choices.Add(selected);
         }
         AudioDeviceDriver[] drivers = [AudioDeviceDriver.Wdm, AudioDeviceDriver.Ks, AudioDeviceDriver.Mme, AudioDeviceDriver.Asio];
         foreach (var driver in drivers)
         {
-            var label = driver == AudioDeviceDriver.Wdm ? "WDM, recommandé" : VmParam.DriverKey(driver).ToUpperInvariant();
+            var label = driver == AudioDeviceDriver.Wdm ? Strings.Get("CS_053") : VmParam.DriverKey(driver).ToUpperInvariant();
             foreach (var device in devices.Where(d => d.Driver == driver).OrderBy(d => d.Name, StringComparer.CurrentCultureIgnoreCase))
                 Choices.Add(new DeviceChoice(device, $"{device.Name} · {label}"));
         }

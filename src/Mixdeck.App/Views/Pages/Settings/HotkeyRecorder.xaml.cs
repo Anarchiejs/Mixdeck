@@ -1,4 +1,5 @@
-﻿using Microsoft.UI.Input;
+using Mixdeck.App.Localization;
+using Microsoft.UI.Input;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Input;
@@ -52,17 +53,17 @@ public sealed partial class HotkeyRecorder : UserControl
         if (key is 0x10 or 0x11 or 0x12 or 0x5B or 0x5C or >= 0xA0 and <= 0xA5) return;
         captured = null;
         if (!HotkeyFormatter.IsValidCombination(modifiers, key))
-            ShowError("Ajoutez un modificateur (Ctrl, Alt, Maj ou Windows). Une touche seule n’est pas un raccourci valide, sauf certaines touches multimédias ou F13 à F24.");
+            ShowError(Strings.Get("CS_137"));
         else
         {
             var binding = new HotkeyBinding(action, modifiers, key, targetBus, stepDb);
-            if (conflicts(binding)) ShowError("Cette combinaison est déjà attribuée à une autre action de Mixdeck.");
+            if (conflicts(binding)) ShowError(Strings.Get("CS_138"));
             else
             {
                 captured = binding;
                 ValidationError.IsOpen = false;
-                CombinationText.Text = HotkeyFormatter.Format(binding);
-                if (Value is null) ShowError("Choisissez le profil à appliquer avant d’enregistrer.");
+                CombinationText.Text = LocalizedHotkeyFormatter.Format(binding);
+                if (Value is null) ShowError(Strings.Get("CS_139"));
             }
         }
         Captured?.Invoke(this, EventArgs.Empty);

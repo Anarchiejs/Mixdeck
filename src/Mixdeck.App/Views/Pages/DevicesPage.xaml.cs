@@ -1,3 +1,4 @@
+using Mixdeck.App.Localization;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Mixdeck.App.ViewModels.Pages;
@@ -24,15 +25,15 @@ public sealed partial class DevicesPage : Page
             var dialog = new ContentDialog
             {
                 XamlRoot = XamlRoot,
-                Title = "Redémarrer le moteur audio ?",
-                Content = "Le son sera interrompu quelques instants. Vos réglages restent conservés.",
-                PrimaryButtonText = "Redémarrer",
-                CloseButtonText = "Annuler",
+                Title = Strings.Get("CS_083"),
+                Content = Strings.Get("CS_084"),
+                PrimaryButtonText = Strings.Get("CS_085"),
+                CloseButtonText = Strings.Get("CS_086"),
                 DefaultButton = ContentDialogButton.Close,
             };
             if (await dialog.ShowAsync() == ContentDialogResult.Primary) ViewModel.RestartEngine();
         }
-        catch (Exception) { ViewModel.Report("Impossible d’ouvrir la confirmation du redémarrage.", true); }
+        catch (Exception) { ViewModel.Report(Strings.Get("CS_087"), true); }
         finally { dialogOpen = false; }
     }
 }

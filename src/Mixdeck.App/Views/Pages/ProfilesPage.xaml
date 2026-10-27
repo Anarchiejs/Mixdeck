@@ -7,25 +7,25 @@
     xmlns:common="using:Mixdeck.App.Views.Pages.Common">
     <ScrollViewer HorizontalScrollMode="Disabled" VerticalScrollBarVisibility="Auto">
         <StackPanel Padding="{StaticResource MixdeckPagePadding}" Spacing="24">
-            <TextBlock Style="{StaticResource TitleTextBlockStyle}" Text="Profils" />
-            <TextBlock Text="Retrouvez le bon mixage en un clic. Enregistrez vos réglages pour chaque moment."
+            <TextBlock x:Uid="ProfilesPage001" Style="{StaticResource TitleTextBlockStyle}"  />
+            <TextBlock x:Uid="ProfilesPage002"
                 Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" Margin="0,-16,0,0" />
             <StackPanel Orientation="Horizontal" Spacing="8">
                 <Button Click="OnCreateClick" Style="{StaticResource AccentButtonStyle}" IsEnabled="{x:Bind ViewModel.IsIdle, Mode=OneWay}">
-                    <StackPanel Orientation="Horizontal" Spacing="8"><FontIcon Glyph="&#xE710;" FontSize="16" /><TextBlock Text="Nouveau profil depuis l’état actuel" /></StackPanel>
+                    <StackPanel Orientation="Horizontal" Spacing="8"><FontIcon Glyph="&#xE710;" FontSize="16" /><TextBlock x:Uid="ProfilesPage003"  /></StackPanel>
                 </Button>
-                <Button Content="Importer…" Click="OnImportClick" IsEnabled="{x:Bind ViewModel.IsIdle, Mode=OneWay}" />
+                <Button x:Uid="ProfilesPage004"  Click="OnImportClick" IsEnabled="{x:Bind ViewModel.IsIdle, Mode=OneWay}" />
             </StackPanel>
-            <ProgressBar IsIndeterminate="True" Visibility="{x:Bind ViewModel.IsBusy, Mode=OneWay}" AutomationProperties.Name="Opération en cours" />
-            <InfoBar IsOpen="{x:Bind ViewModel.HasError, Mode=TwoWay}" Visibility="{x:Bind ViewModel.HasError, Mode=OneWay}" Severity="Error" Title="Opération impossible"
+            <ProgressBar x:Uid="ProfilesPage005" IsIndeterminate="True" Visibility="{x:Bind ViewModel.IsBusy, Mode=OneWay}"  />
+            <InfoBar x:Uid="ProfilesPage006" IsOpen="{x:Bind ViewModel.HasError, Mode=TwoWay}" Visibility="{x:Bind ViewModel.HasError, Mode=OneWay}" Severity="Error"
                      Message="{x:Bind ViewModel.ErrorMessage, Mode=OneWay}" />
             <Border Style="{StaticResource MixdeckCardStyle}" Visibility="{x:Bind IsEmpty}" Padding="32">
                 <StackPanel Spacing="16" HorizontalAlignment="Center" MaxWidth="400">
                     <FontIcon Glyph="&#xE8A5;" FontSize="40" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
-                    <TextBlock Text="Aucun profil pour l’instant" Style="{StaticResource SubtitleTextBlockStyle}" TextAlignment="Center" TextWrapping="Wrap" />
-                    <TextBlock Text="Enregistrez l’état actuel de votre console pour le retrouver quand vous en avez besoin."
+                    <TextBlock x:Uid="ProfilesPage007"  Style="{StaticResource SubtitleTextBlockStyle}" TextAlignment="Center" TextWrapping="Wrap" />
+                    <TextBlock x:Uid="ProfilesPage008"
                         Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" TextAlignment="Center" />
-                    <Button Content="Créer mon premier profil" Click="OnCreateClick" HorizontalAlignment="Center" IsEnabled="{x:Bind ViewModel.IsIdle, Mode=OneWay}" />
+                    <Button x:Uid="ProfilesPage009"  Click="OnCreateClick" HorizontalAlignment="Center" IsEnabled="{x:Bind ViewModel.IsIdle, Mode=OneWay}" />
                 </StackPanel>
             </Border>
             <ItemsRepeater x:Name="ProfileList" ItemsSource="{x:Bind ViewModel.Mixer.Profiles}" ElementPrepared="OnProfilePrepared">

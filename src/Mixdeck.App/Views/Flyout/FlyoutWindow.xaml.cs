@@ -46,7 +46,7 @@ public sealed partial class FlyoutWindow : Window
         _settings = settings;
         _taskbar = taskbar;
         _shell = shell;
-        InitializeComponent();
+        InitializeComponent(); Title = Mixdeck.App.Localization.Strings.Get("FlyoutWindow001.Title");
 
         WindowInterop.MakeToolWindow(this, alwaysOnTop: true);
         theme.Register(this);

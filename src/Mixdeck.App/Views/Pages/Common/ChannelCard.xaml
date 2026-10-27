@@ -7,41 +7,41 @@
     <Border x:Name="Card" Style="{StaticResource MixdeckCardStyle}" Padding="12" Width="136">
         <StackPanel Spacing="12">
             <Grid>
-                <Button HorizontalAlignment="Left" Click="OnIconClick" Style="{StaticResource SubtleButtonStyle}"
-                        AutomationProperties.Name="Changer l’icône du canal" ToolTipService.ToolTip="Changer l’icône">
+                <Button x:Uid="ChannelCard001" HorizontalAlignment="Left" Click="OnIconClick" Style="{StaticResource SubtleButtonStyle}"
+                         >
                     <FontIcon Glyph="{x:Bind Model.Icon, Mode=OneWay}" FontSize="20" />
                 </Button>
-                <Button HorizontalAlignment="Right" Click="OnMenuClick" Style="{StaticResource SubtleButtonStyle}"
-                        AutomationProperties.Name="Options du canal" ToolTipService.ToolTip="Options du canal">
+                <Button x:Uid="ChannelCard002" HorizontalAlignment="Right" Click="OnMenuClick" Style="{StaticResource SubtleButtonStyle}"
+                         >
                     <FontIcon Glyph="&#xE712;" FontSize="16" />
                 </Button>
             </Grid>
-            <controls:ChannelHeader x:Name="Header" ChannelName="{x:Bind Model.DisplayName, Mode=OneWay}"
-                Icon="" NameCommitted="OnNameCommitted" ToolTipService.ToolTip="F2 ou double-clic pour renommer" />
+            <controls:ChannelHeader x:Uid="ChannelCard003" x:Name="Header" ChannelName="{x:Bind Model.DisplayName, Mode=OneWay}"
+                Icon="" NameCommitted="OnNameCommitted"  />
             <TextBlock Text="{x:Bind KindText}" Style="{StaticResource CaptionTextBlockStyle}"
                        Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
             <Grid Height="192" ColumnSpacing="4">
                 <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="48" /></Grid.ColumnDefinitions>
-                <controls:VuMeter LeftDb="{x:Bind Model.LeftDb, Mode=OneWay}" RightDb="{x:Bind Model.RightDb, Mode=OneWay}"
+                <controls:VuMeter x:Uid="ChannelCard004" LeftDb="{x:Bind Model.LeftDb, Mode=OneWay}" RightDb="{x:Bind Model.RightDb, Mode=OneWay}"
                     LeftPeakDb="{x:Bind Model.LeftPeakDb, Mode=OneWay}" RightPeakDb="{x:Bind Model.RightPeakDb, Mode=OneWay}"
                     IsMuted="{x:Bind Model.IsMuted, Mode=OneWay}" IsClipped="{x:Bind Model.IsClipped, Mode=OneWay}"
-                    ShowScale="True" IsStereo="True" AutomationProperties.Name="Niveau stéréo du canal" />
-                <controls:Fader Grid.Column="1" Orientation="Vertical" HorizontalAlignment="Center"
+                    ShowScale="True" IsStereo="True"  />
+                <controls:Fader x:Uid="ChannelCard005" Grid.Column="1" Orientation="Vertical" HorizontalAlignment="Center"
                     Value="{x:Bind Model.Gain, Mode=TwoWay}" IsMuted="{x:Bind Model.IsMuted, Mode=OneWay}"
-                    AutomationProperties.Name="Gain du canal" ToolTipService.ToolTip="Double-clic pour revenir à 0 dB" />
+                      />
             </Grid>
             <TextBlock Text="{x:Bind shared:Converters.Db(Model.Gain), Mode=OneWay}" HorizontalAlignment="Center"
                        Style="{StaticResource BodyStrongTextBlockStyle}" />
-            <controls:MuteToggle IsChecked="{x:Bind Model.IsMuted, Mode=TwoWay}" HorizontalAlignment="Stretch"
-                AutomationProperties.Name="{x:Bind shared:Converters.MuteLabel(Model.IsMuted), Mode=OneWay}" ToolTipService.ToolTip="Couper ou rétablir le son" />
+            <controls:MuteToggle x:Uid="ChannelCard006" IsChecked="{x:Bind Model.IsMuted, Mode=TwoWay}" HorizontalAlignment="Stretch"
+                AutomationProperties.Name="{x:Bind shared:Converters.MuteLabel(Model.IsMuted), Mode=OneWay}"  />
             <StackPanel Spacing="8" Visibility="{x:Bind IsStrip}">
-                <ToggleButton Content="Solo" IsChecked="{x:Bind Strip.IsSolo, Mode=TwoWay}" HorizontalAlignment="Stretch" />
-                <TextBlock Text="Panoramique" Style="{StaticResource CaptionTextBlockStyle}" />
-                <Slider Minimum="-0.5" Maximum="0.5" StepFrequency="0.01" SmallChange="0.01" LargeChange="0.1"
+                <ToggleButton x:Uid="ChannelCard007"  IsChecked="{x:Bind Strip.IsSolo, Mode=TwoWay}" HorizontalAlignment="Stretch" />
+                <TextBlock x:Uid="ChannelCard008"  Style="{StaticResource CaptionTextBlockStyle}" />
+                <Slider x:Uid="ChannelCard009" Minimum="-0.5" Maximum="0.5" StepFrequency="0.01" SmallChange="0.01" LargeChange="0.1"
                     Value="{x:Bind Strip.PanX, Mode=TwoWay}" DoubleTapped="OnPanDoubleTapped" IsThumbToolTipEnabled="False"
-                    AutomationProperties.Name="Panoramique gauche-droite" ToolTipService.ToolTip="Double-clic pour centrer" />
-                <Grid><TextBlock Text="G" Style="{StaticResource CaptionTextBlockStyle}" /><TextBlock Text="D" HorizontalAlignment="Right" Style="{StaticResource CaptionTextBlockStyle}" /></Grid>
-                <TextBlock Text="Envoyer vers" Style="{StaticResource CaptionTextBlockStyle}" />
+                      />
+                <Grid><TextBlock x:Uid="ChannelCard010"  Style="{StaticResource CaptionTextBlockStyle}" /><TextBlock x:Uid="ChannelCard011"  HorizontalAlignment="Right" Style="{StaticResource CaptionTextBlockStyle}" /></Grid>
+                <TextBlock x:Uid="ChannelCard012"  Style="{StaticResource CaptionTextBlockStyle}" />
                 <ItemsRepeater ItemsSource="{x:Bind Strip.Routes, Mode=OneWay}">
                     <ItemsRepeater.Layout><UniformGridLayout MinItemWidth="32" MinItemHeight="32" MaximumRowsOrColumns="3" MinColumnSpacing="4" MinRowSpacing="4" /></ItemsRepeater.Layout>
                     <ItemsRepeater.ItemTemplate>
@@ -51,21 +51,21 @@
                     </ItemsRepeater.ItemTemplate>
                 </ItemsRepeater>
                 <StackPanel Spacing="4" Visibility="{x:Bind HasEq}">
-                    <TextBlock Text="Égaliseur" Style="{StaticResource BodyStrongTextBlockStyle}" Margin="0,8,0,4" />
-                    <TextBlock Text="Graves" Style="{StaticResource CaptionTextBlockStyle}" />
-                    <Slider Minimum="-12" Maximum="12" StepFrequency="0.5" Value="{x:Bind Strip.EqLow, Mode=TwoWay}" IsThumbToolTipEnabled="False" AutomationProperties.Name="Graves" />
+                    <TextBlock x:Uid="ChannelCard013"  Style="{StaticResource BodyStrongTextBlockStyle}" Margin="0,8,0,4" />
+                    <TextBlock x:Uid="ChannelCard014"  Style="{StaticResource CaptionTextBlockStyle}" />
+                    <Slider x:Uid="ChannelCard015" Minimum="-12" Maximum="12" StepFrequency="0.5" Value="{x:Bind Strip.EqLow, Mode=TwoWay}" IsThumbToolTipEnabled="False"  />
                     <TextBlock Text="{x:Bind shared:Converters.Db(Strip.EqLow), Mode=OneWay}" Style="{StaticResource CaptionTextBlockStyle}" />
-                    <TextBlock Text="Médiums" Style="{StaticResource CaptionTextBlockStyle}" />
-                    <Slider Minimum="-12" Maximum="12" StepFrequency="0.5" Value="{x:Bind Strip.EqMid, Mode=TwoWay}" IsThumbToolTipEnabled="False" AutomationProperties.Name="Médiums" />
+                    <TextBlock x:Uid="ChannelCard016"  Style="{StaticResource CaptionTextBlockStyle}" />
+                    <Slider x:Uid="ChannelCard017" Minimum="-12" Maximum="12" StepFrequency="0.5" Value="{x:Bind Strip.EqMid, Mode=TwoWay}" IsThumbToolTipEnabled="False"  />
                     <TextBlock Text="{x:Bind shared:Converters.Db(Strip.EqMid), Mode=OneWay}" Style="{StaticResource CaptionTextBlockStyle}" />
-                    <TextBlock Text="Aigus" Style="{StaticResource CaptionTextBlockStyle}" />
-                    <Slider Minimum="-12" Maximum="12" StepFrequency="0.5" Value="{x:Bind Strip.EqHigh, Mode=TwoWay}" IsThumbToolTipEnabled="False" AutomationProperties.Name="Aigus" />
+                    <TextBlock x:Uid="ChannelCard018"  Style="{StaticResource CaptionTextBlockStyle}" />
+                    <Slider x:Uid="ChannelCard019" Minimum="-12" Maximum="12" StepFrequency="0.5" Value="{x:Bind Strip.EqHigh, Mode=TwoWay}" IsThumbToolTipEnabled="False"  />
                     <TextBlock Text="{x:Bind shared:Converters.Db(Strip.EqHigh), Mode=OneWay}" Style="{StaticResource CaptionTextBlockStyle}" />
                 </StackPanel>
             </StackPanel>
             <StackPanel Spacing="8" Visibility="{x:Bind IsBus}">
-                <ToggleButton Content="Mono" IsChecked="{x:Bind Bus.IsMono, Mode=TwoWay}" HorizontalAlignment="Stretch" />
-                <ToggleButton Content="EQ activé" IsChecked="{x:Bind Bus.EqOn, Mode=TwoWay}" Visibility="{x:Bind Bus.HasEq}" HorizontalAlignment="Stretch" />
+                <ToggleButton x:Uid="ChannelCard020"  IsChecked="{x:Bind Bus.IsMono, Mode=TwoWay}" HorizontalAlignment="Stretch" />
+                <ToggleButton x:Uid="ChannelCard021"  IsChecked="{x:Bind Bus.EqOn, Mode=TwoWay}" Visibility="{x:Bind Bus.HasEq}" HorizontalAlignment="Stretch" />
             </StackPanel>
         </StackPanel>
     </Border>

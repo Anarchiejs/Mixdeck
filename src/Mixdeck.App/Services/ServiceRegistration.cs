@@ -36,13 +36,23 @@ internal static class ServiceRegistration
         services.AddSingleton(paths);
         services.AddSingleton(settings);
         services.AddSingleton(TimeProvider.System);
+        services.AddSingleton<ITextProvider, Mixdeck.App.Localization.AppTextProvider>();
         services.AddSingleton<IUiDispatcher>(new UiDispatcher(dispatcherQueue));
 
         // Moteur audio : le vrai Voicemeeter, ou une simulation en mode démo.
         services.AddSingleton<IMixer>(sp =>
         {
             var loggers = sp.GetRequiredService<ILoggerFactory>();
-            return options.Demo ? VoicemeeterMixer.CreateSimulated(loggers, options.DemoLayout) : VoicemeeterMixer.CreateDefault(loggers);
+            if (!options.Demo) return VoicemeeterMixer.CreateDefault(loggers);
+            var layout = options.DemoLayout;
+            var api = new SimulatedVoicemeeterApi(layout: layout);
+            string[] labels = [Localization.Strings.Get("CS_104"), "Discord", Localization.Strings.Get("CS_107"),
+                Localization.Strings.Get("CS_010"), Localization.Strings.Get("CS_109")];
+            for (var index = 0; index < layout.StripCount; index++)
+                api.SimulateExternalChange(Core.Model.VmParam.StripLabel(index), index < labels.Length ? labels[index]
+                    : layout.IsVirtualStrip(index) ? layout.DefaultStripLabels[index] : Localization.Strings.Format("Core_InputName", index + 1));
+            api.SimulateExternalChange(Core.Model.VmParam.BusDeviceName(0), Localization.Strings.Get("CS_105") + " (Realtek Audio)");
+            return new VoicemeeterMixer(api, loggers.CreateLogger<VoicemeeterMixer>(), TimeProvider.System);
         });
 
         // Cœur

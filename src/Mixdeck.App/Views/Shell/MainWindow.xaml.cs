@@ -30,7 +30,7 @@ public sealed partial class MainWindow : Window
     public MainWindow(MixerViewModel mixer, ThemeService theme)
     {
         Mixer = mixer;
-        InitializeComponent();
+        InitializeComponent(); Title = Mixdeck.App.Localization.Strings.Get("MainWindow001.Title");
 
         ExtendsContentIntoTitleBar = true;
         SetTitleBar(AppTitleBar);
