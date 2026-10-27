@@ -34,11 +34,63 @@ public sealed partial class OsdWindow : Window
         _hideTimer = DispatcherQueue.CreateTimer();
         _hideTimer.Interval = TimeSpan.FromMilliseconds(1600);
         _hideTimer.IsRepeating = false;
-        _hideTimer.Tick += (_, _) => FadeOut();
+        _hideTimer.Tick += OnHideTimerTick;
+        Closed += OnClosed;
+    }
+
+    /// <summary>Pastille persistante : pas de minuterie, d'animation ou d'activation de la fenêtre.</summary>
+    public void ShowMicBadge()
+    {
+        if (_visible) return;
+        _hideTimer.Stop();
+        _animation?.Stop();
+        _animation = null;
+        Message.Visibility = Visibility.Collapsed;
+        Root.Padding = new Thickness(0);
+        Glyph.HorizontalAlignment = HorizontalAlignment.Center;
+        Microsoft.UI.Xaml.Controls.Grid.SetColumnSpan(Glyph, 2);
+        Glyph.Glyph = "\uF781";
+        Glyph.Foreground = (Brush)Application.Current.Resources["MixdeckMutedBrush"];
+        Microsoft.UI.Xaml.Automation.AutomationProperties.SetName(Root, "Micro coupé");
+        var placement = _taskbar.GetPrimary();
+        var size = (int)Math.Round(44 * placement.Scale);
+        var margin = (int)Math.Round(12 * placement.Scale);
+        var area = placement.WorkArea;
+        var x = placement.Edge == TaskbarEdge.Left ? area.Left + margin : area.Right - size - margin;
+        var y = placement.Edge == TaskbarEdge.Top ? area.Top + margin : area.Bottom - size - margin;
+        AppWindow.MoveAndResize(new RectInt32(x, y, size, size));
+        Root.Opacity = 1;
+        AppWindow.Show(activateWindow: false);
+        _visible = true;
+    }
+
+    public void Hide()
+    {
+        if (!_visible) return;
+        _hideTimer.Stop();
+        _animation?.Stop();
+        _animation = null;
+        AppWindow.Hide();
+        _visible = false;
+    }
+
+    private void OnHideTimerTick(DispatcherQueueTimer sender, object args) => FadeOut();
+
+    private void OnClosed(object sender, WindowEventArgs args)
+    {
+        _hideTimer.Stop();
+        _hideTimer.Tick -= OnHideTimerTick;
+        _animation?.Stop();
+        _animation = null;
+        Closed -= OnClosed;
     }
 
     public void Show(string text, string glyph, bool isWarning)
     {
+        Message.Visibility = Visibility.Visible;
+        Root.Padding = new Thickness(16, 0, 20, 0);
+        Glyph.HorizontalAlignment = HorizontalAlignment.Stretch;
+        Microsoft.UI.Xaml.Controls.Grid.SetColumnSpan(Glyph, 1);
         Message.Text = text;
         Glyph.Glyph = glyph;
         Glyph.Foreground = isWarning
