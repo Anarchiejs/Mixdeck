@@ -1,12 +1,37 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Gabarit de départ : le lot L7 remplace ce contenu. -->
 <Page
     x:Class="Mixdeck.App.Views.Pages.ProfilesPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
-    <ScrollViewer>
-        <StackPanel Padding="{StaticResource MixdeckPagePadding}" Spacing="16">
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:shared="using:Mixdeck.App.ViewModels.Shared"
+    xmlns:common="using:Mixdeck.App.Views.Pages.Common">
+    <ScrollViewer HorizontalScrollMode="Disabled" VerticalScrollBarVisibility="Auto">
+        <StackPanel Padding="{StaticResource MixdeckPagePadding}" Spacing="24">
             <TextBlock Style="{StaticResource TitleTextBlockStyle}" Text="Profils" />
+            <TextBlock Text="Retrouve le bon mixage en un clic. Enregistre tes réglages pour chaque moment."
+                Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" Margin="0,-16,0,0" />
+            <StackPanel Spacing="8">
+                <Button Click="OnCreateClick" Style="{StaticResource AccentButtonStyle}" IsEnabled="{x:Bind ViewModel.IsIdle, Mode=OneWay}">
+                    <StackPanel Orientation="Horizontal" Spacing="8"><FontIcon Glyph="&#xE710;" FontSize="16" /><TextBlock Text="Nouveau profil depuis l’état actuel" /></StackPanel>
+                </Button>
+                <Button Content="Importer…" Click="OnImportClick" IsEnabled="{x:Bind ViewModel.IsIdle, Mode=OneWay}" />
+            </StackPanel>
+            <ProgressBar IsIndeterminate="True" Visibility="{x:Bind ViewModel.IsBusy, Mode=OneWay}" AutomationProperties.Name="Opération en cours" />
+            <InfoBar IsOpen="{x:Bind ViewModel.HasError, Mode=TwoWay}" Severity="Error" Title="Opération impossible"
+                     Message="{x:Bind ViewModel.ErrorMessage, Mode=OneWay}" />
+            <Border Style="{StaticResource MixdeckCardStyle}" Visibility="{x:Bind IsEmpty}" Padding="32">
+                <StackPanel Spacing="16" HorizontalAlignment="Center" MaxWidth="400">
+                    <FontIcon Glyph="&#xE8A5;" FontSize="40" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                    <TextBlock Text="Aucun profil pour l’instant" Style="{StaticResource SubtitleTextBlockStyle}" TextAlignment="Center" TextWrapping="Wrap" />
+                    <TextBlock Text="Enregistre l’état actuel de ta console pour le retrouver quand tu en as besoin."
+                        Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" TextAlignment="Center" />
+                    <Button Content="Créer mon premier profil" Click="OnCreateClick" HorizontalAlignment="Center" IsEnabled="{x:Bind ViewModel.IsIdle, Mode=OneWay}" />
+                </StackPanel>
+            </Border>
+            <ItemsRepeater x:Name="ProfileList" ItemsSource="{x:Bind ViewModel.Mixer.Profiles}" ElementPrepared="OnProfilePrepared">
+                <ItemsRepeater.Layout><StackLayout Spacing="8" /></ItemsRepeater.Layout>
+                <ItemsRepeater.ItemTemplate><DataTemplate x:DataType="shared:ProfileItemViewModel"><common:ProfileCard Item="{x:Bind}" /></DataTemplate></ItemsRepeater.ItemTemplate>
+            </ItemsRepeater>
         </StackPanel>
     </ScrollViewer>
 </Page>
