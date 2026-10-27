@@ -138,7 +138,8 @@ public sealed partial class MainWindow : Window
 
     private void OnAppWindowChanged(AppWindow sender, AppWindowChangedEventArgs args)
     {
-        if (args.DidPresenterChange || args.DidVisibilityChange)
+        // La restauration après une réduction ne lève que DidSizeChange : sans lui, les vumètres restaient arrêtés.
+        if (args.DidPresenterChange || args.DidVisibilityChange || args.DidSizeChange)
         {
             UpdateMeters();
         }
