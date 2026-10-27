@@ -10,7 +10,8 @@ public sealed class AutomationTests
     {
         using var rig = new TestRig();
         var osd = new FakeOsd();
-        var dispatcher = new ActionDispatcher(rig.Mixer, rig.Profiles, rig.Settings, osd, NullLogger<ActionDispatcher>.Instance);
+        using var coordinator = new AutomationCoordinator(new FakeProcesses(), new FakeForeground(), rig.Profiles, rig.Mixer, rig.Settings, osd, NullLogger<AutomationCoordinator>.Instance);
+        var dispatcher = new ActionDispatcher(rig.Mixer, rig.Profiles, rig.Settings, osd, NullLogger<ActionDispatcher>.Instance, coordinator);
         Task Send(HotkeyAction action, bool pressed = true, float step = 2, int bus = 0) => dispatcher.HandleAsync(new(new(action, HotkeyModifiers.None, 0, bus, step), pressed));
         await Send(HotkeyAction.ToggleMic);
         Assert.True(rig.Mixer.Snapshot.Strips[0].Mute);
@@ -46,7 +47,8 @@ public sealed class AutomationTests
         var osd = new FakeOsd();
         await rig.Profiles.SaveAsync(new() { Id = "a", Name = "Musique", Icon = "\uE8D6" });
         await rig.Profiles.SaveAsync(new() { Id = "b", Name = "Jeu" });
-        var dispatcher = new ActionDispatcher(rig.Mixer, rig.Profiles, rig.Settings, osd, NullLogger<ActionDispatcher>.Instance);
+        using var coordinator = new AutomationCoordinator(new FakeProcesses(), new FakeForeground(), rig.Profiles, rig.Mixer, rig.Settings, osd, NullLogger<AutomationCoordinator>.Instance);
+        var dispatcher = new ActionDispatcher(rig.Mixer, rig.Profiles, rig.Settings, osd, NullLogger<ActionDispatcher>.Instance, coordinator);
         await dispatcher.HandleAsync(new(new(HotkeyAction.NextProfile, HotkeyModifiers.None, 0), true));
         Assert.Equal("a", rig.Profiles.Active?.Id);
         Assert.Equal("Profil : Musique", osd.Messages.Last().Text);

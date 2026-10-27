@@ -3,7 +3,8 @@ using Microsoft.Extensions.Logging;
 using Mixdeck.Core.Abstractions;
 using Mixdeck.Core.Model;
 namespace Mixdeck.Core.Automation;
-public sealed class ActionDispatcher(IMixer mixer, IProfileService profiles, ISettingsStore settings, IOsdService osd, ILogger<ActionDispatcher> logger)
+public sealed class ActionDispatcher(IMixer mixer, IProfileService profiles, ISettingsStore settings, IOsdService osd,
+    ILogger<ActionDispatcher> logger, AutomationCoordinator automation)
 {
     public event EventHandler? FlyoutRequested;
     public async Task HandleAsync(HotkeyEventArgs e)
@@ -25,8 +26,22 @@ public sealed class ActionDispatcher(IMixer mixer, IProfileService profiles, ISe
                     break;
                 case HotkeyAction.NextProfile:
                 case HotkeyAction.PreviousProfile:
-                    await profiles.ApplyNextAsync(binding.Action == HotkeyAction.NextProfile ? 1 : -1);
+                    var list = profiles.Profiles;
+                    if (list.Count == 0) return;
+                    var activeIndex = list.ToList().FindIndex(p => p.Id == profiles.Active?.Id);
+                    var nextIndex = activeIndex < 0 ? 0 : (activeIndex + (binding.Action == HotkeyAction.NextProfile ? 1 : -1) + list.Count) % list.Count;
+                    await automation.ApplyManualProfileAsync(list[nextIndex].Id);
                     if (config.ShowOsd && profiles.Active is { } active) osd.Show("Profil : " + active.Name, active.Icon);
+                    break;
+                case HotkeyAction.ApplyProfile:
+                    if (binding.ProfileId is not { } id || !profiles.Profiles.Any(p => p.Id == id))
+                    {
+                        logger.LogWarning("Profil de raccourci introuvable : {ProfileId}", binding.ProfileId);
+                        return;
+                    }
+                    await automation.ApplyManualProfileAsync(id);
+                    if (config.ShowOsd && profiles.Active is { } applied && applied.Id == id)
+                        osd.Show("Profil : " + applied.Name, applied.Icon);
                     break;
                 case HotkeyAction.VolumeUp:
                 case HotkeyAction.VolumeDown:
