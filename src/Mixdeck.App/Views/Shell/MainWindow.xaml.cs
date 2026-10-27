@@ -25,6 +25,7 @@ public sealed partial class MainWindow : Window
     };
 
     private IDisposable? _meters;
+    private bool _closed;
 
     public MainWindow(MixerViewModel mixer, ThemeService theme)
     {
@@ -45,16 +46,29 @@ public sealed partial class MainWindow : Window
 
         ResizeForDpi(1180, 760);
         AppWindow.Changed += OnAppWindowChanged;
-        AppWindow.Closing += (_, e) =>
-        {
-            // Fermer la console laisse Mixdeck dans la barre des tâches.
-            e.Cancel = true;
-            AppWindow.Hide();
-            UpdateMeters();
-        };
+        Closed += OnClosed;
     }
 
     public MixerViewModel Mixer { get; }
+
+    private void OnClosed(object sender, WindowEventArgs args)
+    {
+        _closed = true;
+        _meters?.Dispose();
+        _meters = null;
+        AppWindow.Changed -= OnAppWindowChanged;
+        Closed -= OnClosed;
+        Bindings.StopTracking();
+        ContentFrame.Navigated -= OnFrameNavigated;
+        Navigation.SelectionChanged -= OnNavigationSelectionChanged;
+        // Décharger la page déclenche ses désabonnements et libère les ressources Win2D des vumètres.
+        ContentFrame.Content = null;
+        ContentFrame.BackStack.Clear();
+        ContentFrame.ForwardStack.Clear();
+        Navigation.Content = null;
+        Content = null;
+        // ThemeService ne conserve que des WeakReference<Window> : aucun abonnement à défaire.
+    }
 
     public void ShowPage(ShellPage? page)
     {
@@ -116,7 +130,7 @@ public sealed partial class MainWindow : Window
     /// <summary>Vumètres actifs seulement quand la console est visible et pas réduite.</summary>
     private void UpdateMeters()
     {
-        var visible = AppWindow.IsVisible
+        var visible = !_closed && AppWindow.IsVisible
             && AppWindow.Presenter is not OverlappedPresenter { State: OverlappedPresenterState.Minimized };
         if (visible && _meters is null)
         {

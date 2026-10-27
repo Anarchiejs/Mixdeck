@@ -1,9 +1,12 @@
 using System.ComponentModel;
+using System.Globalization;
 using CommunityToolkit.Mvvm.Input;
 using H.NotifyIcon;
 using H.NotifyIcon.Core;
 using Microsoft.UI.Xaml.Controls;
 using Mixdeck.App.ViewModels.Shared;
+using Mixdeck.Core.Abstractions;
+using Mixdeck.Platform.Taskbar;
 
 namespace Mixdeck.App.Services;
 
@@ -19,11 +22,17 @@ public sealed class TrayIconService : IDisposable
     private readonly System.Drawing.Icon _mutedIcon;
     private TaskbarIcon? _icon;
     private MenuFlyoutItem? _micItem;
+    private readonly MicFeedbackService _feedback;
+    private ProfileItemViewModel? _profile;
+    private bool _disposed;
 
-    public TrayIconService(IShellService shell, MixerViewModel mixer)
+    public TrayIconService(IShellService shell, MixerViewModel mixer, ISettingsStore settings,
+        IUiDispatcher ui, ITaskbarLocator taskbar, ThemeService theme)
     {
         _shell = shell;
         _mixer = mixer;
+        // Même durée de vie que l'icône, déjà créée au lancement et libérée à l'arrêt.
+        _feedback = new MicFeedbackService(mixer, settings, ui, taskbar, theme);
         var assets = Path.Combine(AppContext.BaseDirectory, "Assets");
         _normalIcon = new System.Drawing.Icon(Path.Combine(assets, "Mixdeck.ico"));
         _mutedIcon = new System.Drawing.Icon(Path.Combine(assets, "MixdeckMuted.ico"));
@@ -31,6 +40,7 @@ public sealed class TrayIconService : IDisposable
 
     public void Create()
     {
+        if (_disposed || _icon is not null) return;
         _micItem = new MenuFlyoutItem { Command = _mixer.ToggleMicCommand, Icon = new FontIcon { Glyph = "" } };
         var menu = new MenuFlyout();
         menu.Items.Add(new MenuFlyoutItem
@@ -67,11 +77,14 @@ public sealed class TrayIconService : IDisposable
             ContextMenuMode = ContextMenuMode.PopupMenu,
             ContextFlyout = menu,
             LeftClickCommand = new RelayCommand(_shell.ToggleFlyout),
+            MiddleClickCommand = _mixer.ToggleMicCommand,
             NoLeftClickDelay = true,
         };
         _icon.ForceCreate(enablesEfficiencyMode: false);
 
         _mixer.PropertyChanged += OnMixerPropertyChanged;
+        _mixer.Buses[0].PropertyChanged += OnBusPropertyChanged;
+        TrackProfile();
         Refresh();
     }
 
@@ -80,6 +93,7 @@ public sealed class TrayIconService : IDisposable
         if (e.PropertyName is nameof(MixerViewModel.IsMicMuted) or nameof(MixerViewModel.ActiveProfile)
             or nameof(MixerViewModel.ConnectionState) or nameof(MixerViewModel.Mic))
         {
+            TrackProfile();
             Refresh();
         }
     }
@@ -94,18 +108,53 @@ public sealed class TrayIconService : IDisposable
         var muted = _mixer.IsMicMuted;
         _icon.Icon = muted ? _mutedIcon : _normalIcon;
         _micItem.Text = muted ? "Activer le micro" : "Couper le micro";
+        _micItem.IsEnabled = _mixer.IsConnected;
 
         var status = !_mixer.IsConnected
             ? _mixer.ConnectionTitle
-            : muted ? "Micro coupé" : "Micro actif";
-        var profile = _mixer.ActiveProfile is { } p ? $"\nProfil : {p.Name}" : string.Empty;
-        _icon.ToolTipText = $"Mixdeck — {status}{profile}";
+            : muted ? "Micro coupé" : "Micro activé";
+        var gain = _mixer.Buses[0].Gain.ToString("0.##", CultureInfo.GetCultureInfo("fr-FR")).Replace("-", "−");
+        var volume = _mixer.IsConnected ? $" · A1 {gain} dB" : string.Empty;
+        var profile = _mixer.ActiveProfile is { } p ? $"\nProfil {p.Name.Replace('\r', ' ').Replace('\n', ' ')}" : string.Empty;
+        var tooltip = $"Mixdeck · {status}{volume}{profile}";
+        // La taille native est exprimée en caractères UTF-16 ; ne pas couper une paire de substitution.
+        if (tooltip.Length > 127)
+        {
+            var length = char.IsHighSurrogate(tooltip[125]) ? 125 : 126;
+            tooltip = tooltip[..length] + "…";
+        }
+        _icon.ToolTipText = tooltip;
+    }
+
+    private void OnBusPropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName == nameof(BusViewModel.Gain)) Refresh();
+    }
+
+    private void TrackProfile()
+    {
+        if (ReferenceEquals(_profile, _mixer.ActiveProfile)) return;
+        if (_profile is not null) _profile.PropertyChanged -= OnProfilePropertyChanged;
+        _profile = _mixer.ActiveProfile;
+        if (_profile is not null) _profile.PropertyChanged += OnProfilePropertyChanged;
+    }
+
+    private void OnProfilePropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName == nameof(ProfileItemViewModel.Name)) Refresh();
     }
 
     public void Dispose()
     {
+        if (_disposed) return;
+        _disposed = true;
         _mixer.PropertyChanged -= OnMixerPropertyChanged;
+        _mixer.Buses[0].PropertyChanged -= OnBusPropertyChanged;
+        if (_profile is not null) _profile.PropertyChanged -= OnProfilePropertyChanged;
+        _profile = null;
+        _feedback.Dispose();
         _icon?.Dispose();
+        _icon = null;
         _normalIcon.Dispose();
         _mutedIcon.Dispose();
     }

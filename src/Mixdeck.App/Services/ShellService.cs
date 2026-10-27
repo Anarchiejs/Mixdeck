@@ -8,7 +8,7 @@ using Mixdeck.Core.Settings;
 
 namespace Mixdeck.App.Services;
 
-/// <summary>Crée les fenêtres à la demande et les garde ouvertes (cachées) ensuite.</summary>
+/// <summary>Recrée la console à la demande ; seul le panneau rapide reste en mémoire.</summary>
 public sealed class ShellService(IServiceProvider services, MixdeckPaths paths, ILogger<ShellService> logger) : IShellService
 {
     private MainWindow? _main;
@@ -20,8 +20,18 @@ public sealed class ShellService(IServiceProvider services, MixdeckPaths paths, 
     public void ShowMainWindow(ShellPage? page = null)
     {
         HideFlyout();
-        _main ??= services.GetRequiredService<MainWindow>();
+        if (_main is null)
+        {
+            _main = services.GetRequiredService<MainWindow>();
+            _main.Closed += OnMainClosed;
+        }
         _main.ShowPage(page);
+    }
+
+    private void OnMainClosed(object sender, WindowEventArgs args)
+    {
+        if (sender is MainWindow window) window.Closed -= OnMainClosed;
+        if (ReferenceEquals(sender, _main)) _main = null;
     }
 
     public nint MainWindowHandle => _main is null ? 0 : WinRT.Interop.WindowNative.GetWindowHandle(_main);
