@@ -259,7 +259,7 @@
     <value>Outputs</value>
   </data>
   <data name="MixerPage010.Text" xml:space="preserve">
-    <value>Double-click a fader to reset it to 0 dB, or a pan control to center it. Press F2 on a name to rename it.</value>
+    <value>Click a fader, then use the mouse wheel to adjust it (Shift for fine steps). Double-click a fader to reset it to 0 dB, or a pan control to center it. Press F2 or double-click a name to rename it. Only channels with a device are shown: use the + button to add the others.</value>
   </data>
   <data name="ProfilesPage001.Text" xml:space="preserve">
     <value>Profiles</value>
@@ -784,7 +784,7 @@
     <value>Mono</value>
   </data>
   <data name="ChannelCard021.Content" xml:space="preserve">
-    <value>EQ enabled</value>
+    <value>EQ</value>
   </data>
   <data name="ProfileCard001.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
     <value>New profile name</value>
@@ -1616,5 +1616,26 @@
   </data>
   <data name="DevicesPage018.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
     <value>Hear myself: play my microphone in the headphones</value>
+  </data>
+  <data name="ChannelCard021.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
+    <value>Output equalizer</value>
+  </data>
+  <data name="MixerPage011.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Add input</value>
+  </data>
+  <data name="MixerPage011.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
+    <value>Add a hidden input</value>
+  </data>
+  <data name="MixerPage012.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Add output</value>
+  </data>
+  <data name="MixerPage012.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
+    <value>Add a hidden output</value>
+  </data>
+  <data name="CS_ConsoleHide" xml:space="preserve">
+    <value>Hide from console</value>
+  </data>
+  <data name="CS_ConsoleNoDevice" xml:space="preserve">
+    <value>{0} (no device)</value>
   </data>
 </root>

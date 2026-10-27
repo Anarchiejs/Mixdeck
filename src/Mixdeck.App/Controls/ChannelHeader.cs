@@ -17,6 +17,7 @@ public sealed class ChannelHeader : Control
 {
     private TextBox? editor;
     private TextBlock? label;
+    private FontIcon? icon;
     public static readonly DependencyProperty ChannelNameProperty = DependencyProperty.Register(nameof(ChannelName), typeof(string), typeof(ChannelHeader), new PropertyMetadata(Strings.Get("CS_001")));
     public static readonly DependencyProperty IconProperty = DependencyProperty.Register(nameof(Icon), typeof(string), typeof(ChannelHeader), new PropertyMetadata("\uE8D6"));
     public string ChannelName { get => (string)GetValue(ChannelNameProperty); set => SetValue(ChannelNameProperty, value); }
@@ -27,6 +28,7 @@ public sealed class ChannelHeader : Control
         DefaultStyleKey = typeof(ChannelHeader); ControlResources.Load(this); IsTabStop = true;
         DoubleTapped += (_, e) => { Edit(); e.Handled = true; };
         KeyDown += OnKeyDown;
+        RegisterPropertyChangedCallback(IconProperty, (_, _) => UpdateIcon());
         Microsoft.UI.Xaml.Automation.AutomationProperties.SetHelpText(this, Strings.Get("CS_002"));
     }
     protected override void OnApplyTemplate()
@@ -35,8 +37,12 @@ public sealed class ChannelHeader : Control
         base.OnApplyTemplate();
         editor = GetTemplateChild("PART_Editor") as TextBox;
         label = GetTemplateChild("PART_Label") as TextBlock;
+        icon = GetTemplateChild("PART_Icon") as FontIcon;
+        UpdateIcon();
         if (editor is not null) editor.LostFocus += EditorLostFocus;
     }
+    // Sans icône (la tranche affiche déjà la sienne), le nom prend toute la largeur.
+    private void UpdateIcon() { if (icon is not null) icon.Visibility = string.IsNullOrEmpty(Icon) ? Visibility.Collapsed : Visibility.Visible; }
     private void EditorLostFocus(object sender, RoutedEventArgs e) => Finish(false);
     private void Edit()
     {

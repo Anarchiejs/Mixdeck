@@ -32,7 +32,7 @@ public static class IconPicker
         for (var i = 0; i < Icons.Length; i++)
         {
             var (glyph, name) = Icons[i];
-            var button = new Button { Width = 40, Height = 40, Content = new FontIcon { Glyph = glyph, FontSize = 20 } };
+            var button = new Button { Width = 40, Height = 40, Padding = new Thickness(0), Content = new FontIcon { Glyph = glyph, FontSize = 20 } };
             AutomationProperties.SetName(button, name);
             ToolTipService.SetToolTip(button, name);
             button.Click += (_, _) => { flyout.Hide(); selected(glyph); };

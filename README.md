@@ -13,7 +13,7 @@ Le projet est en cours de construction vers la v1.0 : l'appli compile, démarre 
 - Atténuation automatique : la musique baisse quand quelqu'un parle sur Discord.
 - Badge permanent et son de confirmation quand le micro est coupé.
 - « M'écouter » (panneau et page Appareils) : le micro est envoyé dans A1, généralement le casque, pour s'entendre parler.
-- Console de mixage.
+- Console de mixage : tranches d'entrées et de sorties qui passent à la ligne, seules les tranches reliées à un périphérique sont affichées (bouton + pour les autres), égaliseur repliable ; la molette ne règle un fader qu'après un clic dessus.
 - Matrice de routage.
 - Profils rappelés avec un fondu.
 - Règles par application.

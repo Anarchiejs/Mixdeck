@@ -259,7 +259,7 @@
     <value>Sorties</value>
   </data>
   <data name="MixerPage010.Text" xml:space="preserve">
-    <value>Double-cliquez sur un fader pour revenir à 0 dB, ou sur le panoramique pour le centrer. F2 sur un nom permet de le modifier.</value>
+    <value>Cliquez sur un fader, puis utilisez la molette pour l’ajuster (Maj pour un réglage fin). Double-cliquez sur un fader pour revenir à 0 dB, ou sur le panoramique pour le centrer. F2 ou double-clic sur un nom permet de le modifier. Seules les tranches reliées à un périphérique sont affichées : le bouton + ajoute les autres.</value>
   </data>
   <data name="ProfilesPage001.Text" xml:space="preserve">
     <value>Profils</value>
@@ -784,7 +784,7 @@
     <value>Mono</value>
   </data>
   <data name="ChannelCard021.Content" xml:space="preserve">
-    <value>EQ activé</value>
+    <value>EQ</value>
   </data>
   <data name="ProfileCard001.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
     <value>Nouveau nom du profil</value>
@@ -1616,5 +1616,26 @@
   </data>
   <data name="DevicesPage018.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
     <value>M'écouter : entendre mon micro dans le casque</value>
+  </data>
+  <data name="ChannelCard021.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
+    <value>Égaliseur de la sortie</value>
+  </data>
+  <data name="MixerPage011.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Ajouter une entrée</value>
+  </data>
+  <data name="MixerPage011.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
+    <value>Ajouter une entrée masquée</value>
+  </data>
+  <data name="MixerPage012.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Ajouter une sortie</value>
+  </data>
+  <data name="MixerPage012.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
+    <value>Ajouter une sortie masquée</value>
+  </data>
+  <data name="CS_ConsoleHide" xml:space="preserve">
+    <value>Masquer de la console</value>
+  </data>
+  <data name="CS_ConsoleNoDevice" xml:space="preserve">
+    <value>{0} (aucun périphérique)</value>
   </data>
 </root>
