@@ -332,6 +332,33 @@ public sealed class VoicemeeterMixerTests
     }
 
     [Fact]
+    public async Task WritesAcceptedBeforeDisposeAreSentBeforeLogout()
+    {
+        using var firstWrite = new ManualResetEventSlim();
+        using var release = new ManualResetEventSlim();
+        var blocked = 0;
+        var api = new ApiHarness
+        {
+            Written = () =>
+            {
+                if (Interlocked.Exchange(ref blocked, 1) != 0) return;
+                firstWrite.Set();
+                release.Wait(TimeSpan.FromSeconds(5));
+            },
+        };
+        var mixer = new VoicemeeterMixer(api, NullLogger<VoicemeeterMixer>.Instance, TimeProvider.System);
+        await mixer.StartAsync().WaitAsync(TimeSpan.FromSeconds(2));
+        mixer.SetFloat(VmParam.StripGain(0), -3);
+        firstWrite.Wait(TimeSpan.FromSeconds(2)).Should().BeTrue();
+        // Le thread est occupé : cette écriture (ex. le gain rendu par l'atténuation) attend dans la file.
+        mixer.SetFloat(VmParam.StripGain(1), -7);
+        var disposing = mixer.DisposeAsync().AsTask();
+        release.Set();
+        await disposing.WaitAsync(TimeSpan.FromSeconds(3));
+        api.Inner.Calls.Should().Contain(c => c.Method == nameof(api.SetParameterFloat) && c.Parameter == VmParam.StripGain(1));
+    }
+
+    [Fact]
     public async Task SimulatorIsDeterministicWithASeed()
     {
         var first = new SimulatedVoicemeeterApi(42);

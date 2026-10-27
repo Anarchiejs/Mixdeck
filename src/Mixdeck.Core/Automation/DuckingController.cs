@@ -20,6 +20,10 @@ public sealed class DuckingController(IMixer mixer, ISettingsStore settings, Tim
     private long rampStart;
     private double rampMilliseconds;
     private long? lastFrame, belowSince;
+    // Gain rendu par la dernière restauration : Voicemeeter ne le publie qu'après coup, la trame suivante ne doit pas
+    // prendre l'ancien gain baissé pour la base (constat de la revue adverse).
+    private (int Index, float Gain, long At)? restored;
+    private static readonly TimeSpan RestoredValidity = TimeSpan.FromSeconds(2);
     private static readonly TimeSpan FrameInterval = TimeSpan.FromMilliseconds(50);
 
     public void Start()
@@ -117,10 +121,15 @@ public sealed class DuckingController(IMixer mixer, ISettingsStore settings, Tim
         if (target is null)
         {
             target = config.TargetStrip;
-            baseline = observed = current = strip.Gain;
+            var justRestored = restored is { } r && r.Index == config.TargetStrip && time.GetElapsedTime(r.At, now) < RestoredValidity
+                ? r.Gain : (float?)null;
+            restored = null;
+            baseline = current = justRestored ?? strip.Gain;
+            observed = strip.Gain;
             ducked = false;
             belowSince = null;
             pendingWrites.Clear();
+            if (justRestored is { } gain) pendingWrites.Add(gain);
             BeginRamp(false, now);
         }
         Observe(mixer.Snapshot);
@@ -160,12 +169,13 @@ public sealed class DuckingController(IMixer mixer, ISettingsStore settings, Tim
         mixer.SetFloat(VmParam.StripGain(index), gain);
     }
 
-    private void Restore(MixerSnapshot? snapshot = null)
+    private void Restore(MixerSnapshot? snapshot = null, bool forProfile = false)
     {
         if (target is null) return;
         if (mixer.State != MixerConnectionState.Connected) { reconnect = true; return; }
         Observe(snapshot ?? mixer.Snapshot);
         Write(baseline);
+        restored = forProfile ? null : (target.Value, baseline, time.GetTimestamp());
         target = null;
         pendingWrites.Clear();
         belowSince = null;
@@ -178,7 +188,7 @@ public sealed class DuckingController(IMixer mixer, ISettingsStore settings, Tim
         lock (gate)
         {
             ObjectDisposedException.ThrowIf(disposed, this);
-            if (suspensions++ == 0) Guard(() => Restore());
+            if (suspensions++ == 0) Guard(() => Restore(forProfile: true));
             return new Suspension(this);
         }
     }

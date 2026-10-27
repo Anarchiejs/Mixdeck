@@ -212,4 +212,20 @@ public sealed class DuckingTests
         r.Controller.Dispose();
         Assert.Equal(-5, r.Gain);
     }
-}
+
+    // Revue adverse : après une restauration, Voicemeeter publie le gain rendu un peu plus tard. Une attaque
+    // instantanée ne doit pas prendre le gain encore baissé comme nouvelle base (musique baissée deux fois).
+    [Fact]
+    public async Task InstantAttackAfterRestoreKeepsTheUserBase()
+    {
+        using var r = new Rig();
+        await r.Core.Settings.UpdateAsync(s => s with { Ducking = s.Ducking with { AttackMilliseconds = 0 } });
+        r.Attenuate();
+        r.Core.Mixer.DeferWrites = true;
+        await r.Core.Settings.UpdateAsync(s => s with { Ducking = s.Ducking with { ThresholdDb = -21 } });
+        r.Frame(1);
+        r.Core.Mixer.FlushWrites();
+        r.Core.Mixer.DeferWrites = false;
+        r.Frame(1);
+        Assert.Equal(-12, r.Gain);
+    }}
