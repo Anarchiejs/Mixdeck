@@ -1,0 +1,18 @@
+<Project>
+  <PropertyGroup>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Deterministic>true</Deterministic>
+    <Company>Mixdeck</Company>
+    <Product>Mixdeck</Product>
+    <Version>0.1.0</Version>
+    <EnforceCodeStyleInBuild>false</EnforceCodeStyleInBuild>
+    <!-- VoicemeeterRemote64.dll est 64 bits : tout ce qui touche Windows est compilé en x64. -->
+    <IsWindowsProject Condition="$(MSBuildProjectName.EndsWith('.Voicemeeter')) or $(MSBuildProjectName.EndsWith('.Platform')) or $(MSBuildProjectName.EndsWith('.App')) or $(MSBuildProjectName.EndsWith('.Voicemeeter.Tests'))">true</IsWindowsProject>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(IsWindowsProject)' == 'true'">
+    <PlatformTarget>x64</PlatformTarget>
+    <RuntimeIdentifier Condition="'$(RuntimeIdentifier)' == ''">win-x64</RuntimeIdentifier>
+  </PropertyGroup>
+</Project>
