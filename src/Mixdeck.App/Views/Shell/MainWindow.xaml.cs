@@ -18,6 +18,7 @@ public sealed partial class MainWindow : Window
         [ShellPage.Mixer] = typeof(MixerPage),
         [ShellPage.Routing] = typeof(RoutingPage),
         [ShellPage.Devices] = typeof(DevicesPage),
+        [ShellPage.FlStudio] = typeof(FlStudioPage),
         [ShellPage.Profiles] = typeof(ProfilesPage),
         [ShellPage.Rules] = typeof(RulesPage),
         [ShellPage.Settings] = typeof(SettingsPage),

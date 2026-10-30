@@ -6,6 +6,7 @@ public enum ShellPage
     Mixer,
     Routing,
     Devices,
+    FlStudio,
     Profiles,
     Rules,
     Settings,

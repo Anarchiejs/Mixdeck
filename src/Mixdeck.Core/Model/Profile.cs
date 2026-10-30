@@ -18,6 +18,9 @@ public sealed record Profile
     public IReadOnlyList<StripProfile> Strips { get; init; } = [];
     public IReadOnlyList<BusProfile> Buses { get; init; } = [];
 
+    /// <summary>État de pistes de FL Studio à appliquer avec le profil ; vide = ne pas toucher à FL.</summary>
+    public IReadOnlyList<DawTrackProfile> Daw { get; init; } = [];
+
     public DateTimeOffset CreatedAt { get; init; } = DateTimeOffset.UtcNow;
 
     public static string NewId() => Guid.NewGuid().ToString("N");

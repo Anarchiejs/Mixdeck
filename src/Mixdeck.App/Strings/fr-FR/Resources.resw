@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <root>
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms</value>
@@ -1596,6 +1596,9 @@
   <data name="CS_MonitorTarget" xml:space="preserve">
     <value>Retour du micro dans {0}</value>
   </data>
+  <data name="FlyoutWindow013.Text" xml:space="preserve">
+    <value>FL Studio · effets du micro</value>
+  </data>
   <data name="FlyoutWindow011.Text" xml:space="preserve">
     <value>M'écouter</value>
   </data>
@@ -1638,4 +1641,88 @@
   <data name="CS_ConsoleNoDevice" xml:space="preserve">
     <value>{0} (aucun périphérique)</value>
   </data>
+  <data name="DevicesPage019.Title" xml:space="preserve">
+    <value>Sortie d'écoute</value>
+  </data>
+  <data name="DevicesPage019.Description" xml:space="preserve">
+    <value>Où renvoyer le micro quand « M'écouter » est actif</value>
+  </data>
+  <data name="DevicesPage020.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Sortie d'écoute</value>
+  </data>
+  <data name="MainWindowFlStudio.Content" xml:space="preserve"><value>FL Studio</value></data>
+  <data name="FlStudioPage001.Text" xml:space="preserve"><value>FL Studio</value></data>
+  <data name="FlStudioPage003.Header" xml:space="preserve"><value>Activer l’intégration FL Studio</value></data>
+  <data name="FlStudioPage004.Header" xml:space="preserve"><value>Port vers FL Studio (entrée dans FL)</value></data>
+  <data name="FlStudioPage005.Header" xml:space="preserve"><value>Port depuis FL Studio (sortie dans FL)</value></data>
+  <data name="FlStudioPage006.Header" xml:space="preserve"><value>Inclure FL Studio dans les profils</value></data>
+  <data name="FlStudioPage007.Text" xml:space="preserve"><value>Sélectionnée</value></data>
+  <data name="FlStudioPage008.Content" xml:space="preserve"><value>Sélectionner</value></data>
+  <data name="FlStudioPage009.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>Couper ou rétablir la piste</value></data>
+  <data name="FlStudioPage010.Header" xml:space="preserve"><value>Effets</value></data>
+  <data name="FlStudioPage011.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>Volume de la piste</value></data>
+  <data name="FlStudioPage012.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>Activer ou couper le slot</value></data>
+  <data name="Fl_State_Disabled" xml:space="preserve"><value>Désactivé</value></data>
+  <data name="Fl_State_PortsMissing" xml:space="preserve"><value>Ports introuvables</value></data>
+  <data name="Fl_State_WaitingForDaw" xml:space="preserve"><value>En attente de FL Studio</value></data>
+  <data name="Fl_State_Connected" xml:space="preserve"><value>Connecté</value></data>
+  <data name="Fl_Setup" xml:space="preserve"><value>« Installer Mixdeck.cmd » fait ces réglages tout seul (FL fermé). À la main :
+1. Installez loopMIDI et le script Mixdeck dans le dossier des scripts MIDI de FL Studio.
+2. Créez deux ports loopMIDI nommés exactement « {0} » et « {1} ».
+3. Dans FL Studio, ouvrez Options &gt; MIDI. Activez l’entrée « {0} », choisissez Controller type = Mixdeck et le port 10.
+4. Choisissez la sortie « {1} », avec le même port 10. Ne mettez aucun port sur la sortie « {0} » : FL l’y remet parfois en rechargeant le script, vérifiez-la après.</value></data>
+  <data name="Fl_Slot" xml:space="preserve"><value>Slot {0}</value></data>
+  <data name="Fl_SaveError" xml:space="preserve"><value>Impossible d’enregistrer les réglages FL Studio.</value></data>
+  <data name="Settings_ToggleDawSlot" xml:space="preserve"><value>Basculer un slot de FL Studio</value></data>
+  <data name="Settings_ToggleDawTrackMute" xml:space="preserve"><value>Couper/rétablir une piste de FL Studio</value></data>
+  <data name="Fl_TrackNumber" xml:space="preserve"><value>Numéro de piste (0 = Master)</value></data>
+  <data name="Fl_TrackChoice" xml:space="preserve"><value>Piste FL Studio</value></data>
+  <data name="Fl_SlotNumber" xml:space="preserve"><value>Slot (1 à 10)</value></data>
+  <data name="Fl_ChooseTarget" xml:space="preserve"><value>Choisissez une piste et un slot valides.</value></data>
+  <data name="Core_DawSlotOn" xml:space="preserve"><value>{0} : {1} activé</value></data>
+  <data name="Core_DawSlotOff" xml:space="preserve"><value>{0} : {1} coupé</value></data>
+  <data name="Core_DawTrackMuted" xml:space="preserve"><value>{0} coupée</value></data>
+  <data name="Core_DawTrackOn" xml:space="preserve"><value>{0} rétablie</value></data>
+<data name="FlStudioPage003.OnContent" xml:space="preserve"><value>Activé</value></data>
+<data name="FlStudioPage003.OffContent" xml:space="preserve"><value>Coupé</value></data>
+<data name="FlStudioPage006.OnContent" xml:space="preserve"><value>Activé</value></data>
+<data name="FlStudioPage006.OffContent" xml:space="preserve"><value>Coupé</value></data>
+<data name="FlStudioPage010.OnContent" xml:space="preserve"><value>Activé</value></data>
+<data name="FlStudioPage010.OffContent" xml:space="preserve"><value>Coupé</value></data>
+<data name="FlStudioPage012.OnContent" xml:space="preserve"><value>Activé</value></data>
+<data name="FlStudioPage012.OffContent" xml:space="preserve"><value>Coupé</value></data>
+  <!-- L5 Discord : textes ici -->
+  <data name="Discord_Title.Text" xml:space="preserve"><value>Discord</value></data>
+  <data name="Discord_Enable.Header" xml:space="preserve"><value>Synchroniser le muet avec Discord</value></data>
+  <data name="Discord_ClientId.Header" xml:space="preserve"><value>Application ID</value></data>
+  <data name="Discord_Secret.Header" xml:space="preserve"><value>Secret de l’application</value></data>
+  <data name="Discord_SecretStored" xml:space="preserve"><value>Secret enregistré</value></data>
+  <data name="Discord_SecretMissing" xml:space="preserve"><value>Aucun secret enregistré</value></data>
+  <data name="Discord_Authorize.Content" xml:space="preserve"><value>Autoriser dans Discord</value></data>
+  <data name="Discord_Forget.Content" xml:space="preserve"><value>Oublier</value></data>
+  <data name="Discord_State_Disabled" xml:space="preserve"><value>Synchronisation désactivée (ou mode démo)</value></data>
+  <data name="Discord_State_Disconnected" xml:space="preserve"><value>Discord fermé</value></data>
+  <data name="Discord_State_AuthorizationRequired" xml:space="preserve"><value>À autoriser dans Discord</value></data>
+  <data name="Discord_State_Connecting" xml:space="preserve"><value>Connexion à Discord…</value></data>
+  <data name="Discord_State_Connected" xml:space="preserve"><value>Connecté à Discord</value></data>
+  <data name="Discord_State_Error" xml:space="preserve"><value>Erreur Discord : vérifiez l’application, les droits RPC et la connexion, puis réessayez.</value></data>
+  <data name="Discord_CheckSettings" xml:space="preserve"><value>Activez la synchronisation et saisissez un Application ID numérique.</value></data>
+  <data name="Discord_AuthorizeError" xml:space="preserve"><value>Autorisation impossible. Vérifiez le secret, l’application Discord, les droits RPC et réessayez.</value></data>
+  <data name="Discord_ForgetError" xml:space="preserve"><value>Impossible d’effacer les identifiants Discord.</value></data>
+  <data name="Discord_Help.Text" xml:space="preserve"><value>1. Créez votre application sur discord.com/developers.
+2. Copiez son Application ID et son secret ici, puis activez la synchronisation.
+3. Ajoutez http://localhost dans OAuth2 &gt; Redirects, puis cliquez sur Autoriser dans Discord.
+Pour une application RPC non approuvée, votre compte doit figurer parmi ses testeurs. Oublier efface les identifiants locaux ; vous pouvez aussi révoquer l’accès dans Discord.</value></data>
+  <!-- L6 Périphérique Windows par défaut : textes ici -->
+  <data name="L6FlyoutOutputLabel.Text" xml:space="preserve"><value>Sortie Windows</value></data>
+  <data name="L6FlyoutOutput.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>Sortie Windows par défaut</value></data>
+  <data name="L6DefaultsTitle.Text" xml:space="preserve"><value>Périphériques Windows par défaut</value></data>
+  <data name="L6DefaultsDescription.Text" xml:space="preserve"><value>Choisissez la sortie et le micro utilisés par défaut par Windows, y compris pour les communications.</value></data>
+  <data name="L6OutputLabel.Text" xml:space="preserve"><value>Sortie Windows</value></data>
+  <data name="L6InputLabel.Text" xml:space="preserve"><value>Entrée Windows</value></data>
+  <data name="L6DefaultOutput.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>Sortie Windows par défaut</value></data>
+  <data name="L6DefaultInput.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>Entrée Windows par défaut</value></data>
+  <data name="L6_ReadError" xml:space="preserve"><value>Impossible de lire les périphériques Windows.</value></data>
+  <data name="L6_SetError" xml:space="preserve"><value>Impossible de changer le périphérique Windows par défaut (erreur {0}).</value></data>
+  <data name="L6_PartialError" xml:space="preserve"><value>Changement incomplet pour les rôles Windows (erreur {0}). Vérifiez le périphérique sélectionné.</value></data>
 </root>

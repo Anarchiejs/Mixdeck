@@ -16,8 +16,22 @@ public sealed partial class DevicesPage : Page
     }
     public DevicesPageViewModel ViewModel { get; }
     public MixerViewModel Mixer { get; } = App.GetService<MixerViewModel>();
-    private void OnLoaded(object sender, RoutedEventArgs e) => ViewModel.Activate();
-    private void OnUnloaded(object sender, RoutedEventArgs e) => ViewModel.Deactivate();
+    public WindowsDefaultDevicesViewModel WindowsDefaults { get; } = App.GetService<WindowsDefaultDevicesViewModel>();
+    private bool defaultsActive;
+    private void OnLoaded(object sender, RoutedEventArgs e)
+    {
+        ViewModel.Activate();
+        if (defaultsActive) return;
+        defaultsActive = true;
+        WindowsDefaults.Activate();
+    }
+    private void OnUnloaded(object sender, RoutedEventArgs e)
+    {
+        ViewModel.Deactivate();
+        if (!defaultsActive) return;
+        defaultsActive = false;
+        WindowsDefaults.Deactivate();
+    }
     private async void OnRestartEngine(object sender, RoutedEventArgs e)
     {
         if (dialogOpen) return;

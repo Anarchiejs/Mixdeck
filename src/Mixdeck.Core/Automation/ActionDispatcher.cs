@@ -4,8 +4,9 @@ using Mixdeck.Core.Abstractions;
 using Mixdeck.Core.Model;
 namespace Mixdeck.Core.Automation;
 public sealed class ActionDispatcher(IMixer mixer, IProfileService profiles, ISettingsStore settings, IOsdService osd,
-    ILogger<ActionDispatcher> logger, AutomationCoordinator automation, ITextProvider? textProvider = null)
+    ILogger<ActionDispatcher> logger, AutomationCoordinator automation, ITextProvider? textProvider = null, IDaw? daw = null)
 {
+    private readonly IDaw daw = daw ?? NullDaw.Instance;
     private readonly ITextProvider text = textProvider ?? FrenchTextProvider.Instance;
     public event EventHandler? FlyoutRequested;
     public async Task HandleAsync(HotkeyEventArgs e)
@@ -17,6 +18,32 @@ public sealed class ActionDispatcher(IMixer mixer, IProfileService profiles, ISe
             var config = settings.Current;
             switch (binding.Action)
             {
+                case HotkeyAction.ToggleDawSlot:
+                case HotkeyAction.ToggleDawTrackMute:
+                    if (daw.State != DawConnectionState.Connected || !daw.Tracks.TryGetValue(binding.DawTrack, out var track))
+                    {
+                        logger.LogWarning("Piste FL indisponible : {Track}", binding.DawTrack);
+                        return;
+                    }
+                    if (binding.Action == HotkeyAction.ToggleDawTrackMute)
+                    {
+                        var mute = !track.Muted;
+                        daw.SetMute(track.Index, mute);
+                        if (config.ShowOsd) osd.Show(string.Format(text.Culture, text.Get(mute ? "Core_DawTrackMuted" : "Core_DawTrackOn"), track.Name), "\uE720", mute);
+                    }
+                    else
+                    {
+                        var slot = track.Slots.FirstOrDefault(s => s.Index == binding.DawSlot);
+                        if (slot is null)
+                        {
+                            logger.LogWarning("Slot FL introuvable : {Track}/{Slot}", binding.DawTrack, binding.DawSlot);
+                            return;
+                        }
+                        daw.SetSlot(track.Index, slot.Index, !slot.Enabled);
+                        if (config.ShowOsd) osd.Show(string.Format(text.Culture, text.Get(slot.Enabled ? "Core_DawSlotOff" : "Core_DawSlotOn"),
+                            track.Name, string.Format(text.Culture, text.Get("Core_DawSlotName"), slot.Index + 1)), "\uE950", slot.Enabled);
+                    }
+                    break;
                 case HotkeyAction.ToggleMic:
                 case HotkeyAction.PushToTalk:
                     var strip = mixer.Snapshot.Strips.FirstOrDefault(s => s.Index == config.MicStripIndex);

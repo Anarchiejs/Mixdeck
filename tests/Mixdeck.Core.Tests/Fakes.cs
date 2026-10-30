@@ -112,3 +112,24 @@ internal sealed class TestRig : IDisposable
         while (!condition()) await Task.Delay(1, timeout.Token);
     }
 }
+
+internal sealed class FakeDaw : IDaw
+{
+    public DawConnectionState State { get; set; } = DawConnectionState.Connected;
+    public IReadOnlyDictionary<int, DawTrack> Tracks { get; set; } = new Dictionary<int, DawTrack>();
+    public int SelectedTrack => -1;
+    public List<(string Kind, int Track, int Slot, object Value)> Calls { get; } = [];
+    public event EventHandler<DawConnectionState>? StateChanged;
+    public void Connect() { State = DawConnectionState.Connected; StateChanged?.Invoke(this, State); }
+    public event EventHandler<DawTrack>? TrackChanged { add { } remove { } }
+    public event EventHandler<int>? SelectedTrackChanged { add { } remove { } }
+    public Task StartAsync(CancellationToken cancellationToken = default) => Task.CompletedTask;
+    public Task RefreshAsync(CancellationToken cancellationToken = default) => Task.CompletedTask;
+    public void SelectTrack(int track) { }
+    public void SetMute(int track, bool muted) => Calls.Add(("Mute", track, -1, muted));
+    public void SetVolume(int track, float volume) => Calls.Add(("Volume", track, -1, volume));
+    public void SetSlotsEnabled(int track, bool enabled) => Calls.Add(("Effects", track, -1, enabled));
+    public void SetSlot(int track, int slot, bool enabled) => Calls.Add(("Slot", track, slot, enabled));
+    public void ChangePreset(int track, int slot, bool next) { }
+    public ValueTask DisposeAsync() => ValueTask.CompletedTask;
+}

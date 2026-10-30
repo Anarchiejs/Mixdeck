@@ -22,6 +22,7 @@ public sealed class TrayIconService : IDisposable
     private readonly System.Drawing.Icon _normalIcon;
     private readonly System.Drawing.Icon _mutedIcon;
     private TaskbarIcon? _icon;
+    private bool? _iconMuted;
     private MenuFlyoutItem? _micItem;
     private readonly MicFeedbackService _feedback;
     private ProfileItemViewModel? _profile;
@@ -74,7 +75,7 @@ public sealed class TrayIconService : IDisposable
 
         _icon = new TaskbarIcon
         {
-            Icon = _normalIcon,
+            Icon = (System.Drawing.Icon)_normalIcon.Clone(),
             // Menu Windows natif : le mode SecondWindow crée une fenêtre réduite visible dans la barre des tâches.
             ContextMenuMode = ContextMenuMode.PopupMenu,
             ContextFlyout = menu,
@@ -114,7 +115,13 @@ public sealed class TrayIconService : IDisposable
         }
 
         var muted = _mixer.IsMicMuted;
-        _icon.Icon = muted ? _mutedIcon : _normalIcon;
+        // H.NotifyIcon libère l'icône remplacée : lui donner une copie, et seulement quand l'état change,
+        // sinon l'icône gardée ici serait réutilisée après libération (ObjectDisposedException).
+        if (_iconMuted != muted)
+        {
+            _iconMuted = muted;
+            _icon.Icon = (System.Drawing.Icon)(muted ? _mutedIcon : _normalIcon).Clone();
+        }
         _micItem.Text = !_mixer.HasMic ? Strings.Get("CS_016") : muted ? Strings.Get("CS_017") : Strings.Get("CS_018");
         _micItem.IsEnabled = _mixer.CanToggleMic;
 

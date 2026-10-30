@@ -4,10 +4,12 @@ using Mixdeck.Core.Abstractions;
 using Mixdeck.Core.Model;
 using Mixdeck.Core.Serialization;
 using Mixdeck.Core.Settings;
+using Mixdeck.Core.Automation;
 namespace Mixdeck.Core.Profiles;
 public sealed class ProfileService(IMixer mixer, ISettingsStore settings, MixdeckPaths paths,
-    ILogger<ProfileService> logger, TimeProvider timeProvider) : IProfileService
+    ILogger<ProfileService> logger, TimeProvider timeProvider, IDaw? daw = null) : IProfileService
 {
+    private readonly IDaw daw = daw ?? NullDaw.Instance;
     private readonly SemaphoreSlim files = new(1, 1);
     private readonly object fadeLock = new();
     private CancellationTokenSource? currentFade;
@@ -52,6 +54,9 @@ public sealed class ProfileService(IMixer mixer, ISettingsStore settings, Mixdec
         var snapshot = mixer.Snapshot;
         var profile = new Profile { Id = Profile.NewId(), Name = name, CreatedAt = timeProvider.GetUtcNow(),
             VoicemeeterType = snapshot.Layout.VoicemeeterType,
+            Daw = settings.Current.FlStudio.CaptureInProfiles && daw.State == DawConnectionState.Connected
+                ? daw.Tracks.Values.Select(t => new DawTrackProfile(t.Index, t.Muted, t.Volume, t.SlotsEnabled, t.Slots.ToArray())).ToArray()
+                : [],
             Strips = snapshot.Strips.Select(s => new StripProfile(s.Index, s.Gain, s.Mute, s.Routes.ToArray(), s.PanX)).ToArray(),
             Buses = snapshot.Buses.Select(b => new BusProfile(b.Index, b.Gain, b.Mute)).ToArray() };
         await SaveAsync(profile, cancellationToken);
@@ -115,6 +120,7 @@ public sealed class ProfileService(IMixer mixer, ISettingsStore settings, Mixdec
         try
         {
             ActiveChanged?.Invoke(this, profile);
+            ApplyDaw(profile);
             var duration = fade ?? TimeSpan.FromMilliseconds(Math.Max(0, settings.Current.FadeMilliseconds));
             var steps = Math.Max(1, (int)Math.Ceiling(duration.TotalMilliseconds / 16));
             for (var step = duration <= TimeSpan.Zero ? steps : 0; step <= steps; step++)
@@ -169,6 +175,35 @@ public sealed class ProfileService(IMixer mixer, ISettingsStore settings, Mixdec
         catch (OperationCanceledException) when (!cancellationToken.IsCancellationRequested) { }
         finally { lock (fadeLock) { if (ReferenceEquals(currentFade, source)) currentFade = null; } }
     }
+    private int dawSubscribed;
+    private void DawStateChanged(object? sender, DawConnectionState state)
+    {
+        if (state == DawConnectionState.Connected && Active is { } profile) ApplyDaw(profile);
+    }
+    private void ApplyDaw(Profile profile)
+    {
+        if (profile.Daw.Count == 0) return;
+        if (daw.State != DawConnectionState.Connected)
+        {
+            // Cas typique : une règle applique le profil au lancement de FL, avant que le script réponde.
+            // L'état FL sera appliqué dès la connexion, si ce profil est toujours actif.
+            logger.LogInformation("Profil {Profile} : FL Studio pas encore connecté, pistes appliquées à la connexion", profile.Name);
+            if (Interlocked.Exchange(ref dawSubscribed, 1) == 0) daw.StateChanged += DawStateChanged;
+            return;
+        }
+        var tracks = daw.Tracks;
+        foreach (var target in profile.Daw)
+        {
+            tracks.TryGetValue(target.Track, out var current);
+            if (target.Muted is { } muted && current?.Muted != muted) daw.SetMute(target.Track, muted);
+            // Le volume voyage sur 14 bits : un écart d'un pas n'est pas une différence.
+            if (target.Volume is { } volume && (current is null || Math.Abs(current.Volume - volume) > 1f / 16383)) daw.SetVolume(target.Track, volume);
+            if (target.SlotsEnabled is { } enabled && current?.SlotsEnabled != enabled) daw.SetSlotsEnabled(target.Track, enabled);
+            foreach (var slot in target.Slots ?? [])
+                if (current?.Slots.FirstOrDefault(s => s.Index == slot.Index)?.Enabled != slot.Enabled)
+                    daw.SetSlot(target.Track, slot.Index, slot.Enabled);
+        }
+    }
     public Task ApplyNextAsync(int direction, CancellationToken cancellationToken = default)
     {
         var list = Profiles;
@@ -204,6 +239,7 @@ public sealed class ProfileService(IMixer mixer, ISettingsStore settings, Mixdec
         var layout = p.VoicemeeterType is >= 1 and <= 3 ? MixerLayout.ForType(p.VoicemeeterType) : MixerLayout.Banana;
         return p with
         {
+            Daw = p.Daw ?? [],
             VoicemeeterType = layout.VoicemeeterType,
             Strips = (p.Strips ?? []).Where(s => s.Index >= 0 && s.Index < layout.StripCount).DistinctBy(s => s.Index)
                 .Select(s => s with { Gain = Gain(s.Gain), Routes = Enumerable.Range(0, layout.BusCount).Select(i => i < (s.Routes?.Count ?? 0) && s.Routes![i]).ToArray(), PanX = float.IsFinite(s.PanX) ? Math.Clamp(s.PanX, -1, 1) : 0 }).ToArray(),

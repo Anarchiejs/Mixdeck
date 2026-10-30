@@ -114,6 +114,12 @@ public partial class App : Application
             _ = remote.HideWindowWhenConnectedAsync(settings.HideVoicemeeterWindow);
         }
 
+        // FL Studio : recherche des ports loopMIDI et reconnexion en fond, sans retarder le démarrage.
+        await GetService<IDaw>().StartAsync();
+        // L5 : la synchronisation écoute avant que Discord puisse se connecter.
+        GetService<DiscordMuteSync>().Start();
+        await GetService<IDiscordVoice>().StartAsync();
+
         await GetService<IProfileService>().LoadAsync();
 
         GetService<TrayIconService>().Create();
@@ -220,9 +226,16 @@ public partial class App : Application
             GetService<TrayIconService>().Dispose();
             GetService<AutomationCoordinator>().Dispose();
             GetService<DuckingController>().Dispose();
+            GetService<DiscordMuteSync>().DisposeAsync().AsTask().Wait(TimeSpan.FromSeconds(2));
+            GetService<IDiscordVoice>().DisposeAsync().AsTask().Wait(TimeSpan.FromSeconds(2));
             GetService<IHotkeyService>().Dispose();
             GetService<IMixer>().DisposeAsync().AsTask().Wait(TimeSpan.FromSeconds(2));
-            _host?.Dispose();
+            GetService<IDaw>().DisposeAsync().AsTask().Wait(TimeSpan.FromSeconds(1));
+            // Les services Discord sont asynchrones : Dispose() de DI les refuserait.
+            if (_host is IAsyncDisposable asyncHost)
+                asyncHost.DisposeAsync().AsTask().GetAwaiter().GetResult();
+            else
+                _host?.Dispose();
         }
         catch (Exception ex)
         {

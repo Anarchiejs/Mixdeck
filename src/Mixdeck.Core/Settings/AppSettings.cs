@@ -73,6 +73,9 @@ public sealed record AppSettings
     /// <summary>Tranche pilotée par le gros bouton « Micro » et les raccourcis micro.</summary>
     public int MicStripIndex { get; init; }
 
+    /// <summary>Sortie où « M'écouter » renvoie le micro (0 = A1).</summary>
+    public int MonitorBusIndex { get; init; }
+
     /// <summary>Durée du fondu des gains lors d'un changement de profil.</summary>
     public int FadeMilliseconds { get; init; } = 300;
 
@@ -105,6 +108,10 @@ public sealed record AppSettings
 
     public DuckingSettings Ducking { get; init; } = new();
 
+    /// <summary>Pilotage de FL Studio par loopMIDI.</summary>
+    public FlStudioSettings FlStudio { get; init; } = new();
+    public DiscordSettings Discord { get; init; } = new();
+
     /// <summary>Petit badge permanent à l'écran tant que le micro est coupé.</summary>
     public bool ShowMicBadge { get; init; }
 
@@ -134,4 +141,16 @@ public sealed record AppSettings
 
     public ChannelCustomization BusCustomization(int index) =>
         Buses.FirstOrDefault(c => c.Index == index) ?? new ChannelCustomization(index);
+}
+
+/// <summary>
+/// Muet synchronisé avec Discord par son RPC local (application Discord créée par l'utilisateur).
+/// Le secret de l'application et les jetons ne sont jamais ici : fichier chiffré par DPAPI (voir DiscordCredentialStore).
+/// </summary>
+public sealed record DiscordSettings
+{
+    public bool Enabled { get; init; }
+
+    /// <summary>Identifiant (« Application ID ») de l'application Discord de l'utilisateur ; pas secret.</summary>
+    public string ClientId { get; init; } = "";
 }

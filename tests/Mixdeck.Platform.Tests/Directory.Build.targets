@@ -1,0 +1,7 @@
+<Project>
+  <!-- L6: test the actual shared VM without the WinUI runtime. The dispatcher contract is supplied locally. -->
+  <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)../../src/Mixdeck.App/ViewModels/Shared/WindowsDefaultDevicesViewModel.cs"
+             Link="WindowsDefaultDevicesViewModel.cs" />
+  </ItemGroup>
+</Project>

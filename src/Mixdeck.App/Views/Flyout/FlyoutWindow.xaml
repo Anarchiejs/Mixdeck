@@ -118,6 +118,47 @@
                 OffContent=""
                 OnContent="" />
         </Grid>
+        <!-- FL Studio : effets du micro, une seule piste allumée à la fois parmi celles qui portent des plugins -->
+        <StackPanel Margin="0,6,0,0" Spacing="2" Visibility="{x:Bind FlQuickPick.IsVisible, Mode=OneWay}">
+            <TextBlock x:Uid="FlyoutWindow013"
+                Margin="4,0,0,2"
+                Style="{StaticResource CaptionTextBlockStyle}"
+                 />
+            <ItemsRepeater x:Name="FlTracks" ItemsSource="{x:Bind FlQuickPick.Tracks}">
+                <ItemsRepeater.Layout>
+                    <UniformGridLayout ItemsStretch="Fill" MinColumnSpacing="4" MinItemWidth="96" MinRowSpacing="4" />
+                </ItemsRepeater.Layout>
+                <ItemsRepeater.ItemTemplate>
+                    <DataTemplate x:DataType="shared:FlQuickTrackViewModel">
+                        <ToggleButton
+                            HorizontalAlignment="Stretch"
+                            AutomationProperties.Name="{x:Bind Name, Mode=OneWay}"
+                            Command="{x:Bind ToggleCommand}"
+                            IsChecked="{x:Bind Active, Mode=OneWay}">
+                            <TextBlock Text="{x:Bind Name, Mode=OneWay}" TextTrimming="CharacterEllipsis" />
+                        </ToggleButton>
+                    </DataTemplate>
+                </ItemsRepeater.ItemTemplate>
+            </ItemsRepeater>
+        </StackPanel>
+        <!-- L6 : sortie Windows, partagée avec la page Appareils. -->
+        <Grid Margin="0,6,0,0" Padding="12,2,4,2" ColumnSpacing="12">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <FontIcon VerticalAlignment="Center" FontSize="16" Glyph="&#xE767;" />
+            <StackPanel Grid.Column="1" Spacing="4">
+                <TextBlock x:Uid="L6FlyoutOutputLabel" Style="{StaticResource CaptionTextBlockStyle}" />
+                <ComboBox x:Uid="L6FlyoutOutput" HorizontalAlignment="Stretch"
+                    ItemsSource="{x:Bind WindowsDefaults.Outputs}" DisplayMemberPath="Name"
+                    SelectedItem="{x:Bind WindowsDefaults.SelectedOutput, Mode=TwoWay}"
+                    IsEnabled="{x:Bind WindowsDefaults.CanEdit, Mode=OneWay}" />
+            </StackPanel>
+        </Grid>
+        <InfoBar IsClosable="False" Severity="Error"
+            IsOpen="{x:Bind WindowsDefaults.HasError, Mode=OneWay}"
+            Message="{x:Bind WindowsDefaults.ErrorMessage, Mode=OneWay}" />
         </StackPanel>
 
         <!-- Entrées et sorties -->

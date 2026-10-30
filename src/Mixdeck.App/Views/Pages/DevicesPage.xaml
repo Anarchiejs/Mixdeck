@@ -26,6 +26,26 @@
         <StackPanel Padding="{StaticResource MixdeckPagePadding}" Spacing="24" MaxWidth="1040">
             <TextBlock x:Uid="DevicesPage001" Style="{StaticResource TitleTextBlockStyle}"  />
             <InfoBar IsOpen="{x:Bind ViewModel.HasMessage, Mode=OneWay}" IsClosable="False" Severity="{x:Bind ViewModel.Severity, Mode=OneWay}" Message="{x:Bind ViewModel.Message, Mode=OneWay}" />
+            <!-- L6 : périphériques Windows par défaut. -->
+            <Border Style="{StaticResource MixdeckCardStyle}">
+                <StackPanel Spacing="12">
+                    <TextBlock x:Uid="L6DefaultsTitle" Style="{StaticResource SubtitleTextBlockStyle}" TextWrapping="Wrap" />
+                    <TextBlock x:Uid="L6DefaultsDescription" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" />
+                    <TextBlock x:Uid="L6OutputLabel" Style="{StaticResource BodyStrongTextBlockStyle}" />
+                    <ComboBox x:Uid="L6DefaultOutput" HorizontalAlignment="Stretch"
+                        ItemsSource="{x:Bind WindowsDefaults.Outputs}" DisplayMemberPath="Name"
+                        SelectedItem="{x:Bind WindowsDefaults.SelectedOutput, Mode=TwoWay}"
+                        IsEnabled="{x:Bind WindowsDefaults.CanEdit, Mode=OneWay}" />
+                    <TextBlock x:Uid="L6InputLabel" Style="{StaticResource BodyStrongTextBlockStyle}" />
+                    <ComboBox x:Uid="L6DefaultInput" HorizontalAlignment="Stretch"
+                        ItemsSource="{x:Bind WindowsDefaults.Inputs}" DisplayMemberPath="Name"
+                        SelectedItem="{x:Bind WindowsDefaults.SelectedInput, Mode=TwoWay}"
+                        IsEnabled="{x:Bind WindowsDefaults.CanEdit, Mode=OneWay}" />
+                    <InfoBar IsClosable="False" Severity="Error"
+                        IsOpen="{x:Bind WindowsDefaults.HasError, Mode=OneWay}"
+                        Message="{x:Bind WindowsDefaults.ErrorMessage, Mode=OneWay}" />
+                </StackPanel>
+            </Border>
             <StackPanel Spacing="8">
                 <TextBlock x:Uid="DevicesPage002"  Style="{StaticResource SubtitleTextBlockStyle}" />
                 <TextBlock x:Uid="DevicesPage003"  TextWrapping="Wrap" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
@@ -51,6 +71,9 @@
                 </StackPanel></Border>
                 <settings:SettingCard x:Uid="DevicesPage017" Glyph="&#xE7F6;" Description="{x:Bind Mixer.MonitorDescription, Mode=OneWay}">
                     <settings:SettingCard.ActionContent><ToggleSwitch x:Uid="DevicesPage018" IsOn="{x:Bind Mixer.IsMonitoring, Mode=TwoWay}" IsEnabled="{x:Bind Mixer.CanToggleMonitor, Mode=OneWay}" /></settings:SettingCard.ActionContent>
+                </settings:SettingCard>
+                <settings:SettingCard x:Uid="DevicesPage019" Glyph="&#xE7F5;">
+                    <settings:SettingCard.ActionContent><ComboBox x:Uid="DevicesPage020" ItemsSource="{x:Bind Mixer.Buses}" DisplayMemberPath="DisplayName" SelectedIndex="{x:Bind Mixer.MonitorBusIndex, Mode=TwoWay}" MinWidth="160" /></settings:SettingCard.ActionContent>
                 </settings:SettingCard>
             </StackPanel>
             <StackPanel Spacing="8">

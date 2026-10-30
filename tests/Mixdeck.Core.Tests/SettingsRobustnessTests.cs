@@ -6,7 +6,7 @@ public sealed class SettingsRobustnessTests
     // Fichier écrit à la main, par une ancienne version ou tronqué : les champs absents ou nuls prennent leur valeur par défaut.
     [Theory]
     [InlineData("{\"schemaVersion\":1}")]
-    [InlineData("{\"schemaVersion\":1,\"strips\":null,\"buses\":null,\"hotkeys\":null,\"rules\":null,\"ducking\":null}")]
+    [InlineData("{\"schemaVersion\":1,\"strips\":null,\"buses\":null,\"hotkeys\":null,\"rules\":null,\"ducking\":null,\"flStudio\":null,\"discord\":null}")]
     public async Task MissingOrNullCollectionsFallBackToDefaults(string json)
     {
         using var rig = new TestRig();
@@ -17,6 +17,8 @@ public sealed class SettingsRobustnessTests
         Assert.NotNull(settings.Buses);
         Assert.NotNull(settings.Rules);
         Assert.NotNull(settings.Ducking);
+        Assert.NotNull(settings.FlStudio);
+        Assert.NotNull(settings.Discord);
         Assert.Equal(AppSettings.DefaultHotkeys, settings.Hotkeys);
         Assert.Equal(new ChannelCustomization(0), settings.StripCustomization(0));
     }

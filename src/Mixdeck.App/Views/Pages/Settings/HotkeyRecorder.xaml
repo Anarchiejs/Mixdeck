@@ -4,6 +4,9 @@
     <StackPanel Spacing="16" MinWidth="280" MaxWidth="440">
         <TextBlock x:Uid="HotkeyRecorder001"  TextWrapping="Wrap" />
         <ComboBox x:Uid="HotkeyRecorder002" x:Name="ProfilePicker"  DisplayMemberPath="Name" HorizontalAlignment="Stretch" SelectionChanged="OnProfileChanged"  />
+        <ComboBox x:Name="TrackPicker" DisplayMemberPath="Name" HorizontalAlignment="Stretch" SelectionChanged="OnProfileChanged" />
+        <NumberBox x:Name="TrackNumber" Minimum="0" Maximum="16383" SmallChange="1" SpinButtonPlacementMode="Compact" ValueChanged="OnTargetChanged" />
+        <NumberBox x:Name="SlotNumber" Minimum="1" Maximum="10" SmallChange="1" SpinButtonPlacementMode="Compact" ValueChanged="OnTargetChanged" />
         <Button x:Uid="HotkeyRecorder003" x:Name="CaptureButton" HorizontalAlignment="Stretch" MinHeight="80" PreviewKeyDown="OnCaptureKeyDown" >
             <TextBlock x:Uid="HotkeyRecorder004" x:Name="CombinationText"  TextWrapping="Wrap" TextAlignment="Center" Style="{StaticResource BodyStrongTextBlockStyle}" />
         </Button>
