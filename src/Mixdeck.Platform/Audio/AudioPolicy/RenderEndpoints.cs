@@ -62,6 +62,8 @@ internal static partial class RenderEndpoints
                 try
                 {
                     PrivateApiNative.Check(collection.Item(index, out device), $"IMMDeviceCollection.Item({index})", trace);
+                    PrivateApiNative.Check(device.GetState(out uint state), "IMMDevice.GetState", trace);
+                    if (!IsActive(state)) continue;
                     PrivateApiNative.Check(device.GetId(out id), "IMMDevice.GetId", trace);
                     string endpointId = Marshal.PtrToStringUni(id) ?? throw new InvalidOperationException("Sortie sans identifiant.");
                     PrivateApiNative.Check(device.OpenPropertyStore(0, out properties), "OpenPropertyStore STGM_READ", trace);
@@ -98,6 +100,8 @@ internal static partial class RenderEndpoints
         if (value is not null) Marshal.ReleaseComObject(value);
     }
 
+    internal static bool IsActive(uint state) => state == 1; // DEVICE_STATE_ACTIVE only.
+
     [StructLayout(LayoutKind.Sequential)]
     private struct PropertyKey { internal Guid FormatId; internal uint Id; }
     [StructLayout(LayoutKind.Explicit, Size = 24)]
@@ -127,6 +131,7 @@ internal static partial class RenderEndpoints
         [PreserveSig] int Activate(in Guid iid, uint context, nint parameters, out nint result);
         [PreserveSig] int OpenPropertyStore(uint access, out IPropertyStore properties);
         [PreserveSig] int GetId(out nint id);
+        [PreserveSig] int GetState(out uint state);
     }
     [ComImport, Guid("886d8eeb-8cf2-4446-8d02-cdba1dbdcf99"), InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
     private interface IPropertyStore

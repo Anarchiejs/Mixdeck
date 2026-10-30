@@ -39,9 +39,12 @@ public sealed partial class FlyoutWindow : Window
     private Storyboard? _openAnimation;
 
     public FlyoutWindow(MixerViewModel mixer, ITaskbarLocator taskbar, IShellService shell, ThemeService theme,
-        AppVolumeListViewModel appVolumes, ISettingsStore settings)
+        AppVolumeListViewModel appVolumes, ISettingsStore settings, FlQuickPickViewModel flQuickPick,
+        WindowsDefaultDevicesViewModel windowsDefaults)
     {
         Mixer = mixer;
+        FlQuickPick = flQuickPick;
+        WindowsDefaults = windowsDefaults;
         _appVolumes = appVolumes;
         _settings = settings;
         _taskbar = taskbar;
@@ -60,6 +63,8 @@ public sealed partial class FlyoutWindow : Window
     }
 
     public MixerViewModel Mixer { get; }
+    public FlQuickPickViewModel FlQuickPick { get; }
+    public WindowsDefaultDevicesViewModel WindowsDefaults { get; }
 
     public bool IsOpen { get; private set; }
 
@@ -77,6 +82,7 @@ public sealed partial class FlyoutWindow : Window
 
     public void Show()
     {
+        if (!IsOpen) WindowsDefaults.Activate();
         PlaceNearTray();
         _meters ??= Mixer.AcquireMeters();
         ShowAppVolumes(_settings.Current.ShowAppVolumes);
@@ -105,6 +111,7 @@ public sealed partial class FlyoutWindow : Window
         }
 
         IsOpen = false;
+        WindowsDefaults.Deactivate();
         _hiddenAt = DateTime.UtcNow;
         _meters?.Dispose();
         _meters = null;

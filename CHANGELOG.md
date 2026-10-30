@@ -31,6 +31,12 @@ et ce projet adhère au [versionnage sémantique](https://semver.org/lang/fr/).
 - Interface en anglais : langue de Windows par défaut, ou choix Français / English dans Réglages.
 - Installation en un clic depuis les sources (`Installer Mixdeck.cmd`) : SDK .NET et Voicemeeter installés au besoin, paquet Velopack construit puis installé ou mis à jour ; options `-SkipTests` et `-OutputDir` dans `build/pack.ps1`.
 - `MIXDECK_DATA_DIR` pour choisir le dossier des données ; arguments de développement `--flyout` et `--page=<nom>`.
+- Pilotage de FL Studio par loopMIDI et un script FL (`fl/Mixdeck/device_Mixdeck.py`) : page « FL Studio » (état de la liaison et aide, pistes, volume, muet, sélection, effets de la piste, slots d'effets avec le nom du plugin ; liste des pistes mise à jour d'elle-même), choix rapide des effets du micro dans le panneau (une seule piste FL avec plugins allumée à la fois, par son interrupteur marche/arrêt), état de FL dans les profils, raccourcis « basculer un slot » et « couper une piste », FL simulé en mode démo, outil `tools/Mixdeck.FlProbe` ; `Installer Mixdeck.cmd` installe loopMIDI s'il manque, crée les deux ports, copie le script et règle *Options > MIDI* de FL (FL fermé).
+- Muet synchronisé avec Discord (RPC local, application Discord de l'utilisateur, secret et jetons chiffrés par DPAPI).
+- Choix de la sortie et de l'entrée Windows par défaut (panneau rapide et page Appareils), suivi des changements faits ailleurs.
+- Un profil appliqué avant que FL soit connecté (règle au lancement de FL) applique son état FL dès la connexion.
+- Nouveau logo « Vumètre M » : cinq barres de niveau suspendues qui dessinent un M, mot « mixdeck » dessiné sur mesure ; icônes de l'appli, de la zone de notification (bleue, rouge quand le micro est coupé) et de l'installateur régénérées par `design/logo/build.py`.
+- Sortie de « M'écouter » réglable (page Appareils) ; la molette du panneau rapide ne règle un volume qu'après un clic sur le curseur.
 
 - Intégration continue GitHub Actions : restauration, compilation Release et tests sur `windows-latest` et dépôt des résultats de tests.
 - Publication Velopack sur les étiquettes `v*` (paquet `MixdeckApp`, installé à part des réglages, deltas à partir de la release précédente, notes tirées de ce journal).

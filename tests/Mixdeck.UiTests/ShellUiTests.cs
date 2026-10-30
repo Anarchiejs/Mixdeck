@@ -57,11 +57,12 @@ public sealed class ShellUiTests : IDisposable
     {
         Launch();
         var window = MainWindow();
-        foreach (var page in new[] { "Routage", "Appareils", "Profils", "Règles", "Réglages", "À propos", "Console" })
+        foreach (var page in new[] { "Routage", "Appareils", "FL Studio", "Profils", "Règles", "Réglages", "À propos", "Console" })
         {
             var item = Retry.WhileNull(() => window.FindFirstDescendant(c => c.ByName(page).And(c.ByControlType(FlaUI.Core.Definitions.ControlType.ListItem))),
                 Timeout, throwOnTimeout: true).Result!;
-            item.Click();
+            // Sélection par UI Automation : un clic souris tombe à côté si une autre fenêtre passe devant.
+            if (item.Patterns.SelectionItem.TryGetPattern(out var selection)) selection.Select(); else item.Click();
             // Le titre de la page reprend le nom de l'entrée du menu.
             var title = Retry.WhileNull(() => window.FindAllDescendants(c => c.ByName(page)).FirstOrDefault(e => e.ControlType == FlaUI.Core.Definitions.ControlType.Text),
                 Timeout).Result;

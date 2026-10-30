@@ -101,7 +101,7 @@ jobs:
           AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
           AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
           AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
-        run: dotnet tool run vpk -- pack --packId MixdeckApp --packVersion ${{ steps.version.outputs.version }} --packDir publish --mainExe Mixdeck.exe --packTitle Mixdeck --icon src/Mixdeck.App/Assets/Mixdeck.ico ${{ steps.signing.outputs.args }}
+        run: dotnet tool run vpk -- pack --packId MixdeckApp --packVersion ${{ steps.version.outputs.version }} --packDir publish --mainExe Mixdeck.exe --runtime win-x64 --packTitle Mixdeck --icon src/Mixdeck.App/Assets/Mixdeck.ico ${{ steps.signing.outputs.args }}
 
       - name: Envoyer sur GitHub Releases
         run: dotnet tool run vpk -- upload github --repoUrl https://github.com/Anarchiejs/Mixdeck --publish --releaseName "Mixdeck ${{ steps.version.outputs.version }}" --tag v${{ steps.version.outputs.version }} --releaseNotes "${{ steps.version.outputs.notes }}" --token "${{ secrets.GITHUB_TOKEN }}"

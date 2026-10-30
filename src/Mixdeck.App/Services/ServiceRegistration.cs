@@ -55,6 +55,12 @@ internal static class ServiceRegistration
             return new VoicemeeterMixer(api, loggers.CreateLogger<VoicemeeterMixer>(), TimeProvider.System);
         });
 
+        // FL Studio par loopMIDI et le script fl/Mixdeck/device_Mixdeck.py, ou un FL simulé en mode démo.
+        services.AddSingleton<Mixdeck.FlStudio.IMidiPorts>(_ => options.Demo
+            ? new Mixdeck.FlStudio.SimulatedFlStudio()
+            : new Mixdeck.FlStudio.WinMidiPorts());
+        services.AddSingleton<IDaw, Mixdeck.FlStudio.FlStudioDaw>();
+
         // Cœur
         services.AddSingleton<IProfileService, ProfileService>();
         services.AddSingleton<ActionDispatcher>();
@@ -86,6 +92,22 @@ internal static class ServiceRegistration
         services.AddSingleton<IShellService>(sp => sp.GetRequiredService<ShellService>());
         services.AddSingleton<TrayIconService>();
         services.AddSingleton<MixerViewModel>();
+        services.AddSingleton<FlQuickPickViewModel>();
+        // L5 Discord : enregistrements ici.
+        services.AddSingleton<Mixdeck.Platform.Discord.DiscordCredentialStore>();
+        services.AddSingleton<Mixdeck.Platform.Discord.DiscordOAuth>();
+        services.AddSingleton<IDiscordVoice>(sp => options.Demo
+            ? new NullDiscordVoice()
+            : new Mixdeck.Platform.Discord.DiscordRpcClient(settings,
+                sp.GetRequiredService<Mixdeck.Platform.Discord.DiscordCredentialStore>(),
+                sp.GetRequiredService<Mixdeck.Platform.Discord.DiscordOAuth>(),
+                sp.GetRequiredService<Microsoft.Extensions.Logging.ILogger<Mixdeck.Platform.Discord.DiscordRpcClient>>()));
+        services.AddSingleton<DiscordMuteSync>();
+        // L6 Périphérique Windows par défaut : enregistrements ici.
+        services.AddSingleton<IWindowsDefaultDevices>(_ => options.Demo
+            ? new SimulatedWindowsDefaultDevices()
+            : new WindowsDefaultDevices());
+        services.AddSingleton<WindowsDefaultDevicesViewModel>();
         services.AddTransient<AppVolumeListViewModel>();
         services.AddSingleton<FlyoutWindow>();
         // La console est recréée à chaque ouverture et libérée à la fermeture (mémoire au repos).
@@ -96,6 +118,7 @@ internal static class ServiceRegistration
         services.AddTransient<MixerPageViewModel>();
         services.AddTransient<RoutingPageViewModel>();
         services.AddTransient<DevicesPageViewModel>();
+        services.AddTransient<FlStudioPageViewModel>();
         services.AddTransient<ProfilesPageViewModel>();
         services.AddTransient<RulesPageViewModel>();
         services.AddTransient<SettingsPageViewModel>();

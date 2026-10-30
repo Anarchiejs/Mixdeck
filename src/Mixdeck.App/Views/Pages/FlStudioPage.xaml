@@ -1,0 +1,60 @@
+<Page x:Class="Mixdeck.App.Views.Pages.FlStudioPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:vm="using:Mixdeck.App.ViewModels.Pages"
+    xmlns:controls="using:Mixdeck.App.Controls"
+    Loaded="OnLoaded" Unloaded="OnUnloaded">
+    <ScrollViewer HorizontalScrollMode="Disabled" VerticalScrollBarVisibility="Auto">
+        <StackPanel Padding="{StaticResource MixdeckPagePadding}" Spacing="24" MaxWidth="1040">
+            <TextBlock x:Uid="FlStudioPage001" Style="{StaticResource TitleTextBlockStyle}" />
+            <Border Style="{StaticResource MixdeckCardStyle}">
+                <StackPanel Spacing="12">
+                    <TextBlock Text="{x:Bind ViewModel.StateText, Mode=OneWay}" Style="{StaticResource SubtitleTextBlockStyle}" />
+                    <TextBlock Text="{x:Bind ViewModel.SetupText, Mode=OneWay}" Visibility="{x:Bind ViewModel.NeedsSetup, Mode=OneWay}" TextWrapping="Wrap" />
+                    <TextBlock Text="{x:Bind ViewModel.Error, Mode=OneWay}" TextWrapping="Wrap" />
+                </StackPanel>
+            </Border>
+            <Border Style="{StaticResource MixdeckCardStyle}">
+                <StackPanel Spacing="12">
+                    <ToggleSwitch x:Uid="FlStudioPage003" IsOn="{x:Bind ViewModel.Enabled, Mode=TwoWay}" />
+                    <TextBox x:Uid="FlStudioPage004" Text="{x:Bind ViewModel.OutputPort, Mode=TwoWay}" />
+                    <TextBox x:Uid="FlStudioPage005" Text="{x:Bind ViewModel.InputPort, Mode=TwoWay}" />
+                    <ToggleSwitch x:Uid="FlStudioPage006" IsOn="{x:Bind ViewModel.CaptureInProfiles, Mode=TwoWay}" />
+                </StackPanel>
+            </Border>
+            <ContentControl IsEnabled="{x:Bind ViewModel.IsConnected, Mode=OneWay}" HorizontalContentAlignment="Stretch">
+            <ItemsRepeater ItemsSource="{x:Bind ViewModel.Tracks}">
+                <ItemsRepeater.Layout><StackLayout Spacing="12" /></ItemsRepeater.Layout>
+                <ItemsRepeater.ItemTemplate>
+                    <DataTemplate x:DataType="vm:FlTrackViewModel">
+                        <Border Style="{StaticResource MixdeckCardStyle}">
+                            <StackPanel Spacing="12">
+                                <TextBlock Text="{x:Bind Name, Mode=OneWay}" Style="{StaticResource SubtitleTextBlockStyle}" />
+                                <StackPanel Orientation="Horizontal" Spacing="12">
+                                    <TextBlock x:Uid="FlStudioPage007" Visibility="{x:Bind Selected, Mode=OneWay}" VerticalAlignment="Center" />
+                                    <Button x:Uid="FlStudioPage008" Command="{x:Bind SelectCommand}" />
+                                    <controls:MuteToggle x:Uid="FlStudioPage009" IsChecked="{x:Bind Muted, Mode=TwoWay}" />
+                                    <ToggleSwitch x:Uid="FlStudioPage010" IsOn="{x:Bind Effects, Mode=TwoWay}" />
+                                </StackPanel>
+                                <controls:FlVolumeSlider x:Uid="FlStudioPage011" Value="{x:Bind Volume, Mode=TwoWay}" />
+                                <TextBlock Text="{x:Bind VolumeText, Mode=OneWay}" />
+                                <ItemsRepeater ItemsSource="{x:Bind Slots}">
+                                    <ItemsRepeater.Layout><StackLayout Spacing="8" /></ItemsRepeater.Layout>
+                                    <ItemsRepeater.ItemTemplate>
+                                        <DataTemplate x:DataType="vm:FlSlotViewModel">
+                                            <StackPanel Orientation="Horizontal" Spacing="12">
+                                                <TextBlock Text="{x:Bind Name, Mode=OneWay}" VerticalAlignment="Center" />
+                                                <ToggleSwitch x:Uid="FlStudioPage012" IsOn="{x:Bind Enabled, Mode=TwoWay}" />
+                                            </StackPanel>
+                                        </DataTemplate>
+                                    </ItemsRepeater.ItemTemplate>
+                                </ItemsRepeater>
+                            </StackPanel>
+                        </Border>
+                    </DataTemplate>
+                </ItemsRepeater.ItemTemplate>
+            </ItemsRepeater>
+            </ContentControl>
+        </StackPanel>
+    </ScrollViewer>
+</Page>

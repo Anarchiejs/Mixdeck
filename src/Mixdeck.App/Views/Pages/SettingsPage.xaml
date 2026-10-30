@@ -13,6 +13,25 @@
                 <TextBlock Text="{x:Bind ViewModel.SaveStatus, Mode=OneWay}" TextWrapping="Wrap" Foreground="{ThemeResource TextFillColorSecondaryBrush}" AutomationProperties.LiveSetting="Polite" />
             </StackPanel>
             <InfoBar x:Uid="SettingsPage002" x:Name="PageError" IsOpen="{x:Bind ViewModel.HasError, Mode=OneWay}"  Message="{x:Bind ViewModel.ErrorMessage, Mode=OneWay}" Severity="Error" IsClosable="False" />
+            <!-- L5 Discord -->
+            <StackPanel Spacing="8">
+                <TextBlock x:Uid="Discord_Title" Style="{StaticResource SubtitleTextBlockStyle}" />
+                <Border Style="{StaticResource MixdeckCardStyle}">
+                    <StackPanel Spacing="12">
+                        <ToggleSwitch x:Uid="Discord_Enable" IsOn="{x:Bind ViewModel.DiscordEnabled, Mode=TwoWay}" />
+                        <TextBox x:Uid="Discord_ClientId" Text="{x:Bind ViewModel.DiscordClientId, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                        <PasswordBox x:Name="DiscordSecret" x:Uid="Discord_Secret" PasswordRevealMode="Hidden" />
+                        <TextBlock Text="{x:Bind ViewModel.DiscordSecretStatus, Mode=OneWay}" />
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <Button x:Uid="Discord_Authorize" Click="OnAuthorizeDiscord" />
+                            <Button x:Uid="Discord_Forget" Click="OnForgetDiscord" />
+                            <ProgressRing IsActive="{x:Bind ViewModel.DiscordBusy, Mode=OneWay}" Width="20" Height="20" />
+                        </StackPanel>
+                        <TextBlock Text="{x:Bind ViewModel.DiscordStatus, Mode=OneWay}" TextWrapping="Wrap" AutomationProperties.LiveSetting="Polite" />
+                        <TextBlock x:Uid="Discord_Help" TextWrapping="Wrap" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                    </StackPanel>
+                </Border>
+            </StackPanel>
             <StackPanel Spacing="8">
                 <TextBlock x:Uid="SettingsPage003"  Style="{StaticResource SubtitleTextBlockStyle}" Margin="0,0,0,4" />
                 <local:SettingCard x:Uid="SettingsPage004"   Glyph="&#xE7E8;">
@@ -136,6 +155,7 @@
                                     </Grid>
                                     <InfoBar x:Uid="SettingsPage059" IsOpen="{x:Bind HasConflict, Mode=OneWay}" IsClosable="False" Severity="Warning"   />
                                     <ComboBox x:Uid="SettingsPage060"  ItemsSource="{x:Bind ProfileChoices}" DisplayMemberPath="Name" SelectedItem="{x:Bind TargetProfile, Mode=TwoWay}" Visibility="{x:Bind IsApplyProfile}" IsEnabled="{x:Bind HasBinding, Mode=OneWay}" HorizontalAlignment="Stretch"  />
+                                    <TextBlock Text="{x:Bind DawTarget, Mode=OneWay}" Visibility="{x:Bind IsDaw}" TextWrapping="Wrap" />
                                     <Grid ColumnSpacing="16" Visibility="{x:Bind IsVolume}">
                                         <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
                                         <ComboBox x:Uid="SettingsPage061" IsEnabled="{x:Bind HasBinding, Mode=OneWay}"  ItemsSource="{x:Bind Mixer.Buses}" DisplayMemberPath="DisplayName" SelectedIndex="{x:Bind TargetBus, Mode=TwoWay}" HorizontalAlignment="Stretch"  />

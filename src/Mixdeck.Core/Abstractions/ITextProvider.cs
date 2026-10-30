@@ -16,6 +16,11 @@ public sealed class FrenchTextProvider : ITextProvider
     public System.Globalization.CultureInfo Culture { get; } = System.Globalization.CultureInfo.GetCultureInfo("fr-FR");
     public string Get(string key) => key switch
     {
+        "Core_DawSlotOn" => "{0} : {1} activé",
+        "Core_DawSlotOff" => "{0} : {1} coupé",
+        "Core_DawTrackMuted" => "{0} coupée",
+        "Core_DawTrackOn" => "{0} rétablie",
+        "Core_DawSlotName" => "Slot {0}",
         "Core_MicMuted" => "Micro coupé",
         "Core_MicOn" => "Micro activé",
         "Core_Profile" => "Profil : {0}",

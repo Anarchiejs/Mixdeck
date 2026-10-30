@@ -114,8 +114,31 @@ public sealed partial class MixerViewModel : ObservableObject, IDisposable
         set { if (CanToggleMic) Mic.IsMuted = value; }
     }
 
-    /// <summary>Route du micro vers le premier bus physique (A1, le casque en général) : s'entendre parler.</summary>
-    private RouteViewModel? MonitorRoute => HasMic && Mic.Routes.Count > 0 ? Mic.Routes[0] : null;
+    /// <summary>Sortie choisie pour « M'écouter » (A1, le casque en général, par défaut).</summary>
+    private int MonitorBusSetting => _settings.Current.MonitorBusIndex >= 0 && _settings.Current.MonitorBusIndex < Buses.Count ? _settings.Current.MonitorBusIndex : 0;
+
+    /// <summary>Route du micro vers la sortie d'écoute : s'entendre parler.</summary>
+    private RouteViewModel? MonitorRoute => HasMic ? RouteTo(MonitorBusSetting) : null;
+
+    private RouteViewModel? RouteTo(int bus) => Mic.Routes.FirstOrDefault(r => r.BusIndex == bus);
+
+    /// <summary>Choix de la sortie ; si l'écoute est active, elle suit la nouvelle sortie.</summary>
+    public int MonitorBusIndex
+    {
+        get => Buses.Count == 0 ? -1 : MonitorBusSetting;
+        set
+        {
+            if (value < 0 || value >= Buses.Count || value == MonitorBusSetting) return;
+            if (IsMonitoring && CanToggleMonitor)
+            {
+                MonitorRoute!.IsOn = false;
+                if (RouteTo(value) is { } next) next.IsOn = true;
+            }
+            _ = _settings.UpdateAsync(s => s with { MonitorBusIndex = value });
+            OnPropertyChanged();
+            OnPropertyChanged(nameof(MonitorDescription));
+        }
+    }
 
     public bool CanToggleMonitor => CanToggleMic && MonitorRoute is not null;
 
@@ -135,9 +158,9 @@ public sealed partial class MixerViewModel : ObservableObject, IDisposable
     /// <summary>Où l'on s'entend, ex. « Retour du micro dans A1 · Casque ».</summary>
     public string MonitorDescription => Buses.Count == 0
         ? string.Empty
-        : Buses[0].DisplayName == Buses[0].BusName
-            ? Strings.Format("CS_MonitorTarget", Buses[0].BusName)
-            : Strings.Format("CS_MonitorTarget", $"{Buses[0].BusName} · {Buses[0].DisplayName}");
+        : Buses[MonitorBusSetting] is var bus && bus.DisplayName == bus.BusName
+            ? Strings.Format("CS_MonitorTarget", bus.BusName)
+            : Strings.Format("CS_MonitorTarget", $"{bus.BusName} · {bus.DisplayName}");
 
     public bool CanLaunchVoicemeeter => ConnectionState == MixerConnectionState.VoicemeeterNotRunning;
 
@@ -400,6 +423,7 @@ public sealed partial class MixerViewModel : ObservableObject, IDisposable
         OnPropertyChanged(nameof(MicDisplayName));
         OnPropertyChanged(nameof(CanToggleMonitor));
         OnPropertyChanged(nameof(IsMonitoring));
+        OnPropertyChanged(nameof(MonitorBusIndex));
         OnPropertyChanged(nameof(MonitorDescription));
     }
 

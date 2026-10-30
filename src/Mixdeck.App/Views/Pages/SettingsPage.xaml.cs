@@ -32,13 +32,28 @@ public sealed partial class SettingsPage : Page
         if (listening) return;
         listening = true;
         App.GetService<ISettingsStore>().Changed += OnSettingsChanged;
+        App.GetService<IDiscordVoice>().StateChanged += OnDiscordStateChanged;
         ViewModel.Mixer.PropertyChanged += OnMixerChanged;
     }
     private void OnUnloaded(object sender, RoutedEventArgs e)
     {
         listening = false;
         App.GetService<ISettingsStore>().Changed -= OnSettingsChanged;
+        App.GetService<IDiscordVoice>().StateChanged -= OnDiscordStateChanged;
+        DiscordSecret.Password = string.Empty;
         ViewModel.Mixer.PropertyChanged -= OnMixerChanged;
+    }
+    private void OnDiscordStateChanged(object? sender, DiscordConnectionState state) => DispatcherQueue.TryEnqueue(ViewModel.RefreshDiscordState);
+    private async void OnAuthorizeDiscord(object sender, RoutedEventArgs e)
+    {
+        var secret = DiscordSecret.Password;
+        DiscordSecret.Password = string.Empty;
+        await ViewModel.AuthorizeDiscordAsync(secret);
+    }
+    private async void OnForgetDiscord(object sender, RoutedEventArgs e)
+    {
+        DiscordSecret.Password = string.Empty;
+        await ViewModel.ForgetDiscordAsync();
     }
     private void OnMixerChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
     {
@@ -102,7 +117,8 @@ public sealed partial class SettingsPage : Page
         try
         {
             await ViewModel.FlushAsync();
-            var recorder = new HotkeyRecorder(row.Action, row.TargetBus, (float)row.StepDb, ViewModel.Conflicts, ViewModel.ProfileChoices, row.TargetProfile?.Id);
+            var recorder = new HotkeyRecorder(row.Action, row.TargetBus, (float)row.StepDb, ViewModel.Conflicts, ViewModel.ProfileChoices, row.TargetProfile?.Id,
+                row.Binding?.DawTrack ?? 0, row.Binding?.DawSlot ?? 0);
             var dialog = new ContentDialog
             {
                 XamlRoot = XamlRoot,

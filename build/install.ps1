@@ -202,4 +202,156 @@ Write-Host "Dossier       : $env:LOCALAPPDATA\MixdeckApp"
 Write-Host 'Menu Demarrer : Mixdeck (raccourci aussi sur le Bureau)'
 Write-Host 'Desinstaller  : Parametres > Applications > Mixdeck'
 Write-Host 'Mettre a jour : relancer ce script apres un git pull.'
+
+# --- 5. Integration FL Studio (optionnelle) -------------------------------------------------
+
+try {
+    Write-Step 'Integration FL Studio'
+
+    $hardwareDirs = @(
+        (Join-Path ([Environment]::GetFolderPath('MyDocuments')) 'Image-Line\FL Studio\Settings\Hardware'),
+        (Join-Path $env:USERPROFILE 'Documents\Image-Line\FL Studio\Settings\Hardware')
+    ) | Where-Object { $_ -and (Test-Path -LiteralPath $_ -PathType Container) } | Select-Object -Unique
+
+    if (@($hardwareDirs).Count -eq 0) {
+        Write-Host 'FL Studio non trouve, etape ignoree.'
+    } else {
+        $sourceScript = Join-Path $repoRoot 'fl\Mixdeck\device_Mixdeck.py'
+        if (-not (Test-Path -LiteralPath $sourceScript -PathType Leaf)) {
+            throw "Script FL Studio introuvable : $sourceScript"
+        }
+        foreach ($hardwareDir in $hardwareDirs) {
+            $mixdeckDir = Join-Path $hardwareDir 'Mixdeck'
+            New-Item -ItemType Directory -Path $mixdeckDir -Force | Out-Null
+            $destination = Join-Path $mixdeckDir 'device_Mixdeck.py'
+            Copy-Item -LiteralPath $sourceScript -Destination $destination -Force
+            Write-Host "Script FL Studio : $destination"
+        }
+    }
+
+    $loopMidiExePaths = @(
+        (Join-Path ${env:ProgramFiles(x86)} 'Tobias Erichsen\loopMIDI\loopMIDI.exe'),
+        (Join-Path $env:ProgramFiles 'Tobias Erichsen\loopMIDI\loopMIDI.exe')
+    ) | Where-Object { $_ -and (Test-Path -LiteralPath $_ -PathType Leaf) }
+    $loopMidiUninstallKeys = @(
+        'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\*',
+        'HKLM:\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\*',
+        'HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\*'
+    )
+    $loopMidiRegistered = $false
+    foreach ($key in $loopMidiUninstallKeys) {
+        if (Get-ItemProperty -Path $key -ErrorAction SilentlyContinue | Where-Object { $_.PSObject.Properties['DisplayName'] -and $_.DisplayName -match 'loopMIDI' } | Select-Object -First 1) {
+            $loopMidiRegistered = $true
+            break
+        }
+    }
+    $loopMidiInstalled = (@($loopMidiExePaths).Count -gt 0) -or $loopMidiRegistered
+
+    # loopMIDI est requis pour FL : installe sans question s'il manque (Windows peut demander l'accord administrateur).
+    $loopMidiUrl = 'https://www.tobias-erichsen.de/software/loopmidi.html'
+    if ($loopMidiInstalled) {
+        Write-Host 'loopMIDI est installe.'
+    } else {
+        $winget = Get-Command -Name winget -ErrorAction SilentlyContinue
+        if ($null -eq $winget) {
+            Write-Host "loopMIDI absent et winget indisponible. Installez-le ici : $loopMidiUrl" -ForegroundColor Yellow
+        } else {
+            Write-Host 'Installation de loopMIDI...'
+            & $winget.Source install --id TobiasErichsen.loopMIDI -e --silent --accept-source-agreements --accept-package-agreements
+            if ($LASTEXITCODE -ne 0) {
+                Write-Host "winget a retourne le code $LASTEXITCODE. Installez loopMIDI : $loopMidiUrl" -ForegroundColor Yellow
+            } else {
+                Write-Host 'loopMIDI installe.'
+            }
+        }
+    }
+    $loopMidiExe = @(
+        (Join-Path ${env:ProgramFiles(x86)} 'Tobias Erichsen\loopMIDI\loopMIDI.exe'),
+        (Join-Path $env:ProgramFiles 'Tobias Erichsen\loopMIDI\loopMIDI.exe')
+    ) | Where-Object { $_ -and (Test-Path -LiteralPath $_ -PathType Leaf) } | Select-Object -First 1
+
+    # Ports loopMIDI : la liste est gardee dans le registre (nom du port = valeur DWORD 1) et lue au demarrage.
+    # loopMIDI reecrit cette liste en quittant : l'arreter AVANT d'ecrire, puis le relancer.
+    $portNames = @('Mixdeck to FL', 'FL to Mixdeck')
+    $portsKey = 'HKCU:\Software\Tobias Erichsen\loopMIDI\Ports'
+    $existingPorts = @()
+    if (Test-Path -LiteralPath $portsKey) { $existingPorts = @((Get-Item -LiteralPath $portsKey).GetValueNames()) }
+    $missingPorts = @($portNames | Where-Object { $existingPorts -notcontains $_ })
+    if ($missingPorts.Count -eq 0) {
+        Write-Host 'Ports loopMIDI deja crees.'
+    } elseif ($null -eq $loopMidiExe) {
+        Write-Host 'loopMIDI introuvable : ports non crees. Creez "Mixdeck to FL" et "FL to Mixdeck" dans loopMIDI.' -ForegroundColor Yellow
+    } else {
+        Get-Process -Name loopMIDI -ErrorAction SilentlyContinue | ForEach-Object {
+            $_.CloseMainWindow() | Out-Null
+            if (-not $_.WaitForExit(5000)) { Stop-Process -Id $_.Id -Force }
+        }
+        # New-Item -Force recree une cle existante en effacant ses valeurs : ne creer que si elle manque.
+        if (-not (Test-Path -LiteralPath $portsKey)) { New-Item -Path $portsKey -Force | Out-Null }
+        foreach ($port in $missingPorts) {
+            New-ItemProperty -LiteralPath $portsKey -Name $port -PropertyType DWord -Value 1 -Force | Out-Null
+        }
+        Write-Host "Ports loopMIDI crees : $($missingPorts -join ', ')"
+    }
+    if ($null -ne $loopMidiExe) {
+        # Demarrage avec Windows (meme reglage que la case de loopMIDI), puis lancement s'il ne tourne pas.
+        $runKey = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Run'
+        if ($null -eq (Get-ItemProperty -LiteralPath $runKey -Name loopMIDI -ErrorAction SilentlyContinue)) {
+            New-ItemProperty -LiteralPath $runKey -Name loopMIDI -PropertyType String -Value $loopMidiExe -Force | Out-Null
+            Write-Host 'loopMIDI demarrera avec Windows.'
+        }
+        if (-not (Get-Process -Name loopMIDI -ErrorAction SilentlyContinue)) {
+            Start-Process -FilePath $loopMidiExe -WindowStyle Minimized
+        }
+    }
+
+    # Reglages MIDI de FL (Options > MIDI), gardes dans le registre sous Devices. FL les reecrit en quittant :
+    # il doit etre ferme pendant l'ecriture.
+    $flKeys = @(Get-ChildItem -LiteralPath 'HKCU:\Software\Image-Line' -ErrorAction SilentlyContinue |
+        Where-Object { $_.PSChildName -like 'FL Studio*' -and (Test-Path -LiteralPath (Join-Path $_.PSPath 'General')) })
+    if ($flKeys.Count -eq 0) {
+        Write-Host 'Reglages FL Studio introuvables (FL jamais lance ?) : configurez Options > MIDI a la main.' -ForegroundColor Yellow
+    } else {
+        while (Get-Process -Name FL64, FL -ErrorAction SilentlyContinue) {
+            if ($NoPrompt) { break }
+            Read-Host 'FL Studio est ouvert. Fermez-le (en enregistrant votre projet), puis appuyez sur Entree' | Out-Null
+        }
+        if (Get-Process -Name FL64, FL -ErrorAction SilentlyContinue) {
+            Write-Host 'FL Studio ouvert : configuration MIDI non ecrite. Relancez l''installation FL fermee.' -ForegroundColor Yellow
+        } else {
+            foreach ($flKey in $flKeys) {
+                $devices = Join-Path $flKey.PSPath 'Devices'
+                $inputs = Join-Path $devices 'MIDI input'
+                $outputs = Join-Path $devices 'MIDI output'
+                # Port 10, sauf s'il est deja pris par un autre peripherique.
+                $usedPorts = @(Get-ChildItem -LiteralPath $inputs, $outputs -ErrorAction SilentlyContinue |
+                    Where-Object { $portNames -notcontains $_.PSChildName } |
+                    ForEach-Object { [int]"$($_.GetValue('Port', '-1'))" } | Where-Object { $_ -ge 0 })
+                $flPort = 10
+                while ($usedPorts -contains $flPort) { $flPort++ }
+
+                $values = @(
+                    @{ Key = Join-Path $inputs 'Mixdeck to FL'; Set = @{ Type = '-3'; ScriptFolder = 'Mixdeck'; Port = "$flPort"; Enabled = '1' } },
+                    @{ Key = Join-Path $inputs 'FL to Mixdeck'; Set = @{ Enabled = '0'; Port = '-1' } },
+                    @{ Key = Join-Path $outputs 'FL to Mixdeck'; Set = @{ Port = "$flPort"; Sync = '0'; SendAllNotesOff = '1' } },
+                    @{ Key = Join-Path $outputs 'Mixdeck to FL'; Set = @{ Port = '-1'; Sync = '0'; SendAllNotesOff = '1' } },
+                    @{ Key = Join-Path $flKey.PSPath 'General'; Set = @{ 'Enable MIDI input' = '1'; 'Enable MIDI output' = '1' } }
+                )
+                foreach ($entry in $values) {
+                    if (-not (Test-Path -LiteralPath $entry.Key)) { New-Item -Path $entry.Key -Force | Out-Null }
+                    foreach ($name in $entry.Set.Keys) {
+                        New-ItemProperty -LiteralPath $entry.Key -Name $name -PropertyType String -Value $entry.Set[$name] -Force | Out-Null
+                    }
+                    if ($entry.Key -notlike '*General' -and $null -eq (Get-ItemProperty -LiteralPath $entry.Key -Name IDString -ErrorAction SilentlyContinue)) {
+                        New-ItemProperty -LiteralPath $entry.Key -Name IDString -PropertyType String -Value '-' -Force | Out-Null
+                    }
+                }
+                Write-Host "$($flKey.PSChildName) configure : entree ""Mixdeck to FL"" (type Mixdeck, port $flPort), sortie ""FL to Mixdeck"" (port $flPort)."
+            }
+        }
+    }
+} catch {
+    Write-Host "Avertissement : integration FL Studio incomplete : $($_.Exception.Message)" -ForegroundColor Yellow
+}
+
 exit 0

@@ -36,6 +36,7 @@
     <ProjectReference Include="..\Mixdeck.Core\Mixdeck.Core.csproj" />
     <ProjectReference Include="..\Mixdeck.Voicemeeter\Mixdeck.Voicemeeter.csproj" />
     <ProjectReference Include="..\Mixdeck.Platform\Mixdeck.Platform.csproj" />
+    <ProjectReference Include="..\Mixdeck.FlStudio\Mixdeck.FlStudio.csproj" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Assets\**\*" CopyToOutputDirectory="PreserveNewest" />

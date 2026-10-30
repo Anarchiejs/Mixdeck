@@ -51,6 +51,8 @@ public sealed partial class ChannelRow : UserControl
         if (e.Handled) return;
         var point = e.GetCurrentPoint(this);
         if (point.Properties.IsHorizontalMouseWheel) return;
+        // Comme dans la console : seul un curseur cliqué au préalable suit la molette, sinon le panneau défile.
+        if (VolumeFader.FocusState == FocusState.Unfocused) { _wheelRemainder = 0; return; }
         e.Handled = true; // Même à la borne, ne jamais faire défiler le panneau.
         if (Channel is null || !IsEnabled) return;
         _wheelRemainder += point.Properties.MouseWheelDelta;
