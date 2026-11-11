@@ -10,34 +10,34 @@ permissions:
 
 jobs:
   velopack:
-    name: Empaquetage Velopack
+    name: Velopack package
     runs-on: windows-latest
     steps:
-      - name: Récupérer le code
+      - name: Check out
         uses: actions/checkout@v4
 
-      - name: Installer le SDK .NET
+      - name: Set up the .NET SDK
         uses: actions/setup-dotnet@v4
         with:
           global-json-file: global.json
 
-      - name: Lire la version et les notes
+      - name: Read the version and notes
         id: version
         shell: pwsh
         run: |
           $tag = '${{ github.ref_name }}'
           if (-not $tag.StartsWith('v')) {
-            Write-Error "Étiquette inattendue : $tag"
+            Write-Error "Unexpected tag: $tag"
             exit 1
           }
           $version = $tag.Substring(1)
           if ($version -notmatch '^\d+\.\d+\.\d+([-+][0-9A-Za-z.-]+)?$') {
-            Write-Error "Version invalide : $version"
+            Write-Error "Invalid version: $version"
             exit 1
           }
           $changelogPath = Join-Path (Get-Location) 'CHANGELOG.md'
           if (-not (Test-Path -LiteralPath $changelogPath)) {
-            Write-Error 'CHANGELOG.md introuvable.'
+            Write-Error 'CHANGELOG.md was not found.'
             exit 1
           }
           $changelog = Get-Content -LiteralPath $changelogPath -Raw -Encoding utf8
@@ -45,7 +45,7 @@ jobs:
           $chunks = [regex]::Split($changelog, '(?m)^(?=## )')
           $section = $chunks | Where-Object { $_ -match "^## \[$escaped\]" } | Select-Object -First 1
           if ([string]::IsNullOrWhiteSpace($section)) {
-            Write-Error "Aucune section CHANGELOG pour $version. Ajoutez « ## [$version] » avant d'étiqueter."
+            Write-Error "No CHANGELOG section for $version. Add « ## [$version] » before tagging."
             exit 1
           }
           $kept = foreach ($line in ($section -split '\r?\n')) {
@@ -54,7 +54,7 @@ jobs:
           }
           $notes = (($kept -join "`n").Trim()) + "`n"
           if ([string]::IsNullOrWhiteSpace($notes)) {
-            Write-Error "La section CHANGELOG de $version est vide."
+            Write-Error "The CHANGELOG section for $version is empty."
             exit 1
           }
           $notesPath = Join-Path (Get-Location) 'release-notes.md'
@@ -62,27 +62,27 @@ jobs:
           [System.IO.File]::WriteAllText($notesPath, $notes, $utf8)
           Add-Content -Path $env:GITHUB_OUTPUT -Value "version=$version" -Encoding utf8NoBOM
           Add-Content -Path $env:GITHUB_OUTPUT -Value "notes=$notesPath" -Encoding utf8NoBOM
-          Write-Host "Version : $version"
+          Write-Host "Version: $version"
 
-      - name: Publier l'application
+      - name: Publish the application
         run: dotnet publish src/Mixdeck.App/Mixdeck.App.csproj -c Release -r win-x64 --self-contained "-p:Version=${{ steps.version.outputs.version }}" -o publish
 
-      - name: Restaurer l'outil vpk
+      - name: Restore the vpk tool
         run: dotnet tool restore
 
-      - name: Télécharger la release précédente (deltas)
+      - name: Download the previous release (deltas)
         id: download
         continue-on-error: true
         run: dotnet tool run vpk -- download github --repoUrl https://github.com/Anarchiejs/Mixdeck --token "${{ secrets.GITHUB_TOKEN }}"
 
-      - name: Pas de base delta
+      - name: No delta base
         if: steps.download.outcome == 'failure'
         shell: pwsh
-        run: Write-Host "Aucune release précédente utilisable. Le paquet sera complet, sans delta."
+        run: Write-Host "No usable previous release. The package will be full, without a delta."
 
-      # Signature Azure Trusted Signing (docs/SIGNATURE.md) : active seulement si la variable de dépôt
-      # AZURE_SIGNING vaut "true" et que les secrets AZURE_* existent. Sinon, paquet non signé (avertissement SmartScreen).
-      - name: Préparer la signature
+      # Azure Trusted Signing (docs/SIGNATURE.md) runs only when the repository variable
+      # AZURE_SIGNING is "true" and the AZURE_* secrets exist. Otherwise the package is unsigned (SmartScreen warning).
+      - name: Prepare signing
         id: signing
         if: vars.AZURE_SIGNING == 'true'
         shell: pwsh
@@ -96,12 +96,12 @@ jobs:
           Set-Content -LiteralPath $path -Value $metadata -Encoding utf8
           Add-Content -Path $env:GITHUB_OUTPUT -Value "args=--azureTrustedSignFile `"$path`"" -Encoding utf8NoBOM
 
-      - name: Empaqueter
+      - name: Pack
         env:
           AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
           AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
           AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
         run: dotnet tool run vpk -- pack --packId MixdeckApp --packVersion ${{ steps.version.outputs.version }} --packDir publish --mainExe Mixdeck.exe --runtime win-x64 --packTitle Mixdeck --icon src/Mixdeck.App/Assets/Mixdeck.ico ${{ steps.signing.outputs.args }}
 
-      - name: Envoyer sur GitHub Releases
+      - name: Upload to GitHub Releases
         run: dotnet tool run vpk -- upload github --repoUrl https://github.com/Anarchiejs/Mixdeck --publish --releaseName "Mixdeck ${{ steps.version.outputs.version }}" --tag v${{ steps.version.outputs.version }} --releaseNotes "${{ steps.version.outputs.notes }}" --token "${{ secrets.GITHUB_TOKEN }}"

@@ -2,10 +2,10 @@ using System.Runtime.InteropServices;
 
 namespace Mixdeck.Platform.Audio;
 
-// IID, CLSID and the complete Windows 7+ vtable checked against Sunshine's Windows implementation:
-// https://github.com/LizardByte/Sunshine/blob/master/src/platform/windows/PolicyConfig.h
-// In particular ResetDeviceFormat MUST occupy slot 5; SetDefaultEndpoint is slot 13 (IUnknown included).
-// This private API can fail on future Windows versions; failures are surfaced by the shared view model.
+// Independent COM declaration of the undocumented Windows 7+ IPolicyConfig ABI.
+// ResetDeviceFormat occupies slot 5; SetDefaultEndpoint is slot 13 (IUnknown included).
+// This is not derived from any GPL project. The private API can fail on future Windows versions;
+// failures are surfaced by the shared view model. See NOTICE.
 [ComImport, Guid("870af99c-171d-4f9e-af0d-e63df40c2bc9")]
 internal class DefaultDevicePolicyClient;
 

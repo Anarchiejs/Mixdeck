@@ -166,7 +166,7 @@
     <value>Licence MIT</value>
   </data>
   <data name="AboutPage015.Text" xml:space="preserve">
-    <value>Voicemeeter est un produit de VB-Audio ; Mixdeck n’est pas affilié à VB-Audio.</value>
+    <value>Voicemeeter est un produit de VB-Audio, FL Studio un produit d’Image-Line, Discord un produit de Discord. Mixdeck n’est affilié à aucun d’eux.</value>
   </data>
   <data name="DevicesPage001.Text" xml:space="preserve">
     <value>Appareils</value>
@@ -1713,7 +1713,9 @@
 2. Copiez son Application ID et son secret ici, puis activez la synchronisation.
 3. Ajoutez http://localhost dans OAuth2 &gt; Redirects, puis cliquez sur Autoriser dans Discord.
 Pour une application RPC non approuvée, votre compte doit figurer parmi ses testeurs. Oublier efface les identifiants locaux ; vous pouvez aussi révoquer l’accès dans Discord.</value></data>
-  <!-- L6 Périphérique Windows par défaut : textes ici -->
+  <data name="AboutPage016.Text" xml:space="preserve"><value>Copyright © 2026 Anarchy (@Anarchiejs).</value></data>
+  <data name="CS_SystemSounds" xml:space="preserve"><value>Sons système</value></data>
+  <data name="CS_UnknownApplication" xml:space="preserve"><value>Application</value></data>
   <data name="L6FlyoutOutputLabel.Text" xml:space="preserve"><value>Sortie Windows</value></data>
   <data name="L6FlyoutOutput.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>Sortie Windows par défaut</value></data>
   <data name="L6DefaultsTitle.Text" xml:space="preserve"><value>Périphériques Windows par défaut</value></data>

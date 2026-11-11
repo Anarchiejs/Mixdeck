@@ -8,9 +8,9 @@ internal static class AppAudioSessionPolicy
 {
     internal static string DisplayName(string? sessionName, string? fileDescription, string processName, bool system) =>
         !string.IsNullOrWhiteSpace(sessionName) ? sessionName.Trim() :
-        system ? "Sons système" :
+        system ? AppAudioSessionNames.SystemSoundsFallback :
         !string.IsNullOrWhiteSpace(fileDescription) ? fileDescription.Trim() :
-        !string.IsNullOrWhiteSpace(processName) ? processName : "Application";
+        !string.IsNullOrWhiteSpace(processName) ? processName : AppAudioSessionNames.UnknownApplicationFallback;
 
     // Comme Sndvol : GUID_NULL signifie une ligne indépendante, même pour un PID identique.
     internal static string GroupKey(SessionEntry entry) => entry.Grouping == Guid.Empty
@@ -19,7 +19,7 @@ internal static class AppAudioSessionPolicy
     internal static IReadOnlyList<AppAudioSession> Group(IEnumerable<SessionEntry> entries) =>
         Array.AsReadOnly(entries.GroupBy(GroupKey)
             .Select(group => group.OrderBy(entry => entry.Session.Id, StringComparer.Ordinal).First().Session)
-            .OrderBy(session => session.DisplayName, StringComparer.Create(System.Globalization.CultureInfo.GetCultureInfo("fr-FR"), true))
+            .OrderBy(session => session.DisplayName, StringComparer.CurrentCultureIgnoreCase)
             .ThenBy(session => session.Id, StringComparer.Ordinal).ToArray());
 }
 

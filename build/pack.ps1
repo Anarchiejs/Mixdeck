@@ -1,5 +1,5 @@
 # Empaquette Mixdeck en local : tests, publication autonome, puis vpk pack.
-# PowerShell 5.1. Le SDK est cherche dans %USERPROFILE%\.dotnet, puis dans le PATH.
+# PowerShell 5.1. Le SDK est cherche sur le PATH (s'il contient un dossier sdk), puis dans %LOCALAPPDATA%\Microsoft\dotnet.
 #Requires -Version 5.1
 [CmdletBinding()]
 param(
@@ -52,26 +52,29 @@ Set-Location -LiteralPath $repoRoot
 Write-Step "Depot : $repoRoot"
 
 function Find-DotNet {
-    $preferred = '%USERPROFILE%\.dotnet\dotnet.exe'
-    if (Test-Path -LiteralPath $preferred) {
-        return $preferred
-    }
     $command = Get-Command -Name dotnet -ErrorAction SilentlyContinue
     if ($null -ne $command -and $command.Source) {
-        return $command.Source
+        $candidateSdk = Join-Path (Split-Path -Parent $command.Source) 'sdk'
+        if (Test-Path -LiteralPath $candidateSdk) {
+            return $command.Source
+        }
+    }
+    $local = Join-Path $env:LOCALAPPDATA 'Microsoft\dotnet\dotnet.exe'
+    if (Test-Path -LiteralPath $local) {
+        return $local
     }
     return $null
 }
 
 $dotnet = Find-DotNet
 if (-not $dotnet) {
-    Fail "SDK .NET introuvable. Installez le SDK 10 (global.json demande 10.0.403) ou placez dotnet.exe dans %USERPROFILE%\.dotnet."
+    Fail "SDK .NET introuvable. Installez le SDK 10 (global.json demande 10.0.403) ou placez dotnet sur le PATH."
 }
 
 $dotnetRoot = Split-Path -Parent $dotnet
 $sdkDir = Join-Path $dotnetRoot 'sdk'
 if (-not (Test-Path -LiteralPath $sdkDir)) {
-    Fail "dotnet trouve ($dotnet) mais aucun SDK dans $sdkDir. Utilisez le SDK de %USERPROFILE%\.dotnet."
+    Fail "dotnet trouve ($dotnet) mais aucun SDK dans $sdkDir."
 }
 
 $env:DOTNET_ROOT = $dotnetRoot

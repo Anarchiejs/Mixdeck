@@ -12,7 +12,7 @@ public sealed class AppAudioSessionPolicyTests
     [InlineData(" ", "Description", "app.exe", false, "Description")]
     [InlineData(null, null, "app.exe", false, "app.exe")]
     [InlineData(null, null, "", false, "Application")]
-    [InlineData(null, "Description", "", true, "Sons système")]
+    [InlineData(null, "Description", "", true, "System sounds")]
     [InlineData("Notification", null, "", true, "Notification")]
     public void ChoosesNameInPriorityOrder(string? name, string? description, string process, bool system, string expected) =>
         AppAudioSessionPolicy.DisplayName(name, description, process, system).Should().Be(expected);

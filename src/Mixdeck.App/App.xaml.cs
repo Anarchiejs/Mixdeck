@@ -173,6 +173,35 @@ public partial class App : Application
         _instance.ActivationRequested += (_, _) => ui.Post(() => shell.ShowMainWindow());
 
         GetService<ShellService>().ExitRequested += (_, _) => Shutdown();
+        QueueUpdateCheck(settings);
+    }
+
+    /// <summary>
+    /// Installed builds contact GitHub Releases only when the user left "Check for updates" on.
+    /// The About page can still check by hand when the switch is off. Development builds are not installed.
+    /// </summary>
+    private void QueueUpdateCheck(AppSettings settings)
+    {
+        if (!settings.CheckForUpdates) return;
+        var updates = GetService<IUpdateService>();
+        if (!updates.IsInstalled) return;
+        _ = CheckForUpdatesQuietlyAsync(updates);
+    }
+
+    private async Task CheckForUpdatesQuietlyAsync(IUpdateService updates)
+    {
+        try
+        {
+            var result = await updates.CheckAsync().ConfigureAwait(false);
+            if (result.IsAvailable)
+                _logger?.LogInformation("Mise à jour disponible : {Version}", result.Version);
+            else if (result.Error is not null)
+                _logger?.LogInformation("Recherche automatique de mise à jour non aboutie");
+        }
+        catch (Exception ex)
+        {
+            _logger?.LogWarning(ex, "Recherche automatique de mise à jour non aboutie");
+        }
     }
 
     /// <summary>

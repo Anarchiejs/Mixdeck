@@ -21,7 +21,7 @@ public sealed partial class AppVolumeRowViewModel : ObservableObject, IDisposabl
         Id = session.Id;
         ProcessId = session.ProcessId;
         Router = router;
-        // Sons système et processus inconnus : Windows ne permet pas de leur choisir une sortie.
+        // System sounds and unknown processes: Windows does not let the user pick their output.
         CanRoute = router is not null && session.ProcessId != 0 && !session.IsSystemSounds;
         Synchronize(session);
     }
@@ -45,9 +45,18 @@ public sealed partial class AppVolumeRowViewModel : ObservableObject, IDisposabl
     [ObservableProperty]
     public partial ImageSource? Icon { get; private set; }
 
-    /// <summary>Point d'extension du routage L14 ; le bouton reste masqué jusque-là.</summary>
+    /// <summary>Per-app output. The button stays hidden until a router is supplied.</summary>
     [ObservableProperty]
     public partial bool CanRoute { get; set; }
+
+    private static string LocalizeName(AppAudioSession session)
+    {
+        if (session.IsSystemSounds && session.DisplayName == AppAudioSessionNames.SystemSoundsFallback)
+            return Strings.Get("CS_SystemSounds");
+        if (session.DisplayName == AppAudioSessionNames.UnknownApplicationFallback && string.IsNullOrEmpty(session.ProcessName))
+            return Strings.Get("CS_UnknownApplication");
+        return session.DisplayName;
+    }
 
     public string VolumeLabel => Volume.ToString("0", Strings.Culture) + " %";
     public string MuteLabel => (IsMuted ? Strings.Get("CS_024") : Strings.Get("CS_025")) + DisplayName;
@@ -57,7 +66,7 @@ public sealed partial class AppVolumeRowViewModel : ObservableObject, IDisposabl
         _syncing = true;
         try
         {
-            DisplayName = session.DisplayName;
+            DisplayName = LocalizeName(session);
             OnPropertyChanged(nameof(MuteLabel));
             if (_volumeEdited is null || Environment.TickCount64 - _volumeEdited >= 400)
                 Volume = Math.Clamp(session.Volume * 100d, 0, 100);
