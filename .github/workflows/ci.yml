@@ -6,37 +6,32 @@ on:
 
 jobs:
   build:
-    name: Compilation et tests
+    name: Build and test
     runs-on: windows-latest
     steps:
-      - name: Récupérer le code
+      - name: Check out
         uses: actions/checkout@v4
 
-      - name: Installer le SDK .NET
+      - name: Set up the .NET SDK
         uses: actions/setup-dotnet@v4
         with:
           global-json-file: global.json
 
-      - name: Restaurer
+      - name: Restore
         run: dotnet restore Mixdeck.slnx
 
-      - name: Compiler
+      - name: Build
         run: dotnet build Mixdeck.slnx -c Release -nologo
 
-      - name: Tester
+      - name: Test
         run: dotnet test Mixdeck.slnx -c Release -nologo --logger "console;verbosity=minimal" --logger trx --results-directory TestResults
 
-      # Tests d'interface (FlaUI) : le runner Windows a une session de bureau. Ne bloquent pas la CI tant qu'ils
-      # n'ont pas fait leurs preuves sur GitHub.
-      - name: Tester l'interface
-        continue-on-error: true
-        env:
-          MIXDECK_UI_TESTS: "1"
-        run: dotnet test tests/Mixdeck.UiTests -c Release -nologo --no-build --logger "console;verbosity=normal" --logger "trx;LogFileName=ui.trx" --results-directory TestResults
-      - name: Publier les résultats de tests
+      # UI tests (FlaUI) need an interactive desktop session and do not pass on GitHub-hosted runners.
+      # They stay in the tree for a local run with MIXDECK_UI_TESTS=1. They are not part of CI.
+      - name: Upload test results
         if: ${{ !cancelled() }}
         uses: actions/upload-artifact@v4
         with:
-          name: resultats-tests
+          name: test-results
           path: "**/TestResults/**/*.trx"
           if-no-files-found: warn

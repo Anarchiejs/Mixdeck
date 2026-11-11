@@ -1,25 +1,24 @@
-# Signer Mixdeck (supprimer l'avertissement SmartScreen)
+# Sign Mixdeck (remove the SmartScreen warning)
 
-Sans signature, Windows affiche « Windows a protégé votre ordinateur » au premier lancement de l'installateur.
-La publication (`.github/workflows/release.yml`) sait signer avec **Azure Trusted Signing** (environ 10 $ par mois,
-offre Basic). Tant que rien n'est configuré, elle produit un paquet non signé, comme avant.
+Without a signature, Windows shows "Windows protected your PC" the first time the installer runs.
+The release workflow (`.github/workflows/release.yml`) can sign with **Azure Trusted Signing** (about 10 USD per month,
+Basic offer). Until it is configured, the workflow produces an unsigned package.
 
-## Ce qu'il faut faire une fois (compte Azure de l'auteur)
+## One-time setup (maintainer's Azure account)
 
-1. Dans le portail Azure, créer une ressource **Trusted Signing Account** (région proche, offre Basic).
-   Noter son **point de terminaison** (ex. `https://weu.codesigning.azure.net/`) et son **nom**.
-2. Faire la **validation d'identité** (Identity validation, « Individual » pour un développeur seul). Elle peut prendre
-   quelques jours.
-3. Créer un **profil de certificat** « Public Trust » et noter son nom.
-4. Créer une **inscription d'application** (Microsoft Entra ID > Inscriptions d'applications) avec un secret client, et
-   lui donner le rôle **Trusted Signing Certificate Profile Signer** sur le compte de signature.
-5. Dans le dépôt GitHub (Settings > Secrets and variables > Actions) :
-   - secrets : `AZURE_TENANT_ID`, `AZURE_CLIENT_ID`, `AZURE_CLIENT_SECRET` ;
-   - variables : `AZURE_SIGNING` = `true`, `AZURE_SIGNING_ENDPOINT`, `AZURE_SIGNING_ACCOUNT`, `AZURE_SIGNING_PROFILE`.
+1. In the Azure portal, create a **Trusted Signing Account** (a nearby region, Basic offer).
+   Note its **endpoint** (for example `https://weu.codesigning.azure.net/`) and its **name**.
+2. Complete **identity validation** ("Individual" for a solo developer). It can take a few days.
+3. Create a **Public Trust** certificate profile and note its name.
+4. Create an **app registration** (Microsoft Entra ID > App registrations) with a client secret, and
+   grant it the **Trusted Signing Certificate Profile Signer** role on the signing account.
+5. In the GitHub repository (Settings > Secrets and variables > Actions):
+   - secrets: `AZURE_TENANT_ID`, `AZURE_CLIENT_ID`, `AZURE_CLIENT_SECRET`;
+   - variables: `AZURE_SIGNING` = `true`, `AZURE_SIGNING_ENDPOINT`, `AZURE_SIGNING_ACCOUNT`, `AZURE_SIGNING_PROFILE`.
 
-À la prochaine étiquette `v*`, `vpk pack --azureTrustedSignFile` signe `Mixdeck.exe`, les DLL et l'installateur.
+Do not commit those values. On the next `v*` tag, `vpk pack --azureTrustedSignFile` signs `Mixdeck.exe`, the DLLs, and the installer.
 
-## Vérifier
+## Check
 
-Clic droit sur `Mixdeck-win-Setup.exe` > Propriétés > **Signatures numériques** : le nom validé doit apparaître.
-SmartScreen peut encore prévenir pendant quelques jours, le temps que la réputation du certificat s'établisse.
+Right-click `Mixdeck-win-Setup.exe` > Properties > **Digital Signatures**: the validated name must appear.
+SmartScreen can still warn for a few days while the certificate builds reputation.

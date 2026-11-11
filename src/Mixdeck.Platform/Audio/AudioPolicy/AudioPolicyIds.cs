@@ -2,7 +2,7 @@
 // Source : https://github.com/File-New-Project/EarTrumpet/tree/f492b8fa6459d9c5b442ad07ea28d70e9db7f493/EarTrumpet
 // Interop/MMDeviceAPI/IAudioPolicyConfigFactoryVariantFor{Downlevel,21H2}.cs et
 // Extensions/OperatingSystemExtensions.cs : le seuil « 21H2 » est 21390, PAS 19044.
-// Validation sur Windows 11 23H2 (22631) à effectuer dans la session utilisateur avec la sonde L14.
+// L'API privée peut échouer sur une version future de Windows ; l'échec est remonté à l'interface.
 namespace Mixdeck.Platform.Audio.AudioPolicy;
 
 internal static class AudioPolicyIds

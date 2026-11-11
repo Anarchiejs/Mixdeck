@@ -1,5 +1,12 @@
 namespace Mixdeck.Core.Abstractions;
 
+/// <summary>Exact fallback display names produced when Windows gives a session no usable name. The UI localizes these values.</summary>
+public static class AppAudioSessionNames
+{
+    public const string SystemSoundsFallback = "System sounds";
+    public const string UnknownApplicationFallback = "Application";
+}
+
 /// <summary>Une application qui joue du son (session audio Windows), comme dans le mélangeur de volume de Windows.</summary>
 /// <param name="Id">Identifiant stable de la session (IAudioSessionControl2.GetSessionInstanceIdentifier).</param>
 /// <param name="ProcessName">Nom de l'exécutable avec extension, ex. "Discord.exe" ; vide pour les sons système.</param>

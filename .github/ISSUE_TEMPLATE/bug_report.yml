@@ -1,0 +1,50 @@
+name: Bug report
+description: Something in Mixdeck does not behave as documented.
+title: "[Bug] "
+labels: []
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Do not paste a Discord secret, a token, a crash log that contains personal paths, or a Windows user name.
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened
+      description: What you did, what you expected, and what Mixdeck did instead.
+    validations:
+      required: true
+  - type: input
+    id: windows
+    attributes:
+      label: Windows version
+      description: For example, Windows 11 24H2. Settings > System > About.
+      placeholder: Windows 11 24H2
+    validations:
+      required: true
+  - type: dropdown
+    id: voicemeeter
+    attributes:
+      label: Voicemeeter edition
+      options:
+        - Standard
+        - Banana
+        - Potato
+        - Not installed (demo mode)
+    validations:
+      required: true
+  - type: dropdown
+    id: demo
+    attributes:
+      label: Does --demo reproduce it?
+      options:
+        - Yes
+        - No
+        - Not tried
+    validations:
+      required: true
+  - type: textarea
+    id: extra
+    attributes:
+      label: Anything else
+      description: FL Studio or Discord only if the bug needs them. Leave device names out if they identify you.
