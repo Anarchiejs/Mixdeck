@@ -219,53 +219,30 @@ public sealed class CoreMidiPorts : IMidiPorts, IMidiAvailability
 
     private sealed class DestinationOutput(uint destination) : IMidiOutput
     {
-        private static readonly MidiCompletion Completion = OnComplete;
+        private static readonly MidiCompletion Completion = SysexSendLease.OnComplete;
+        private static readonly IntPtr CompletionPointer = Marshal.GetFunctionPointerForDelegate(Completion);
 
         public void SendSysex(byte[] message)
         {
             ObjectDisposedException.ThrowIf(Volatile.Read(ref _disposed) != 0, this);
-            var request = Marshal.AllocHGlobal(40);
-            var data = Marshal.AllocHGlobal(message.Length);
-            var done = new ManualResetEventSlim(false);
-            var handle = GCHandle.Alloc(done);
+            var pending = SysexSendLease.Allocate(destination, message, CompletionPointer);
+            var accepted = false;
             try
             {
-                Marshal.Copy(message, 0, data, message.Length);
-                Marshal.WriteInt32(request, 0, (int)destination);
-                Marshal.WriteIntPtr(request, 8, data);
-                Marshal.WriteInt32(request, 16, message.Length);
-                Marshal.WriteByte(request, 20, 0);
-                Marshal.WriteByte(request, 21, 0);
-                Marshal.WriteByte(request, 22, 0);
-                Marshal.WriteByte(request, 23, 0);
-                Marshal.WriteIntPtr(request, 24, Marshal.GetFunctionPointerForDelegate(Completion));
-                Marshal.WriteIntPtr(request, 32, GCHandle.ToIntPtr(handle));
-                Check(MIDISendSysex(request), "MIDISendSysex");
-                if (!done.Wait(TimeSpan.FromSeconds(1)))
+                Check(MIDISendSysex(pending.Request), "MIDISendSysex");
+                accepted = true;
+                if (!pending.Wait(TimeSpan.FromSeconds(1)))
                 {
-                    Marshal.WriteByte(request, 20, 1);
-                    if (!done.Wait(TimeSpan.FromMilliseconds(500)))
+                    pending.RequestAbort();
+                    if (!pending.Wait(TimeSpan.FromMilliseconds(500)))
                         throw new MidiPortException("Délai d'envoi MIDI dépassé (1 s).");
                 }
             }
             finally
             {
-                if (done.IsSet)
-                {
-                    handle.Free();
-                    done.Dispose();
-                    Marshal.FreeHGlobal(data);
-                    Marshal.FreeHGlobal(request);
-                }
+                if (accepted) pending.WaiterFinished();
+                else pending.ReleaseBecauseNotSent();
             }
-        }
-
-        private static void OnComplete(IntPtr request)
-        {
-            var pointer = Marshal.ReadIntPtr(request, 32);
-            if (pointer == 0) return;
-            var handle = GCHandle.FromIntPtr(pointer);
-            if (handle.Target is ManualResetEventSlim done) done.Set();
         }
 
         public void Dispose() => Volatile.Write(ref _disposed, 1);

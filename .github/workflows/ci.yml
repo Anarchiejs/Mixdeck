@@ -2,7 +2,12 @@ name: CI
 
 on:
   push:
+    branches: [main]
   pull_request:
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 
 jobs:
   build:
@@ -49,6 +54,7 @@ jobs:
           global-json-file: global.json
 
       - name: Test
+        # Includes the Avalonia.Headless smoke test that opens the main window.
         run: dotnet test Mixdeck.Portable.slnx -c Release -nologo --logger "console;verbosity=minimal"
 
       - name: Self-check

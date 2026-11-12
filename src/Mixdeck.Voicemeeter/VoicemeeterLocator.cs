@@ -48,14 +48,19 @@ public static class VoicemeeterLocator
             if (end < 0) return null;
             executable = command[..(end + 4)];
         }
-        if (OperatingSystem.IsWindows() && Path.IsPathFullyQualified(executable))
-            return Path.GetDirectoryName(executable);
-        // The uninstall string is a Windows path. Tests parse it on every OS.
-        if (executable.Length >= 3 && char.IsAsciiLetter(executable[0]) && executable[1] == ':' && executable[2] is '\\' or '/')
-        {
-            var slash = Math.Max(executable.LastIndexOf('\\'), executable.LastIndexOf('/'));
-            return slash > 2 ? executable[..slash] : null;
-        }
-        return null;
+        return ParentDirectory(executable);
+    }
+
+    /// <summary>
+    /// Directory portion of a Windows uninstall path. Separators are handled as characters so the
+    /// result is the same on every operating system (<c>Path.GetDirectoryName</c> only treats '\' as a separator on Windows).
+    /// </summary>
+    private static string? ParentDirectory(string path)
+    {
+        var normalized = path.Replace('/', '\\');
+        var separator = normalized.LastIndexOf('\\');
+        if (separator <= 0) return null;
+        if (separator == 2 && normalized[1] == ':') return normalized[..3];
+        return normalized[..separator];
     }
 }

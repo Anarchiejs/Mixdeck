@@ -105,6 +105,7 @@ public sealed class ShellWindow : Window
             CornerRadius = new CornerRadius(8),
             Padding = new Thickness(12, 8),
             Tag = key,
+            Name = "nav-" + page,
         };
         button.Click += (_, _) => Select(page);
         _nav[page] = button;
@@ -185,7 +186,9 @@ public sealed class AudioPage : UserControl
         _banner.TextWrapping = TextWrapping.Wrap;
         _banner.Foreground = ShellWindow.Paint("#FFB020");
         _outputsTitle = ShellWindow.Label("", 16);
+        _outputsTitle.Name = "audio-outputs";
         _inputsTitle = ShellWindow.Label("", 16);
+        _inputsTitle.Name = "audio-inputs";
         var scroll = new ScrollViewer
         {
             Content = new StackPanel

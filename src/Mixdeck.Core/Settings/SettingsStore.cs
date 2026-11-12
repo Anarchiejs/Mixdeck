@@ -13,6 +13,7 @@ public sealed class SettingsStore(MixdeckPaths paths, ILogger<SettingsStore> log
         await gate.WaitAsync(cancellationToken);
         try
         {
+            LegacyDiscordCleanup.Remove(paths.Root);
             if (File.Exists(paths.SettingsFile))
             {
                 try { return Current = await ReadAsync(paths.SettingsFile, cancellationToken); }

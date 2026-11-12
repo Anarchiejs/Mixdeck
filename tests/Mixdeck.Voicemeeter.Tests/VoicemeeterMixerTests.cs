@@ -374,10 +374,13 @@ public sealed class VoicemeeterMixerTests
     }
 
     [Theory]
-    [InlineData("\"C:\\Program Files (x86)\\VB\\Voicemeeter\\uninstall.exe\" /S")]
-    [InlineData("C:\\Program Files (x86)\\VB\\Voicemeeter\\uninstall.exe /S")]
-    public void FindsDirectoryInUninstallCommand(string command) =>
-        VoicemeeterLocator.DirectoryFromUninstallString(command).Should().Be(@"C:\Program Files (x86)\VB\Voicemeeter");
+    [InlineData("\"C:\\Program Files (x86)\\VB\\Voicemeeter\\uninstall.exe\" /S", "C:\\Program Files (x86)\\VB\\Voicemeeter")]
+    [InlineData("C:\\Program Files (x86)\\VB\\Voicemeeter\\uninstall.exe /S", "C:\\Program Files (x86)\\VB\\Voicemeeter")]
+    [InlineData("C:/Program Files (x86)/VB/Voicemeeter/uninstall.exe", "C:\\Program Files (x86)\\VB\\Voicemeeter")]
+    [InlineData("\"\\\\server\\share\\VB\\Voicemeeter\\uninstall.exe\" /S", "\\\\server\\share\\VB\\Voicemeeter")]
+    [InlineData("C:\\uninstall.exe /S", "C:\\")]
+    public void FindsDirectoryInUninstallCommand(string command, string directory) =>
+        VoicemeeterLocator.DirectoryFromUninstallString(command).Should().Be(directory);
 
     private sealed class ApiHarness : IVoicemeeterApi
     {
