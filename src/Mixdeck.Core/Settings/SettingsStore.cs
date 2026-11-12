@@ -56,7 +56,6 @@ public sealed class SettingsStore(MixdeckPaths paths, ILogger<SettingsStore> log
             Rules = settings.Rules ?? [],
             Ducking = settings.Ducking ?? new(),
             FlStudio = settings.FlStudio ?? new(),
-            Discord = settings.Discord ?? new(),
         },
         _ => throw new JsonException("Version de réglages non prise en charge")
     };

@@ -22,6 +22,6 @@ NuGet packages are restored at build time and keep their own licenses.
 published by Xceed under a commercial license and is not used.
 
 Voicemeeter and VoicemeeterRemote64.dll are products of VB-Audio. FL Studio is
-a product of Image-Line. Discord is a product of Discord. loopMIDI is a product
-of Tobias Erichsen. None of those binaries are included in this repository.
-Mixdeck is not affiliated with their authors.
+a product of Image-Line. loopMIDI is a product of Tobias Erichsen. None of
+those binaries are included in this repository. Mixdeck is not affiliated
+with their authors.
