@@ -13,7 +13,7 @@ Mixdeck est une application Windows native (C# / .NET 10, WinUI 3, non empaquet�
 
 **État.** Préversion. La version d'assembly dans `Directory.Build.props` est **0.1.0**. Aucune publication GitHub Releases n'existe encore. L'application compile, démarre et pilote Voicemeeter. Tant que la [signature Azure Trusted Signing](docs/SIGNATURE.md) n'est pas configurée, l'installateur n'est **pas signé** : SmartScreen avertit au premier lancement.
 
-Mixdeck n'est pas affilié à VB-Audio, Image-Line ni Discord.
+Mixdeck n'est pas affilié à VB-Audio ni à Image-Line.
 
 ## Fonctionnalités
 
@@ -21,14 +21,13 @@ Mixdeck n'est pas affilié à VB-Audio, Image-Line ni Discord.
 - Panneau ancré à la barre des tâches. La molette règle le volume de la ligne après un clic sur cette ligne.
 - Volume par application et « Envoyer vers… » pour choisir la sortie d'une application.
 - Page Appareils : micro, casque et enceintes de Voicemeeter, préréglages du micro, redémarrage du moteur audio.
-- Atténuation automatique : la musique baisse quand quelqu'un parle sur Discord.
+- Atténuation automatique : une entrée baisse quand une autre a du signal.
 - Badge et son de confirmation facultatifs quand le micro est coupé.
 - « M'écouter » envoie le micro vers un bus, en général le casque.
 - Console : tranches qui passent à la ligne, seulement celles reliées à un périphérique (et les tranches virtuelles), égaliseur repliable.
 - Matrice de routage, profils avec fondu, règles par application.
 - Raccourcis globaux, push-to-talk, raccourci par profil, profil au démarrage.
 - Page FL Studio : piste, volume, muet, effets de piste et slots (avec le nom du plugin). Un profil peut garder l'état de FL.
-- Muet synchronisé avec Discord, dans les deux sens.
 - Sortie Windows par défaut depuis le panneau, sortie et entrée depuis la page Appareils.
 - Journal local des plantages et une seule relance automatique.
 - Affichage à l'écran (OSD).
@@ -47,7 +46,6 @@ Aucune capture n'est versionnée. Il faut les prendre sous Windows. Déposez-les
 Facultatif :
 
 - FL Studio et [loopMIDI](https://www.tobias-erichsen.de/software/loopmidi.html) pour la page FL Studio.
-- Une application Discord dont vous êtes propriétaire, pour la synchro du muet. Discord doit tourner sur la machine.
 
 ## Confidentialité
 
@@ -62,7 +60,6 @@ Mixdeck n'a pas de compte de télémétrie et n'envoie ni journaux ni rapports d
 | Règles | Nom de l'exécutable au premier plan et noms des processus lancés. En mémoire et dans vos règles. Jamais envoyés. |
 | Volume par application | Noms affichés des sessions Windows, noms de processus et volumes de la sortie par défaut. |
 | Périphériques par défaut et « Envoyer vers… » | API COM non documentées de Windows (`IPolicyConfig`, `IAudioPolicyConfig`, zone de notification de l'Explorateur). Elles peuvent cesser de fonctionner après une mise à jour de Windows. Mixdeck désactive alors la fonction ou affiche l'erreur. |
-| Discord | Seulement si vous activez la synchro. Mixdeck demande le scope `rpc` (les scopes voix plus étroits sont réservés aux partenaires Discord). Le secret et les jetons sont chiffrés par DPAPI pour l'utilisateur Windows courant dans `discord.bin`. Le seul appel à discord.com est le point de terminaison de jeton OAuth. Le muet passe par le RPC local de Discord. |
 | FL Studio | MIDI local, par les deux ports loopMIDI. L'installateur peut écrire les réglages MIDI de FL et copier le script dans Documents. |
 | Mises à jour | Une version installée interroge GitHub Releases au démarrage si Réglages > Rechercher les mises à jour est activé (c'est le cas par défaut). C'est une requête vers `https://github.com/Anarchiejs/Mixdeck`. Coupez l'interrupteur pour arrêter la recherche automatique. La page À propos peut encore chercher quand vous cliquez sur le bouton. Les builds de développement ne sont pas installés : ils ne cherchent pas. |
 
@@ -138,16 +135,6 @@ Limites : FL doit être ouvert avec le script actif. Un plugin s'active ou se co
 
 Diagnostic : `tools/Mixdeck.FlProbe`.
 
-## Discord
-
-Le muet du micro de Mixdeck et celui de Discord restent identiques. Discord n'autorise ce pilotage qu'aux applications dont vous êtes propriétaire ou testeur :
-
-1. Sur [discord.com/developers/applications](https://discord.com/developers/applications), créez une application.
-2. Dans *OAuth2*, copiez l'identifiant et le secret, et ajoutez `http://localhost` dans *Redirects*.
-3. Dans Mixdeck, *Réglages > Discord* : activez la synchro, collez l'identifiant et le secret, cliquez « Autoriser dans Discord ».
-
-Le secret et les jetons sont chiffrés pour votre session Windows (DPAPI) dans `discord.bin`. Le scope demandé est `rpc`. Quand Discord s'ouvre, l'état de Mixdeck fait foi.
-
 ## Journaux
 
 | Chemin | Rôle |
@@ -155,7 +142,6 @@ Le secret et les jetons sont chiffrés pour votre session Windows (DPAPI) dans `
 | `%LOCALAPPDATA%\Mixdeck\logs` | Journaux et plantages |
 | `%LOCALAPPDATA%\Mixdeck\settings.json` | Réglages (`settings.json.bak` en secours) |
 | `%LOCALAPPDATA%\Mixdeck\profiles` | Profils |
-| `%LOCALAPPDATA%\Mixdeck\discord.bin` | Secret et jetons Discord, DPAPI |
 
 ## Architecture
 

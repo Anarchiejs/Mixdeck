@@ -166,7 +166,7 @@
     <value>MIT License</value>
   </data>
   <data name="AboutPage015.Text" xml:space="preserve">
-    <value>Voicemeeter is a VB-Audio product. FL Studio is an Image-Line product. Discord is a Discord product. Mixdeck is not affiliated with them.</value>
+    <value>Voicemeeter is a VB-Audio product. FL Studio is an Image-Line product. Mixdeck is not affiliated with them.</value>
   </data>
   <data name="DevicesPage001.Text" xml:space="preserve">
     <value>Devices</value>
@@ -325,7 +325,7 @@
     <value>Your mix follows your activity</value>
   </data>
   <data name="RulesPage007.Text" xml:space="preserve">
-    <value>For example, switch to your Music profile when FL64.exe starts, or unmute your microphone when Discord.exe is in the foreground.</value>
+    <value>For example, switch to your Music profile when FL64.exe starts, or unmute your microphone when a browser is in the foreground.</value>
   </data>
   <data name="RulesPage008.Content" xml:space="preserve">
     <value>Create a rule</value>
@@ -841,7 +841,7 @@
     <value>App or process</value>
   </data>
   <data name="RuleEditor004.PlaceholderText" xml:space="preserve">
-    <value>e.g. FL64.exe or Discord</value>
+    <value>e.g. FL64.exe or Spotify.exe</value>
   </data>
   <data name="RuleEditor004.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
     <value>App or process</value>
@@ -1691,28 +1691,6 @@
 <data name="FlStudioPage010.OffContent" xml:space="preserve"><value>Off</value></data>
 <data name="FlStudioPage012.OnContent" xml:space="preserve"><value>On</value></data>
 <data name="FlStudioPage012.OffContent" xml:space="preserve"><value>Off</value></data>
-  <!-- L5 Discord : textes ici -->
-  <data name="Discord_Title.Text" xml:space="preserve"><value>Discord</value></data>
-  <data name="Discord_Enable.Header" xml:space="preserve"><value>Sync microphone mute with Discord</value></data>
-  <data name="Discord_ClientId.Header" xml:space="preserve"><value>Application ID</value></data>
-  <data name="Discord_Secret.Header" xml:space="preserve"><value>Application secret</value></data>
-  <data name="Discord_SecretStored" xml:space="preserve"><value>Secret saved</value></data>
-  <data name="Discord_SecretMissing" xml:space="preserve"><value>No secret saved</value></data>
-  <data name="Discord_Authorize.Content" xml:space="preserve"><value>Authorize in Discord</value></data>
-  <data name="Discord_Forget.Content" xml:space="preserve"><value>Forget</value></data>
-  <data name="Discord_State_Disabled" xml:space="preserve"><value>Sync disabled (or demo mode)</value></data>
-  <data name="Discord_State_Disconnected" xml:space="preserve"><value>Discord closed</value></data>
-  <data name="Discord_State_AuthorizationRequired" xml:space="preserve"><value>Authorization required in Discord</value></data>
-  <data name="Discord_State_Connecting" xml:space="preserve"><value>Connecting to Discord…</value></data>
-  <data name="Discord_State_Connected" xml:space="preserve"><value>Connected to Discord</value></data>
-  <data name="Discord_State_Error" xml:space="preserve"><value>Discord error: check the application, RPC permissions and connection, then retry.</value></data>
-  <data name="Discord_CheckSettings" xml:space="preserve"><value>Enable sync and enter a numeric Application ID.</value></data>
-  <data name="Discord_AuthorizeError" xml:space="preserve"><value>Authorization failed. Check your secret, Discord application and RPC permissions, then retry.</value></data>
-  <data name="Discord_ForgetError" xml:space="preserve"><value>Could not delete Discord credentials.</value></data>
-  <data name="Discord_Help.Text" xml:space="preserve"><value>1. Create your application at discord.com/developers.
-2. Copy its Application ID and secret here, then enable sync.
-3. Add http://localhost under OAuth2 &gt; Redirects, then click Authorize in Discord.
-For an unapproved RPC application, your account must be listed as a tester. Forget removes local credentials; you can also revoke access in Discord.</value></data>
   <data name="AboutPage016.Text" xml:space="preserve"><value>Copyright © 2026 Anarchy (@Anarchiejs).</value></data>
   <data name="CS_SystemSounds" xml:space="preserve"><value>System sounds</value></data>
   <data name="CS_UnknownApplication" xml:space="preserve"><value>Application</value></data>

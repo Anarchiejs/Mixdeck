@@ -18,7 +18,6 @@ namespace Mixdeck.App.ViewModels.Pages;
 public sealed partial class SettingsPageViewModel : ObservableObject
 {
     private readonly ISettingsStore settings;
-    private readonly IDiscordVoice discord;
     private readonly IHotkeyService hotkeys;
     private readonly IShellService shell;
     private readonly SemaphoreSlim saveGate = new(1, 1);
@@ -30,10 +29,9 @@ public sealed partial class SettingsPageViewModel : ObservableObject
     private int pendingSaves;
     private bool refreshAfterFailure;
 
-    public SettingsPageViewModel(ISettingsStore settings, MixerViewModel mixer, IHotkeyService hotkeys, IShellService shell, MixdeckPaths paths, IDiscordVoice discord)
+    public SettingsPageViewModel(ISettingsStore settings, MixerViewModel mixer, IHotkeyService hotkeys, IShellService shell, MixdeckPaths paths)
     {
         this.settings = settings;
-        this.discord = discord;
         this.hotkeys = hotkeys;
         this.shell = shell;
         Mixer = mixer;
@@ -143,9 +141,6 @@ public sealed partial class SettingsPageViewModel : ObservableObject
             ProfileChoices.Add(new(missing, Strings.Get("Settings_MissingProfile")));
         StartupProfile = ProfileChoices.First(p => p.Id == current.StartupProfileId);
         AlwaysShowTrayIcon = current.AlwaysShowTrayIcon;
-        DiscordEnabled = current.Discord.Enabled;
-        DiscordClientId = current.Discord.ClientId;
-        RefreshDiscordState();
         ShowMicBadge = current.ShowMicBadge;
         PlayMicSounds = current.PlayMicSounds;
         ShowAppVolumes = current.ShowAppVolumes;
@@ -166,63 +161,6 @@ public sealed partial class SettingsPageViewModel : ObservableObject
         foreach (var row in Hotkeys) row.Refresh(current.Hotkeys.FirstOrDefault(h => h.Action == row.Action), hotkeys.Failed);
         OnPropertyChanged(nameof(AccentSummary));
         loading = false;
-    }
-
-    // L5 Discord : le secret reste dans le PasswordBox et le coffre DPAPI.
-    [ObservableProperty]
-    public partial bool DiscordEnabled { get; set; }
-    [ObservableProperty]
-    public partial string DiscordClientId { get; set; } = string.Empty;
-    [ObservableProperty]
-    public partial string DiscordStatus { get; set; } = string.Empty;
-    [ObservableProperty]
-    public partial string DiscordSecretStatus { get; set; } = string.Empty;
-    [ObservableProperty]
-    public partial bool DiscordBusy { get; set; }
-
-    partial void OnDiscordEnabledChanged(bool value) => QueueSave(s => s with { Discord = s.Discord with { Enabled = value } });
-    partial void OnDiscordClientIdChanged(string value) => QueueSave(s => s with { Discord = s.Discord with { ClientId = value.Trim() } });
-
-    public void RefreshDiscordState()
-    {
-        DiscordStatus = Strings.Get(discord.State switch
-        {
-            DiscordConnectionState.Disabled => "Discord_State_Disabled",
-            DiscordConnectionState.Disconnected => "Discord_State_Disconnected",
-            DiscordConnectionState.AuthorizationRequired => "Discord_State_AuthorizationRequired",
-            DiscordConnectionState.Connecting => "Discord_State_Connecting",
-            DiscordConnectionState.Connected => "Discord_State_Connected",
-            _ => "Discord_State_Error",
-        });
-        DiscordSecretStatus = Strings.Get(discord.HasCredentials ? "Discord_SecretStored" : "Discord_SecretMissing");
-    }
-
-    public async Task AuthorizeDiscordAsync(string secret)
-    {
-        if (DiscordBusy) return;
-        DiscordBusy = true;
-        try
-        {
-            await FlushAsync();
-            if (HasError) return;
-            if (!DiscordEnabled || DiscordClientId.Length == 0 || !DiscordClientId.All(char.IsAsciiDigit))
-            {
-                ReportError(Strings.Get("Discord_CheckSettings"));
-                return;
-            }
-            await discord.AuthorizeAsync(secret);
-        }
-        catch (Exception) { ReportError(Strings.Get("Discord_AuthorizeError")); }
-        finally { DiscordBusy = false; RefreshDiscordState(); }
-    }
-
-    public async Task ForgetDiscordAsync()
-    {
-        if (DiscordBusy) return;
-        DiscordBusy = true;
-        try { await discord.ForgetAsync(); }
-        catch (Exception) { ReportError(Strings.Get("Discord_ForgetError")); }
-        finally { DiscordBusy = false; RefreshDiscordState(); }
     }
 
     private void QueueSave(Func<AppSettings, AppSettings> change)
