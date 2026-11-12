@@ -8,6 +8,7 @@ public static class VoicemeeterLocator
 
     public static string? FindInstallationDirectory()
     {
+        if (!OperatingSystem.IsWindows()) return null;
         foreach (var view in new[] { RegistryView.Registry32, RegistryView.Registry64 })
         {
             try
@@ -47,6 +48,14 @@ public static class VoicemeeterLocator
             if (end < 0) return null;
             executable = command[..(end + 4)];
         }
-        return Path.IsPathFullyQualified(executable) ? Path.GetDirectoryName(executable) : null;
+        if (OperatingSystem.IsWindows() && Path.IsPathFullyQualified(executable))
+            return Path.GetDirectoryName(executable);
+        // The uninstall string is a Windows path. Tests parse it on Linux and macOS too.
+        if (executable.Length >= 3 && char.IsAsciiLetter(executable[0]) && executable[1] == ':' && executable[2] is '\\' or '/')
+        {
+            var slash = Math.Max(executable.LastIndexOf('\\'), executable.LastIndexOf('/'));
+            return slash > 2 ? executable[..slash] : null;
+        }
+        return null;
     }
 }
