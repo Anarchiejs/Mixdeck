@@ -6,7 +6,7 @@ body:
   - type: markdown
     attributes:
       value: |
-        Do not paste a Discord secret, a token, a crash log that contains personal paths, or a Windows user name.
+        Do not paste a secret, a token, a crash log that contains personal paths, or a Windows user name.
   - type: textarea
     id: what-happened
     attributes:
@@ -47,4 +47,4 @@ body:
     id: extra
     attributes:
       label: Anything else
-      description: FL Studio or Discord only if the bug needs them. Leave device names out if they identify you.
+      description: FL Studio only if the bug needs it. Leave device names out if they identify you.

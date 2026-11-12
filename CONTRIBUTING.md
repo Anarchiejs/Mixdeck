@@ -21,7 +21,7 @@ dotnet test tests/Mixdeck.UiTests -c Release
 
 ## Rules
 
-- Do not commit secrets, `.env` files, Discord tokens, certificate material, or absolute paths from your Windows profile.
+- Do not commit secrets, `.env` files, tokens, certificate material, or absolute paths from your Windows profile.
 - Do not commit local editor or tool folders.
 - User-facing strings go in both `src/Mixdeck.App/Strings/en-US/Resources.resw` and `fr-FR/Resources.resw`. The localization test fails when a key exists in only one language.
 - `Directory.Packages.props` is the only place package versions change. Keep `FluentAssertions` on the 7.x Apache-2.0 line. 8.x is under a commercial Xceed license.

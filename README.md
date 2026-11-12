@@ -13,22 +13,21 @@ Mixdeck is a native Windows tray app (C# / .NET 10, WinUI 3, unpackaged, x64) th
 
 **Status.** Pre-release. The assembly version in `Directory.Build.props` is **0.1.0**. Nothing has been published to GitHub Releases yet. The app builds, starts, and drives Voicemeeter. Installers produced before [Azure Trusted Signing](docs/SIGNATURE.md) is configured are **unsigned**, so Windows SmartScreen warns on first launch.
 
-Mixdeck is not affiliated with VB-Audio, Image-Line, or Discord.
+Mixdeck is not affiliated with VB-Audio or Image-Line.
 
 ## Features
 
 - Tray icon next to the clock: left click opens the flyout, middle click mutes the microphone, tooltip shows mute, A1 volume, and the current profile.
 - Flyout anchored to the taskbar. The wheel changes the volume of the row under the pointer after that row has been clicked.
-- Per-application volume (Discord, a game, a browser, …) and "Send to…" to choose an application's output.
+- Per-application volume (a game, a browser, …) and "Send to…" to choose an application's output.
 - Devices page: Voicemeeter microphone, headphones, and speakers, microphone presets (gate, compressor, clearer voice), audio-engine restart.
-- Automatic ducking: music drops when someone speaks on Discord.
+- Automatic ducking: one input drops when another has signal.
 - Optional always-on mute badge and confirmation sound.
 - "Hear myself" sends the microphone to a bus, usually the headphones.
 - Mixer console: input and output strips that wrap, only strips tied to a device (plus virtual strips), collapsible EQ.
 - Routing matrix, profiles with a fade, per-application rules.
 - Global hotkeys, push-to-talk, a hotkey per profile, and a profile applied at startup.
 - FL Studio page: pick a mixer track, set volume and mute, enable or bypass track effects and each effect slot (with the plugin name). A profile can store FL state. A hotkey can toggle a slot.
-- Microphone mute kept in sync with Discord, both ways (Settings, see below).
 - Default Windows output from the flyout, and default output and input from the Devices page.
 - Local crash log and a single automatic restart.
 - On-screen display.
@@ -47,7 +46,6 @@ Screenshots are not in the repository yet. They have to be captured on Windows. 
 Optional:
 
 - FL Studio, plus [loopMIDI](https://www.tobias-erichsen.de/software/loopmidi.html), for the FL Studio page.
-- A Discord application that you own, for mute sync. Discord must be running locally.
 
 ## Privacy
 
@@ -62,7 +60,6 @@ Mixdeck has no telemetry account and does not upload logs or crash reports.
 | Rules | The foreground executable name and the names of running processes. Kept in memory and in your rules file. Not sent anywhere. |
 | Per-app volume | Windows session display names, process names, and volumes for the default output. |
 | Default devices and "Send to…" | Undocumented Windows COM APIs (`IPolicyConfig`, `IAudioPolicyConfig`, Explorer tray notify). They can stop working after a Windows update. Mixdeck then disables the feature or reports the error. |
-| Discord | Only if you turn sync on. Mixdeck asks Discord for the broad `rpc` scope (the narrower voice scopes are limited to Discord partners). The application secret and tokens are stored with DPAPI for the current Windows user in `discord.bin`. The only call to discord.com is the OAuth token endpoint. Mute changes use Discord's local RPC pipe. |
 | FL Studio | Local MIDI only, through the two loopMIDI ports. The installer can write FL's MIDI settings and copy the device script into your Documents folder. |
 | Updates | An installed build checks GitHub Releases at startup when Settings > Check for updates is on (the default). That is a request to `https://github.com/Anarchiejs/Mixdeck`. Turn the switch off to stop the automatic check. The About page can still check when you click the button. Development builds are not installed, so they do not check. |
 
@@ -156,16 +153,6 @@ Limits: FL must be open with the script active. A plugin can be enabled or bypas
 
 Console diagnostic: `tools/Mixdeck.FlProbe` (`list`, `ping`, `get <track>`, `mute`, `vol`, `slot`, `watch`, …).
 
-## Discord
-
-Mixdeck's microphone mute and Discord's mute stay the same: muting one mutes the other. Discord only allows this control for Discord applications you own or that list you as a tester:
-
-1. On [discord.com/developers/applications](https://discord.com/developers/applications), create an application.
-2. Under *OAuth2*, copy the client id and the client secret, and add `http://localhost` to *Redirects*.
-3. In Mixdeck, *Settings > Discord*: turn sync on, paste the id and the secret, click "Authorize in Discord", and accept the prompt.
-
-The secret and the tokens are encrypted for your Windows user (DPAPI) in `discord.bin`. They are never written to `settings.json` or the logs. The requested scope is `rpc`. When Discord starts, Mixdeck's mute state wins.
-
 ## Logs and files
 
 `MixdeckPaths` puts files in `%LOCALAPPDATA%\Mixdeck`. Settings > "Open the log folder" opens that directory.
@@ -175,7 +162,6 @@ The secret and the tokens are encrypted for your Windows user (DPAPI) in `discor
 | `%LOCALAPPDATA%\Mixdeck\logs` | Logs and crash reports |
 | `%LOCALAPPDATA%\Mixdeck\settings.json` | Settings (`settings.json.bak` is the backup) |
 | `%LOCALAPPDATA%\Mixdeck\profiles` | Profiles |
-| `%LOCALAPPDATA%\Mixdeck\discord.bin` | Discord secret and tokens, DPAPI |
 
 ## Architecture
 

@@ -33,7 +33,7 @@ public class SimulatedVoicemeeterApi : IVoicemeeterApi
         _layout = layout;
         _floats.Clear();
         _strings.Clear();
-        string[] labels = ["Micro", "Discord", "Jeu", "Musique", "Navigateur"];
+        string[] labels = ["Micro", "Conversation", "Jeu", "Musique", "Navigateur"];
         for (var i = 0; i < layout.StripCount; i++)
         {
             _strings[VmParam.StripLabel(i)] = i < labels.Length ? labels[i] : layout.DefaultStripLabels[i];
