@@ -8,6 +8,7 @@ public static class VoicemeeterLocator
 
     public static string? FindInstallationDirectory()
     {
+        if (!OperatingSystem.IsWindows()) return null;
         foreach (var view in new[] { RegistryView.Registry32, RegistryView.Registry64 })
         {
             try
@@ -47,6 +48,19 @@ public static class VoicemeeterLocator
             if (end < 0) return null;
             executable = command[..(end + 4)];
         }
-        return Path.IsPathFullyQualified(executable) ? Path.GetDirectoryName(executable) : null;
+        return ParentDirectory(executable);
+    }
+
+    /// <summary>
+    /// Directory portion of a Windows uninstall path. Separators are handled as characters so the
+    /// result is the same on every operating system (<c>Path.GetDirectoryName</c> only treats '\' as a separator on Windows).
+    /// </summary>
+    private static string? ParentDirectory(string path)
+    {
+        var normalized = path.Replace('/', '\\');
+        var separator = normalized.LastIndexOf('\\');
+        if (separator <= 0) return null;
+        if (separator == 2 && normalized[1] == ':') return normalized[..3];
+        return normalized[..separator];
     }
 }

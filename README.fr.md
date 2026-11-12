@@ -9,11 +9,29 @@
 
 [English](README.md)
 
-Mixdeck est une application Windows native (C# / .NET 10, WinUI 3, non empaquetée, x64) qui pilote [Voicemeeter](https://vb-audio.com/Voicemeeter/) depuis la barre des tâches. Elle s'adresse à qui mélange micro, appels, jeux, musique et FL Studio sur un PC Windows.
+Mixdeck pilote l'audio que vous utilisez. Sous Windows, c'est une application de barre des tâches (C# / .NET 10, WinUI 3, non empaquetée, x64) pour [Voicemeeter](https://vb-audio.com/Voicemeeter/). Sous macOS, le même cœur tourne dans une fenêtre Avalonia et parle à Core Audio. Voicemeeter lui-même reste réservé à Windows. Les plateformes prises en charge sont Windows et macOS.
 
 **État.** Préversion. La version d'assembly dans `Directory.Build.props` est **0.1.0**. Aucune publication GitHub Releases n'existe encore. L'application compile, démarre et pilote Voicemeeter. Tant que la [signature Azure Trusted Signing](docs/SIGNATURE.md) n'est pas configurée, l'installateur n'est **pas signé** : SmartScreen avertit au premier lancement.
 
 Mixdeck n'est pas affilié à VB-Audio ni à Image-Line.
+
+## Plateformes
+
+| | Windows | macOS |
+| --- | --- | --- |
+| Application | Barre des tâches WinUI 3 (`Mixdeck.App`) | Application Avalonia (`Mixdeck.Desktop`) |
+| Mixeur Voicemeeter, profils, règles, atténuation, préréglages du micro | Oui | Indisponible. `--demo` lance le vrai simulateur, affiché comme démonstration |
+| Périphériques, périphérique par défaut, volume, sourdine | Oui | Oui, Core Audio |
+| Volume par application | Oui | Indisponible. Core Audio n'a pas de volume public par application |
+| Envoyer une application vers une autre sortie | Oui, API COM non documentée | Indisponible |
+| Raccourcis globaux et push-to-talk | Oui | Oui, Carbon `RegisterEventHotKey` |
+| Application au premier plan | Oui | Oui, `NSWorkspace` |
+| Règles par processus | Oui | Oui |
+| FL Studio | loopMIDI | Core MIDI : un port IAC du nom réglé, ou les ports virtuels « Mixdeck to FL » et « FL to Mixdeck » |
+| Démarrage à l'ouverture de session | Clé Run, versions installées seulement | LaunchAgent, versions installées seulement |
+| Installation et mises à jour | Installeur Velopack (`build/pack.ps1`) | Paquet Velopack construit sur un Mac, plus un `.app` (`build/pack.sh`) |
+
+Une copie lancée depuis `bin/` ne s'inscrit pas au démarrage. Les données restent sur la machine : `%LOCALAPPDATA%\Mixdeck` sous Windows et `~/Library/Application Support/Mixdeck` sous macOS. `MIXDECK_DATA_DIR` remplace cette racine.
 
 ## Fonctionnalités
 
@@ -39,17 +57,22 @@ Aucune capture n'est versionnée. Il faut les prendre sous Windows. Déposez-les
 
 ## Prérequis
 
-- Windows 10 version 19041 ou plus récente, ou Windows 11. x64 seulement. La plateforme minimale du projet d'application est `10.0.19041.0`.
+Toutes les plateformes : le SDK .NET 10 pour compiler. `global.json` fixe `10.0.403` avec un report `latestFeature`. Les versions publiées sont autonomes.
+
+Windows :
+
+- Windows 10 version 19041 ou plus récente, ou Windows 11. x64 seulement. Le projet WinUI cible `10.0.19041.0`.
 - Voicemeeter Standard, Banana ou Potato, déjà installé. Mixdeck charge `VoicemeeterRemote64.dll` depuis cette installation. La DLL n'est pas livrée avec Mixdeck.
-- Pour compiler : le SDK .NET 10. `global.json` fixe `10.0.403` avec un report `latestFeature`.
+- Facultatif : FL Studio et [loopMIDI](https://www.tobias-erichsen.de/software/loopmidi.html).
 
-Facultatif :
+macOS :
 
-- FL Studio et [loopMIDI](https://www.tobias-erichsen.de/software/loopmidi.html) pour la page FL Studio.
+- macOS 12 ou plus récent. Core Audio fait partie du système.
+- Facultatif : FL Studio. Mixdeck utilise Core MIDI et n'installe pas loopMIDI.
 
 ## Confidentialité
 
-Mixdeck n'a pas de compte de télémétrie et n'envoie ni journaux ni rapports de plantage.
+Mixdeck n'a pas de compte de télémétrie et n'envoie ni journaux ni rapports de plantage. macOS garde les mêmes fichiers dans le dossier indiqué sous Plateformes. L'entrée de démarrage n'est écrite que pour un paquet installé.
 
 | Quoi | Où |
 | --- | --- |
@@ -86,13 +109,26 @@ Les versions publiées sont attachées aux [publications GitHub](https://github.
 
 ## Compiler
 
-À la racine du dépôt :
+À la racine du dépôt.
+
+Windows (application WinUI, services Windows et projets portables) :
 
 ```powershell
 dotnet restore Mixdeck.slnx
 dotnet build Mixdeck.slnx -c Release -nologo
 dotnet test Mixdeck.slnx -c Release -nologo
 ```
+
+macOS (`Mixdeck.Portable.slnx` regroupe les projets qui se compilent sans le kit de ciblage Windows) :
+
+```bash
+dotnet test Mixdeck.Portable.slnx -c Release -nologo
+dotnet run --project src/Mixdeck.Desktop -- --self-check
+bash build/pack.sh --version 0.1.0
+bash build/install.sh
+```
+
+`build/pack.sh` s'exécute sur un Mac. Il accepte `--skip-tests`, `--skip-pack`, `--require-vpk`, `--version` et `--rid` (`osx-arm64` ou `osx-x64`). Il écrit `artifacts/Mixdeck.app`, une archive de cette application et le paquet Velopack. `build/install.sh` copie l'application dans `~/Applications`, sans mot de passe administrateur.
 
 Les tests unitaires ne lancent pas Voicemeeter : le client est testé contre une API simulée.
 
@@ -113,6 +149,12 @@ dotnet test tests/Mixdeck.UiTests -c Release
 
 ```powershell
 dotnet run --project src/Mixdeck.App -- --demo
+```
+
+Sous macOS, le même interrupteur pilote le simulateur dans l'application Avalonia. Un lancement normal ne fait pas semblant que Voicemeeter est installé.
+
+```bash
+dotnet run --project src/Mixdeck.Desktop -- --demo
 ```
 
 Autres arguments : `--minimized`, `--gallery`, `--demo=standard`, `--demo=banana`, `--demo=potato`.
@@ -137,21 +179,27 @@ Diagnostic : `tools/Mixdeck.FlProbe`.
 
 ## Journaux
 
+Les fichiers sont dans `%LOCALAPPDATA%\Mixdeck` sous Windows et dans `~/Library/Application Support/Mixdeck` sous macOS.
+
 | Chemin | Rôle |
 | --- | --- |
-| `%LOCALAPPDATA%\Mixdeck\logs` | Journaux et plantages |
-| `%LOCALAPPDATA%\Mixdeck\settings.json` | Réglages (`settings.json.bak` en secours) |
-| `%LOCALAPPDATA%\Mixdeck\profiles` | Profils |
+| `<données>/logs` | Journaux et plantages |
+| `<données>/settings.json` | Réglages (`settings.json.bak` en secours) |
+| `<données>/profiles` | Profils |
 
 ## Architecture
+
+`Mixdeck.slnx` est la solution Windows. `Mixdeck.Portable.slnx` est celle que la CI macOS compile.
 
 | Projet | Rôle |
 | --- | --- |
 | `src/Mixdeck.Core` | Modèle, contrats, réglages. `net10.0`, sans dépendance Windows. |
-| `src/Mixdeck.Voicemeeter` | Client Voicemeeter. x64. |
-| `src/Mixdeck.Platform` | Services Win32. x64. |
-| `src/Mixdeck.FlStudio` | Client FL Studio. |
-| `src/Mixdeck.App` | Interface WinUI 3 non empaquetée. |
+| `src/Mixdeck.Voicemeeter` | Client Voicemeeter et simulateur. `net10.0`. La DLL native n'est chargée que sous Windows. |
+| `src/Mixdeck.Platform` | Services Win32. Windows seulement. |
+| `src/Mixdeck.Platform.Desktop` | Audio, raccourcis, premier plan, processus, démarrage et instance unique pour macOS. |
+| `src/Mixdeck.FlStudio` | Protocole SysEx. Windows : winmm. macOS : Core MIDI. |
+| `src/Mixdeck.App` | Interface WinUI 3. C'est le produit Windows. |
+| `src/Mixdeck.Desktop` | Interface Avalonia pour macOS. Ce n'est pas ce que `build/pack.ps1` installe. |
 
 Mentions tierces : [NOTICE](NOTICE). Sécurité : [SECURITY.md](SECURITY.md). Contribution : [CONTRIBUTING.md](CONTRIBUTING.md).
 

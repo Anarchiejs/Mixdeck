@@ -482,13 +482,7 @@ $RECYCLE.BIN/
 *.swp
 
 # Mixdeck
-.orchestra/
 artifacts/
 publish/
 Releases/
-
-.grok/
-.grok-mcp.json
-.cursor/
-.claude/
 
