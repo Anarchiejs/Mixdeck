@@ -1,4 +1,5 @@
 using System.Collections.Concurrent;
+using System.Runtime.InteropServices;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Time.Testing;
@@ -208,6 +209,47 @@ public sealed class FlStudioDawTests
         using var input = sim.OpenInput("FL to Mixdeck", _ => { });
         Func<Task> restart = () => daw.StartAsync();
         await restart.Should().ThrowAsync<ObjectDisposedException>();
+    }
+
+    [Fact]
+    public async Task Unsupported_midi_settles_on_ports_missing_and_does_not_open_a_port()
+    {
+        var ports = new UnsupportedMidiPorts("MIDI is not available on this operating system.");
+        await using var daw = new FlStudioDaw(ports, new Settings(), NullLogger<FlStudioDaw>.Instance, new FakeTimeProvider());
+        await daw.StartAsync();
+        await Until(() => daw.State == DawConnectionState.PortsMissing);
+        daw.State.Should().Be(DawConnectionState.PortsMissing);
+        Func<IMidiOutput> open = () => ports.OpenOutput("Mixdeck to FL");
+        open.Should().Throw<MidiPortException>();
+    }
+
+    [Fact]
+    public void Midi_packet_list_reader_walks_packed_packets()
+    {
+        var first = new byte[] { 0xF0, 0x01, 0xF7 };
+        var second = new byte[] { 0xF0, 0x02 };
+        var firstLength = (ushort)first.Length;
+        var secondStart = MidiPacketListReader.Next((IntPtr)4, firstLength);
+        var size = (int)secondStart + 10 + second.Length;
+        var memory = Marshal.AllocHGlobal(size);
+        try
+        {
+            for (var i = 0; i < size; i++) Marshal.WriteByte(memory, i, 0);
+            Marshal.WriteInt32(memory, 2);
+            Marshal.WriteInt16(memory, 4 + 8, (short)firstLength);
+            Marshal.Copy(first, 0, memory + 4 + 10, first.Length);
+            var secondOffset = (int)secondStart;
+            Marshal.WriteInt16(memory, secondOffset + 8, (short)second.Length);
+            Marshal.Copy(second, 0, memory + secondOffset + 10, second.Length);
+            var messages = MidiPacketListReader.Read(memory);
+            messages.Should().HaveCount(2);
+            messages[0].Should().Equal(first);
+            messages[1].Should().Equal(second);
+        }
+        finally
+        {
+            Marshal.FreeHGlobal(memory);
+        }
     }
 
     private static FlStudioDaw Create(SimulatedFlStudio sim, Settings settings, FakeTimeProvider clock) =>

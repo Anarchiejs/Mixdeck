@@ -1,6 +1,12 @@
 namespace Mixdeck.FlStudio;
 
-/// <summary>Accès aux ports MIDI de Windows, remplaçable par un faux dans les tests et en mode démo.</summary>
+/// <summary>Faux quand ce système n'a pas de transport MIDI pour FL Studio. WinMM et CoreMIDI ne l'implémentent pas.</summary>
+public interface IMidiAvailability
+{
+    bool IsSupported { get; }
+}
+
+/// <summary>Accès aux ports MIDI, remplaçable par un faux dans les tests et en mode démo.</summary>
 public interface IMidiPorts
 {
     IReadOnlyList<string> OutputNames();

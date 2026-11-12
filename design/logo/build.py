@@ -1,6 +1,7 @@
 # Génère le logo Mixdeck (direction D « Vumètre M ») : SVG maîtres, icônes de l'appli, PNG.
-# Usage : python design/logo/build.py   (rendu par le script render_png.py du skill logo-design, Chrome).
+# Usage : python design/logo/build.py   (rendu PNG via render_png.py et Chrome).
 import io
+import os
 import struct
 import subprocess
 import sys
@@ -11,7 +12,7 @@ from PIL import Image
 HERE = Path(__file__).resolve().parent
 OUT = HERE / "final"
 ASSETS = HERE.parents[1] / "src" / "Mixdeck.App" / "Assets"
-RENDER = Path.home() / ".claude/plugins/cache/logo-design-skill/logo-design/1.4.5/skills/logo-design/scripts/render_png.py"
+RENDER = Path(os.environ["MIXDECK_RENDER_PNG"]) if os.environ.get("MIXDECK_RENDER_PNG") else HERE / "render_png.py"
 
 BLUE = ("#5A61EB", "#28A7CA")      # dégradé de la tuile, repris de l'ancien logo
 RED = ("#F0555A", "#C4314B")       # micro coupé (MixdeckMutedColor clair/sombre)

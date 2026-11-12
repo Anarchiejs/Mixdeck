@@ -140,14 +140,17 @@ public sealed class FlStudioDaw : IDaw
     {
         var now = _time.GetUtcNow();
         var config = _settings.Current.FlStudio;
+        var supported = _ports is not IMidiAvailability availability || availability.IsSupported;
         if (_activeSettings is null || config.Enabled != _activeSettings.Enabled ||
             config.InputPort != _activeSettings.InputPort || config.OutputPort != _activeSettings.OutputPort)
         {
-            Disconnect(config.Enabled ? DawConnectionState.WaitingForDaw : DawConnectionState.Disabled);
+            Disconnect(!config.Enabled ? DawConnectionState.Disabled
+                : supported ? DawConnectionState.WaitingForDaw
+                : DawConnectionState.PortsMissing);
             _activeSettings = config;
             _nextConnect = now;
         }
-        if (!config.Enabled) return;
+        if (!config.Enabled || !supported) return;
         if (_output is null && now >= _nextConnect)
         {
             _nextConnect = now.AddSeconds(2);
