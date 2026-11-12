@@ -166,7 +166,7 @@
     <value>Licence MIT</value>
   </data>
   <data name="AboutPage015.Text" xml:space="preserve">
-    <value>Voicemeeter est un produit de VB-Audio, FL Studio un produit d’Image-Line, Discord un produit de Discord. Mixdeck n’est affilié à aucun d’eux.</value>
+    <value>Voicemeeter est un produit de VB-Audio, FL Studio un produit d’Image-Line. Mixdeck n’est affilié à aucun d’eux.</value>
   </data>
   <data name="DevicesPage001.Text" xml:space="preserve">
     <value>Appareils</value>
@@ -325,7 +325,7 @@
     <value>Votre mixage suit votre activité</value>
   </data>
   <data name="RulesPage007.Text" xml:space="preserve">
-    <value>Par exemple : quand FL64.exe démarre, passer au profil Musique. Ou activer le micro quand Discord.exe est au premier plan.</value>
+    <value>Par exemple : quand FL64.exe démarre, passer au profil Musique. Ou activer le micro quand un navigateur est au premier plan.</value>
   </data>
   <data name="RulesPage008.Content" xml:space="preserve">
     <value>Créer une règle</value>
@@ -841,7 +841,7 @@
     <value>Application ou processus</value>
   </data>
   <data name="RuleEditor004.PlaceholderText" xml:space="preserve">
-    <value>Ex. FL64.exe ou Discord</value>
+    <value>Ex. FL64.exe ou Spotify.exe</value>
   </data>
   <data name="RuleEditor004.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
     <value>Application ou processus</value>
@@ -1691,28 +1691,6 @@
 <data name="FlStudioPage010.OffContent" xml:space="preserve"><value>Coupé</value></data>
 <data name="FlStudioPage012.OnContent" xml:space="preserve"><value>Activé</value></data>
 <data name="FlStudioPage012.OffContent" xml:space="preserve"><value>Coupé</value></data>
-  <!-- L5 Discord : textes ici -->
-  <data name="Discord_Title.Text" xml:space="preserve"><value>Discord</value></data>
-  <data name="Discord_Enable.Header" xml:space="preserve"><value>Synchroniser le muet avec Discord</value></data>
-  <data name="Discord_ClientId.Header" xml:space="preserve"><value>Application ID</value></data>
-  <data name="Discord_Secret.Header" xml:space="preserve"><value>Secret de l’application</value></data>
-  <data name="Discord_SecretStored" xml:space="preserve"><value>Secret enregistré</value></data>
-  <data name="Discord_SecretMissing" xml:space="preserve"><value>Aucun secret enregistré</value></data>
-  <data name="Discord_Authorize.Content" xml:space="preserve"><value>Autoriser dans Discord</value></data>
-  <data name="Discord_Forget.Content" xml:space="preserve"><value>Oublier</value></data>
-  <data name="Discord_State_Disabled" xml:space="preserve"><value>Synchronisation désactivée (ou mode démo)</value></data>
-  <data name="Discord_State_Disconnected" xml:space="preserve"><value>Discord fermé</value></data>
-  <data name="Discord_State_AuthorizationRequired" xml:space="preserve"><value>À autoriser dans Discord</value></data>
-  <data name="Discord_State_Connecting" xml:space="preserve"><value>Connexion à Discord…</value></data>
-  <data name="Discord_State_Connected" xml:space="preserve"><value>Connecté à Discord</value></data>
-  <data name="Discord_State_Error" xml:space="preserve"><value>Erreur Discord : vérifiez l’application, les droits RPC et la connexion, puis réessayez.</value></data>
-  <data name="Discord_CheckSettings" xml:space="preserve"><value>Activez la synchronisation et saisissez un Application ID numérique.</value></data>
-  <data name="Discord_AuthorizeError" xml:space="preserve"><value>Autorisation impossible. Vérifiez le secret, l’application Discord, les droits RPC et réessayez.</value></data>
-  <data name="Discord_ForgetError" xml:space="preserve"><value>Impossible d’effacer les identifiants Discord.</value></data>
-  <data name="Discord_Help.Text" xml:space="preserve"><value>1. Créez votre application sur discord.com/developers.
-2. Copiez son Application ID et son secret ici, puis activez la synchronisation.
-3. Ajoutez http://localhost dans OAuth2 &gt; Redirects, puis cliquez sur Autoriser dans Discord.
-Pour une application RPC non approuvée, votre compte doit figurer parmi ses testeurs. Oublier efface les identifiants locaux ; vous pouvez aussi révoquer l’accès dans Discord.</value></data>
   <data name="AboutPage016.Text" xml:space="preserve"><value>Copyright © 2026 Anarchy (@Anarchiejs).</value></data>
   <data name="CS_SystemSounds" xml:space="preserve"><value>Sons système</value></data>
   <data name="CS_UnknownApplication" xml:space="preserve"><value>Application</value></data>

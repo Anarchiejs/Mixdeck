@@ -46,7 +46,7 @@ internal static class ServiceRegistration
             if (!options.Demo) return VoicemeeterMixer.CreateDefault(loggers);
             var layout = options.DemoLayout;
             var api = new SimulatedVoicemeeterApi(layout: layout);
-            string[] labels = [Localization.Strings.Get("CS_104"), "Discord", Localization.Strings.Get("CS_107"),
+            string[] labels = [Localization.Strings.Get("CS_104"), Localization.Strings.Get("CS_108"), Localization.Strings.Get("CS_107"),
                 Localization.Strings.Get("CS_010"), Localization.Strings.Get("CS_109")];
             for (var index = 0; index < layout.StripCount; index++)
                 api.SimulateExternalChange(Core.Model.VmParam.StripLabel(index), index < labels.Length ? labels[index]
@@ -93,16 +93,6 @@ internal static class ServiceRegistration
         services.AddSingleton<TrayIconService>();
         services.AddSingleton<MixerViewModel>();
         services.AddSingleton<FlQuickPickViewModel>();
-        // L5 Discord : enregistrements ici.
-        services.AddSingleton<Mixdeck.Platform.Discord.DiscordCredentialStore>();
-        services.AddSingleton<Mixdeck.Platform.Discord.DiscordOAuth>();
-        services.AddSingleton<IDiscordVoice>(sp => options.Demo
-            ? new NullDiscordVoice()
-            : new Mixdeck.Platform.Discord.DiscordRpcClient(settings,
-                sp.GetRequiredService<Mixdeck.Platform.Discord.DiscordCredentialStore>(),
-                sp.GetRequiredService<Mixdeck.Platform.Discord.DiscordOAuth>(),
-                sp.GetRequiredService<Microsoft.Extensions.Logging.ILogger<Mixdeck.Platform.Discord.DiscordRpcClient>>()));
-        services.AddSingleton<DiscordMuteSync>();
         // L6 Périphérique Windows par défaut : enregistrements ici.
         services.AddSingleton<IWindowsDefaultDevices>(_ => options.Demo
             ? new SimulatedWindowsDefaultDevices()

@@ -22,12 +22,12 @@ public enum MicPreset
     Strong,
 }
 
-/// <summary>Atténuation automatique : baisser une entrée (musique) quand une autre (Discord) a du signal.</summary>
+/// <summary>Atténuation automatique : baisser une entrée (musique) quand une autre a du signal.</summary>
 public sealed record DuckingSettings
 {
     public bool Enabled { get; init; }
 
-    /// <summary>Entrée écoutée (ex. la tranche où arrive Discord).</summary>
+    /// <summary>Entrée écoutée (ex. la tranche d'un appel).</summary>
     public int SourceStrip { get; init; } = 3;
 
     /// <summary>Entrée baissée (ex. la tranche de la musique).</summary>
@@ -110,7 +110,6 @@ public sealed record AppSettings
 
     /// <summary>Pilotage de FL Studio par loopMIDI.</summary>
     public FlStudioSettings FlStudio { get; init; } = new();
-    public DiscordSettings Discord { get; init; } = new();
 
     /// <summary>Petit badge permanent à l'écran tant que le micro est coupé.</summary>
     public bool ShowMicBadge { get; init; }
@@ -141,16 +140,4 @@ public sealed record AppSettings
 
     public ChannelCustomization BusCustomization(int index) =>
         Buses.FirstOrDefault(c => c.Index == index) ?? new ChannelCustomization(index);
-}
-
-/// <summary>
-/// Muet synchronisé avec Discord par son RPC local (application Discord créée par l'utilisateur).
-/// Le secret de l'application et les jetons ne sont jamais ici : fichier chiffré par DPAPI (voir DiscordCredentialStore).
-/// </summary>
-public sealed record DiscordSettings
-{
-    public bool Enabled { get; init; }
-
-    /// <summary>Identifiant (« Application ID ») de l'application Discord de l'utilisateur ; pas secret.</summary>
-    public string ClientId { get; init; } = "";
 }

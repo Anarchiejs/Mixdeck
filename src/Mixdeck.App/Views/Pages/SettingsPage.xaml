@@ -13,25 +13,6 @@
                 <TextBlock Text="{x:Bind ViewModel.SaveStatus, Mode=OneWay}" TextWrapping="Wrap" Foreground="{ThemeResource TextFillColorSecondaryBrush}" AutomationProperties.LiveSetting="Polite" />
             </StackPanel>
             <InfoBar x:Uid="SettingsPage002" x:Name="PageError" IsOpen="{x:Bind ViewModel.HasError, Mode=OneWay}"  Message="{x:Bind ViewModel.ErrorMessage, Mode=OneWay}" Severity="Error" IsClosable="False" />
-            <!-- L5 Discord -->
-            <StackPanel Spacing="8">
-                <TextBlock x:Uid="Discord_Title" Style="{StaticResource SubtitleTextBlockStyle}" />
-                <Border Style="{StaticResource MixdeckCardStyle}">
-                    <StackPanel Spacing="12">
-                        <ToggleSwitch x:Uid="Discord_Enable" IsOn="{x:Bind ViewModel.DiscordEnabled, Mode=TwoWay}" />
-                        <TextBox x:Uid="Discord_ClientId" Text="{x:Bind ViewModel.DiscordClientId, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-                        <PasswordBox x:Name="DiscordSecret" x:Uid="Discord_Secret" PasswordRevealMode="Hidden" />
-                        <TextBlock Text="{x:Bind ViewModel.DiscordSecretStatus, Mode=OneWay}" />
-                        <StackPanel Orientation="Horizontal" Spacing="8">
-                            <Button x:Uid="Discord_Authorize" Click="OnAuthorizeDiscord" />
-                            <Button x:Uid="Discord_Forget" Click="OnForgetDiscord" />
-                            <ProgressRing IsActive="{x:Bind ViewModel.DiscordBusy, Mode=OneWay}" Width="20" Height="20" />
-                        </StackPanel>
-                        <TextBlock Text="{x:Bind ViewModel.DiscordStatus, Mode=OneWay}" TextWrapping="Wrap" AutomationProperties.LiveSetting="Polite" />
-                        <TextBlock x:Uid="Discord_Help" TextWrapping="Wrap" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
-                    </StackPanel>
-                </Border>
-            </StackPanel>
             <StackPanel Spacing="8">
                 <TextBlock x:Uid="SettingsPage003"  Style="{StaticResource SubtitleTextBlockStyle}" Margin="0,0,0,4" />
                 <local:SettingCard x:Uid="SettingsPage004"   Glyph="&#xE7E8;">
