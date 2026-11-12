@@ -249,13 +249,6 @@ public partial class App : Application
     {
         try
         {
-            GetService<TrayIconService>().Dispose();
-            GetService<AutomationCoordinator>().Dispose();
-            GetService<DuckingController>().Dispose();
-            GetService<IHotkeyService>().Dispose();
-            GetService<IMixer>().DisposeAsync().AsTask().Wait(TimeSpan.FromSeconds(2));
-            GetService<IDaw>().DisposeAsync().AsTask().Wait(TimeSpan.FromSeconds(1));
-            // Les clients audio sont asynchrones : Dispose() synchrone du conteneur les refuserait.
             if (_host is IAsyncDisposable asyncHost)
                 asyncHost.DisposeAsync().AsTask().GetAwaiter().GetResult();
             else

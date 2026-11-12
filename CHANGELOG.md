@@ -12,6 +12,7 @@ GitHub Releases are created only when a `v*` tag is pushed, and that tag needs a
 
 ### Added
 
+- macOS app (`Mixdeck.Desktop`, Avalonia) beside the Windows WinUI app. System devices, the default device, volume, and mute use Core Audio. Per-app volume and routing stay unavailable. Global hotkeys use Carbon, and the foreground app uses `NSWorkspace`. FL Studio uses Core MIDI. Voicemeeter stays Windows-only; `--demo` still runs the simulator. Login items are a LaunchAgent for installed builds. `build/pack.sh`, `build/install.sh`, and the macOS CI job package the app. `Mixdeck.Portable.slnx` is the solution that job builds.
 - Voicemeeter client for Standard, Banana, and Potato: a dedicated thread, a merged command queue, change-driven reads, 60 Hz meters only while a meter is visible, automatic reconnect, and a simulated engine (`--demo`, `--demo=standard`, `--demo=potato`).
 - Core: atomic JSON settings with a backup copy, profiles with gain fades, per-application rules, and meter ballistics.
 - Windows services: global hotkeys and push-to-talk, process and foreground detection, start with Windows, taskbar placement, single instance.

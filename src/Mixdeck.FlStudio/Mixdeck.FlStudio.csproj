@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
-  <!-- Pilotage de FL Studio : SysEx sur ports MIDI virtuels (winmm), script fl/Mixdeck/device_Mixdeck.py. -->
+  <!-- Pilotage de FL Studio : SysEx (fl/Mixdeck/device_Mixdeck.py). Windows : winmm. macOS : CoreMIDI. -->
   <PropertyGroup>
-    <TargetFramework>net10.0-windows</TargetFramework>
+    <TargetFramework>net10.0</TargetFramework>
     <RootNamespace>Mixdeck.FlStudio</RootNamespace>
   </PropertyGroup>
   <ItemGroup>

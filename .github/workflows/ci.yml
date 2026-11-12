@@ -2,7 +2,12 @@ name: CI
 
 on:
   push:
+    branches: [main]
   pull_request:
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 
 jobs:
   build:
@@ -32,6 +37,36 @@ jobs:
         if: ${{ !cancelled() }}
         uses: actions/upload-artifact@v4
         with:
-          name: test-results
+          name: test-results-windows
           path: "**/TestResults/**/*.trx"
+          if-no-files-found: warn
+
+  macos:
+    name: macOS build and test
+    runs-on: macos-latest
+    steps:
+      - name: Check out
+        uses: actions/checkout@v4
+
+      - name: Set up the .NET SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+
+      - name: Test
+        # Includes the Avalonia.Headless smoke test that opens the main window.
+        run: dotnet test Mixdeck.Portable.slnx -c Release -nologo --logger "console;verbosity=minimal"
+
+      - name: Self-check
+        run: dotnet run --project src/Mixdeck.Desktop/Mixdeck.Desktop.csproj -c Release -- --self-check
+
+      - name: Package
+        run: bash build/pack.sh --skip-tests --require-vpk --version 0.1.0
+
+      - name: Upload packages
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: mixdeck-macos
+          path: artifacts/*
           if-no-files-found: warn
