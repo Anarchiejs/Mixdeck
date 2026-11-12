@@ -36,42 +36,6 @@ jobs:
           path: "**/TestResults/**/*.trx"
           if-no-files-found: warn
 
-  linux:
-    name: Linux build and test
-    runs-on: ubuntu-latest
-    steps:
-      - name: Check out
-        uses: actions/checkout@v4
-
-      - name: Set up the .NET SDK
-        uses: actions/setup-dotnet@v4
-        with:
-          global-json-file: global.json
-
-      - name: Virtual display and AppImage tools
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y xvfb libx11-6 libxtst6 squashfs-tools
-          Xvfb :99 -screen 0 1280x1024x24 >/tmp/xvfb.log 2>&1 &
-          echo "DISPLAY=:99" >> "$GITHUB_ENV"
-
-      - name: Test
-        run: dotnet test Mixdeck.Portable.slnx -c Release -nologo --logger "console;verbosity=minimal"
-
-      - name: Self-check
-        run: dotnet run --project src/Mixdeck.Desktop/Mixdeck.Desktop.csproj -c Release -- --self-check
-
-      - name: Package
-        run: bash build/pack.sh --skip-tests --require-vpk --version 0.1.0
-
-      - name: Upload packages
-        if: ${{ !cancelled() }}
-        uses: actions/upload-artifact@v4
-        with:
-          name: mixdeck-linux
-          path: artifacts/*
-          if-no-files-found: warn
-
   macos:
     name: macOS build and test
     runs-on: macos-latest

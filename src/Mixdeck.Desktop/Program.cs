@@ -23,7 +23,7 @@ public static class Program
     {
         try
         {
-#pragma warning disable CA1416 // Velopack marque le hook Windows ; le même appel retire l'autostart Linux et macOS.
+#pragma warning disable CA1416 // Velopack marque le hook Windows ; le même appel retire l'autostart macOS.
             VelopackApp.Build()
                 .OnBeforeUninstallFastCallback(_ =>
                 {

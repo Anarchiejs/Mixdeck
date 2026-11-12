@@ -18,8 +18,8 @@ body:
     id: os
     attributes:
       label: Operating system
-      description: Windows 11 24H2, Ubuntu 24.04, or macOS 15. Include X11 or Wayland on Linux.
-      placeholder: Ubuntu 24.04, X11
+      description: Windows 11 24H2 or macOS 15.
+      placeholder: macOS 15
     validations:
       required: true
   - type: dropdown
@@ -31,7 +31,7 @@ body:
         - Banana
         - Potato
         - Not installed (demo mode)
-        - Not applicable (Linux or macOS)
+        - Not applicable (macOS)
     validations:
       required: true
   - type: dropdown

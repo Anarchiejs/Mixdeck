@@ -2,7 +2,7 @@ using Mixdeck.Core.Abstractions;
 
 namespace Mixdeck.Platform.Desktop.Processes;
 
-/// <summary>Diff du tableau des processus. Linux lit /proc ; macOS interroge la liste des processus.</summary>
+/// <summary>Diff du tableau des processus, par interrogation de la liste des processus.</summary>
 public sealed class PollingProcessWatcher : IProcessWatcher
 {
     private readonly TimeSpan _interval;

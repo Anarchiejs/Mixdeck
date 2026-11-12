@@ -50,7 +50,7 @@ public static class VoicemeeterLocator
         }
         if (OperatingSystem.IsWindows() && Path.IsPathFullyQualified(executable))
             return Path.GetDirectoryName(executable);
-        // The uninstall string is a Windows path. Tests parse it on Linux and macOS too.
+        // The uninstall string is a Windows path. Tests parse it on every OS.
         if (executable.Length >= 3 && char.IsAsciiLetter(executable[0]) && executable[1] == ':' && executable[2] is '\\' or '/')
         {
             var slash = Math.Max(executable.LastIndexOf('\\'), executable.LastIndexOf('/'));

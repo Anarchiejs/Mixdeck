@@ -9,7 +9,7 @@
 
 [Français](README.fr.md)
 
-Mixdeck controls the audio you are using. On Windows it is a tray app (C# / .NET 10, WinUI 3, unpackaged, x64) for [Voicemeeter](https://vb-audio.com/Voicemeeter/). On Linux and macOS the same core runs in an Avalonia window and talks to the system audio devices. Voicemeeter itself stays Windows-only.
+Mixdeck controls the audio you are using. On Windows it is a tray app (C# / .NET 10, WinUI 3, unpackaged, x64) for [Voicemeeter](https://vb-audio.com/Voicemeeter/). On macOS the same core runs in an Avalonia window and talks to Core Audio. Voicemeeter itself stays Windows-only. Supported platforms are Windows and macOS.
 
 **Status.** Pre-release. The assembly version in `Directory.Build.props` is **0.1.0**. Nothing has been published to GitHub Releases yet. The app builds, starts, and drives Voicemeeter. Installers produced before [Azure Trusted Signing](docs/SIGNATURE.md) is configured are **unsigned**, so Windows SmartScreen warns on first launch.
 
@@ -17,21 +17,21 @@ Mixdeck is not affiliated with VB-Audio or Image-Line.
 
 ## Supported platforms
 
-| | Windows | Linux | macOS |
-| --- | --- | --- | --- |
-| App | WinUI 3 tray app (`Mixdeck.App`) | Avalonia app (`Mixdeck.Desktop`) | Avalonia app (`Mixdeck.Desktop`) |
-| Voicemeeter mixer, profiles, rules, ducking, mic presets | Yes | Unavailable. `--demo` runs the real simulator and is labeled as a demo | Unavailable. Same demo switch |
-| System devices, default device, volume, mute | Yes | Yes, through `pactl` (PulseAudio or pipewire-pulse) | Yes, Core Audio |
-| Per-application volume | Yes | Yes, Pulse sink-inputs | Unavailable. Core Audio has no public per-app volume |
-| Send an application to another output | Yes, undocumented Windows COM | Yes, `pactl move-sink-input` | Unavailable |
-| Global hotkeys and push-to-talk | Yes | X11 only. On Wayland the page says they are unavailable | Yes, Carbon `RegisterEventHotKey` |
-| Foreground application | Yes | X11 `_NET_ACTIVE_WINDOW` only | Yes, `NSWorkspace` |
-| Process rules | Yes | Yes, `/proc` | Yes |
-| FL Studio | loopMIDI | Unavailable. FL Studio has no Linux build | Core MIDI: an IAC port of the configured name, or virtual ports "Mixdeck to FL" and "FL to Mixdeck" |
-| Start at login | Registry Run, installed builds only | XDG autostart, installed builds only | LaunchAgent, installed builds only |
-| Install and updates | Velopack setup (`build/pack.ps1`) | AppImage plus a `.tar.gz` (`build/pack.sh`) | Velopack package built on a Mac, plus a `.app` |
+| | Windows | macOS |
+| --- | --- | --- |
+| App | WinUI 3 tray app (`Mixdeck.App`) | Avalonia app (`Mixdeck.Desktop`) |
+| Voicemeeter mixer, profiles, rules, ducking, mic presets | Yes | Unavailable. `--demo` runs the real simulator and is labeled as a demo |
+| System devices, default device, volume, mute | Yes | Yes, Core Audio |
+| Per-application volume | Yes | Unavailable. Core Audio has no public per-app volume |
+| Send an application to another output | Yes, undocumented Windows COM | Unavailable |
+| Global hotkeys and push-to-talk | Yes | Yes, Carbon `RegisterEventHotKey` |
+| Foreground application | Yes | Yes, `NSWorkspace` |
+| Process rules | Yes | Yes |
+| FL Studio | loopMIDI | Core MIDI: an IAC port of the configured name, or virtual ports "Mixdeck to FL" and "FL to Mixdeck" |
+| Start at login | Registry Run, installed builds only | LaunchAgent, installed builds only |
+| Install and updates | Velopack setup (`build/pack.ps1`) | Velopack package built on a Mac, plus a `.app` (`build/pack.sh`) |
 
-A copy launched from `bin/` does not register itself for login on any system. Data stays on the machine: `%LOCALAPPDATA%\Mixdeck` on Windows, `$XDG_DATA_HOME/Mixdeck` or `~/.local/share/Mixdeck` on Linux, `~/Library/Application Support/Mixdeck` on macOS. `MIXDECK_DATA_DIR` overrides that root.
+A copy launched from `bin/` does not register itself for login. Data stays on the machine: `%LOCALAPPDATA%\Mixdeck` on Windows and `~/Library/Application Support/Mixdeck` on macOS. `MIXDECK_DATA_DIR` overrides that root.
 
 ## Features
 
@@ -65,12 +65,6 @@ Windows:
 - Voicemeeter Standard, Banana, or Potato, already installed. Mixdeck loads VB-Audio's remote library (`VoicemeeterRemote64.dll`) from that install. The DLL is not shipped with Mixdeck.
 - Optional: FL Studio, plus [loopMIDI](https://www.tobias-erichsen.de/software/loopmidi.html).
 
-Linux:
-
-- `pactl` from PulseAudio or `pipewire-pulse`. Without a running server the Audio page says so and does not invent devices.
-- An X11 session for global hotkeys and the foreground application. On Wayland those two stay off; device volume still works.
-- FL Studio is not available.
-
 macOS:
 
 - macOS 12 or later. Core Audio is part of the system.
@@ -78,7 +72,7 @@ macOS:
 
 ## Privacy
 
-Mixdeck has no telemetry account and does not upload logs or crash reports. Linux and macOS keep the same kinds of files in the data directory listed under Supported platforms. A login item is written only for an installed package.
+Mixdeck has no telemetry account and does not upload logs or crash reports. macOS keeps the same kinds of files in the data directory listed under Supported platforms. A login item is written only for an installed package.
 
 | What | Where it goes |
 | --- | --- |
@@ -127,7 +121,7 @@ dotnet build Mixdeck.slnx -c Release -nologo
 dotnet test Mixdeck.slnx -c Release -nologo
 ```
 
-Linux and macOS (`Mixdeck.Portable.slnx` is the projects that build without the Windows targeting pack):
+macOS (`Mixdeck.Portable.slnx` is the projects that build without the Windows targeting pack):
 
 ```bash
 dotnet test Mixdeck.Portable.slnx -c Release -nologo
@@ -136,7 +130,7 @@ bash build/pack.sh --version 0.1.0
 bash build/install.sh
 ```
 
-`build/pack.sh` accepts `--skip-tests`, `--skip-pack`, `--require-vpk`, `--version`, and `--rid` (`linux-x64`, `linux-arm64`, `osx-arm64`, `osx-x64`). The Linux AppImage step needs `mksquashfs` from `squashfs-tools`. `vpk [osx] pack` runs on a Mac. The script still writes `artifacts/Mixdeck.app` and a tarball there. `build/install.sh` installs for the current user and does not ask for root.
+`build/pack.sh` runs on a Mac. It accepts `--skip-tests`, `--skip-pack`, `--require-vpk`, `--version`, and `--rid` (`osx-arm64` or `osx-x64`). It writes `artifacts/Mixdeck.app`, an archive of that app, and the Velopack package. `build/install.sh` copies the app to `~/Applications` and does not ask for an administrator password.
 
 The unit tests (`tests/Mixdeck.Core.Tests`, `tests/Mixdeck.Voicemeeter.Tests`, `tests/Mixdeck.Platform.Tests`, `tests/Mixdeck.FlStudio.Tests`) do not launch Voicemeeter. The client is tested against a simulated API.
 
@@ -173,7 +167,7 @@ dotnet test tests/Mixdeck.UiTests -c Release
 dotnet run --project src/Mixdeck.App -- --demo
 ```
 
-On Linux and macOS the same switch drives the simulator inside the Avalonia app. A normal launch does not pretend Voicemeeter is installed.
+On macOS the same switch drives the simulator inside the Avalonia app. A normal launch does not pretend Voicemeeter is installed.
 
 ```bash
 dotnet run --project src/Mixdeck.Desktop -- --demo
@@ -203,7 +197,7 @@ Console diagnostic: `tools/Mixdeck.FlProbe` (`list`, `ping`, `get <track>`, `mut
 
 ## Logs and files
 
-`MixdeckPaths` uses `%LOCALAPPDATA%\Mixdeck` on Windows, `$XDG_DATA_HOME/Mixdeck` or `~/.local/share/Mixdeck` on Linux, and `~/Library/Application Support/Mixdeck` on macOS.
+`MixdeckPaths` uses `%LOCALAPPDATA%\Mixdeck` on Windows and `~/Library/Application Support/Mixdeck` on macOS.
 
 | Path | Role |
 | --- | --- |
@@ -213,17 +207,17 @@ Console diagnostic: `tools/Mixdeck.FlProbe` (`list`, `ping`, `get <track>`, `mut
 
 ## Architecture
 
-`Mixdeck.slnx` is the Windows solution. `Mixdeck.Portable.slnx` is what Linux and macOS CI build.
+`Mixdeck.slnx` is the Windows solution. `Mixdeck.Portable.slnx` is what macOS CI builds.
 
 | Project | Role |
 | --- | --- |
 | `src/Mixdeck.Core` | Model, contracts, and settings. `net10.0`, no Windows dependency. |
 | `src/Mixdeck.Voicemeeter` | Voicemeeter client and the simulator. `net10.0`. The native DLL is loaded only on Windows. |
 | `src/Mixdeck.Platform` | Win32 services (hotkeys, processes, foreground, startup, taskbar, audio sessions). Windows only. |
-| `src/Mixdeck.Platform.Desktop` | Linux and macOS system audio, hotkeys, foreground, processes, login item, and single instance. |
-| `src/Mixdeck.FlStudio` | SysEx protocol (`FlProtocol`, mirrored by `fl/Mixdeck/device_Mixdeck.py`). Windows uses winmm, macOS uses Core MIDI, Linux reports the integration unavailable. |
+| `src/Mixdeck.Platform.Desktop` | macOS system audio, hotkeys, foreground, processes, login item, and single instance. |
+| `src/Mixdeck.FlStudio` | SysEx protocol (`FlProtocol`, mirrored by `fl/Mixdeck/device_Mixdeck.py`). Windows uses winmm. macOS uses Core MIDI. |
 | `src/Mixdeck.App` | Unpackaged WinUI 3 UI. The Windows product. Assembly name `Mixdeck`. |
-| `src/Mixdeck.Desktop` | Avalonia UI for Linux and macOS. Assembly name `Mixdeck`. It is not what `build/pack.ps1` installs. |
+| `src/Mixdeck.Desktop` | Avalonia UI for macOS. Assembly name `Mixdeck`. It is not what `build/pack.ps1` installs. |
 
 The UI talks to Voicemeeter through `IMixer` and to FL Studio through `IDaw`. A command queue runs on a dedicated thread. The state read back from the device is what the UI shows.
 
@@ -234,7 +228,7 @@ Third-party notices: [NOTICE](NOTICE). Security reports: [SECURITY.md](SECURITY.
 1. Add a `## [X.Y.Z]` section to `CHANGELOG.md`.
 2. Push the tag `vX.Y.Z`.
 
-The release workflow publishes a self-contained `win-x64` build, restores `vpk`, downloads the previous GitHub release for deltas, packs, and uploads the result to GitHub Releases with that changelog section. Linux and macOS jobs then upload an AppImage, a tarball, and (from the macOS runner) the Mac package to the same release. The token is `secrets.GITHUB_TOKEN` (`contents: write`). No secret is written into the repository. Signing is described in [docs/SIGNATURE.md](docs/SIGNATURE.md).
+The release workflow publishes a self-contained `win-x64` build, restores `vpk`, downloads the previous GitHub release for deltas, packs, and uploads the result to GitHub Releases with that changelog section. The macOS job then uploads the Mac package to the same release. The token is `secrets.GITHUB_TOKEN` (`contents: write`). No secret is written into the repository. Signing is described in [docs/SIGNATURE.md](docs/SIGNATURE.md).
 
 ## License
 

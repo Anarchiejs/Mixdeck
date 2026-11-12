@@ -10,9 +10,9 @@ If private advisories are unavailable, open an issue that describes the impact w
 
 ## What this project stores
 
-- Settings, profiles, logs, and crash reports stay on this machine: `%LOCALAPPDATA%\Mixdeck` on Windows, `$XDG_DATA_HOME/Mixdeck` or `~/.local/share/Mixdeck` on Linux, `~/Library/Application Support/Mixdeck` on macOS (or `MIXDECK_DATA_DIR`). They are not uploaded.
+- Settings, profiles, logs, and crash reports stay on this machine: `%LOCALAPPDATA%\Mixdeck` on Windows, `~/Library/Application Support/Mixdeck` on macOS (or `MIXDECK_DATA_DIR`). They are not uploaded.
 - Update checks, when enabled on an installed build, request GitHub Releases for this repository. They do not send a Mixdeck account, because there is none.
 
 ## Scope
 
-The undocumented Windows audio and tray COM interfaces can fail closed on a future Windows build. A failure of those interfaces is a compatibility bug, not by itself a vulnerability. Report it if Mixdeck changes a device the user did not select, keeps running after uninstall, or writes outside the data directory above and the install directory (`%LOCALAPPDATA%\MixdeckApp` on Windows, `~/.local/lib/mixdeck` on Linux, `~/Applications/Mixdeck.app` on macOS).
+The undocumented Windows audio and tray COM interfaces can fail closed on a future Windows build. A failure of those interfaces is a compatibility bug, not by itself a vulnerability. Report it if Mixdeck changes a device the user did not select, keeps running after uninstall, or writes outside the data directory above and the install directory (`%LOCALAPPDATA%\MixdeckApp` on Windows, `~/Applications/Mixdeck.app` on macOS).

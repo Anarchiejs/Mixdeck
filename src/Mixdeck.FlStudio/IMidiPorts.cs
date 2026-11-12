@@ -1,6 +1,6 @@
 namespace Mixdeck.FlStudio;
 
-/// <summary>Faux quand ce système n'a pas de transport MIDI pour FL Studio (Linux). WinMM et CoreMIDI ne l'implémentent pas.</summary>
+/// <summary>Faux quand ce système n'a pas de transport MIDI pour FL Studio. WinMM et CoreMIDI ne l'implémentent pas.</summary>
 public interface IMidiAvailability
 {
     bool IsSupported { get; }

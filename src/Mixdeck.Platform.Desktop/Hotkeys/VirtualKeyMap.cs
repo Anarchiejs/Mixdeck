@@ -4,17 +4,10 @@ namespace Mixdeck.Platform.Desktop.Hotkeys;
 
 /// <summary>
 /// Les raccourcis sont stockés en codes virtuels Win32 (le format déjà enregistré dans settings.json).
-/// Cette table les traduit vers les keysyms X11 et les keycodes Carbon, pour les touches que Mixdeck propose.
+/// Cette table les traduit vers les keycodes Carbon, pour les touches que Mixdeck propose.
 /// </summary>
 public static class VirtualKeyMap
 {
-    public const uint X11Shift = 1;
-    public const uint X11Lock = 2;
-    public const uint X11Control = 4;
-    public const uint X11Alt = 8;
-    public const uint X11NumLock = 16;
-    public const uint X11Super = 64;
-
     public const uint MacCommand = 1 << 8;
     public const uint MacShift = 1 << 9;
     public const uint MacOption = 1 << 11;
@@ -38,45 +31,6 @@ public static class VirtualKeyMap
         [0x2E] = 0x75, [0x24] = 0x73, [0x23] = 0x77, [0x21] = 0x74, [0x22] = 0x79,
     };
 
-    public static bool TryX11Keysym(int virtualKey, out uint keysym)
-    {
-        if (virtualKey is >= 0x41 and <= 0x5A)
-        {
-            keysym = (uint)(virtualKey + 0x20);
-            return true;
-        }
-        if (virtualKey is >= 0x30 and <= 0x39)
-        {
-            keysym = (uint)virtualKey;
-            return true;
-        }
-        if (virtualKey is >= 0x70 and <= 0x87)
-        {
-            keysym = 0xffbe + (uint)(virtualKey - 0x70);
-            return true;
-        }
-        keysym = virtualKey switch
-        {
-            0x25 => 0xff51,
-            0x26 => 0xff52,
-            0x27 => 0xff53,
-            0x28 => 0xff54,
-            0x20 => 0x20,
-            0x0D => 0xff0d,
-            0x1B => 0xff1b,
-            0x09 => 0xff09,
-            0x08 => 0xff08,
-            0x2E => 0xffff,
-            0x24 => 0xff50,
-            0x23 => 0xff57,
-            0x21 => 0xff55,
-            0x22 => 0xff56,
-            0x2D => 0xff63,
-            _ => 0,
-        };
-        return keysym != 0;
-    }
-
     public static bool TryMacKeyCode(int virtualKey, out uint keyCode)
     {
         if (!MacKeyCodes.TryGetValue(virtualKey, out var code))
@@ -86,22 +40,6 @@ public static class VirtualKeyMap
         }
         keyCode = (uint)code;
         return true;
-    }
-
-    public static uint X11Modifiers(HotkeyModifiers modifiers)
-    {
-        uint mask = 0;
-        if (modifiers.HasFlag(HotkeyModifiers.Shift)) mask |= X11Shift;
-        if (modifiers.HasFlag(HotkeyModifiers.Control)) mask |= X11Control;
-        if (modifiers.HasFlag(HotkeyModifiers.Alt)) mask |= X11Alt;
-        if (modifiers.HasFlag(HotkeyModifiers.Win)) mask |= X11Super;
-        return mask;
-    }
-
-    public static IReadOnlyList<uint> X11GrabMasks(HotkeyModifiers modifiers)
-    {
-        var mask = X11Modifiers(modifiers);
-        return [mask, mask | X11Lock, mask | X11NumLock, mask | X11Lock | X11NumLock];
     }
 
     public static uint MacModifiers(HotkeyModifiers modifiers)
@@ -121,7 +59,7 @@ public static class VirtualKeyMap
         if (binding.Modifiers.HasFlag(HotkeyModifiers.Alt)) parts.Add(OperatingSystem.IsMacOS() ? "Option" : "Alt");
         if (binding.Modifiers.HasFlag(HotkeyModifiers.Shift)) parts.Add("Shift");
         if (binding.Modifiers.HasFlag(HotkeyModifiers.Win))
-            parts.Add(OperatingSystem.IsMacOS() ? "Cmd" : OperatingSystem.IsLinux() ? "Super" : "Win");
+            parts.Add(OperatingSystem.IsMacOS() ? "Cmd" : "Win");
         parts.Add(KeyName(binding.VirtualKey));
         return string.Join("+", parts);
     }

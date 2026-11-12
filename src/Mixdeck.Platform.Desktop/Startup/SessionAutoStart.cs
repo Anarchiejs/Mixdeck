@@ -3,52 +3,6 @@ using Mixdeck.Core.Abstractions;
 
 namespace Mixdeck.Platform.Desktop.Startup;
 
-public sealed class XdgAutoStart : IAutoStart
-{
-    private readonly string _file;
-    private readonly string _executable;
-    private readonly string _arguments;
-
-    public XdgAutoStart(string directory, string executable, string arguments = "--minimized")
-    {
-        Directory.CreateDirectory(directory);
-        _file = Path.Combine(directory, "mixdeck.desktop");
-        _executable = executable;
-        _arguments = arguments;
-    }
-
-    public static XdgAutoStart ForCurrentProcess()
-    {
-        var config = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
-        return new XdgAutoStart(Path.Combine(config, "autostart"), Environment.ProcessPath ?? "");
-    }
-
-    public bool IsEnabled => File.Exists(_file);
-
-    public void SetEnabled(bool enabled)
-    {
-        if (!enabled)
-        {
-            if (File.Exists(_file)) File.Delete(_file);
-            return;
-        }
-        if (string.IsNullOrWhiteSpace(_executable)) return;
-        var content = $"""
-            [Desktop Entry]
-            Type=Application
-            Version=1.0
-            Name=Mixdeck
-            Comment=Mixdeck audio control
-            Exec="{_executable}" {_arguments}
-            Terminal=false
-            Categories=AudioVideo;Audio;
-            X-GNOME-Autostart-enabled=true
-
-            """;
-        File.WriteAllText(_file, content.Replace("\r\n", "\n", StringComparison.Ordinal), new UTF8Encoding(false));
-    }
-}
-
 public sealed class LaunchAgentAutoStart : IAutoStart
 {
     private readonly string _file;
@@ -108,8 +62,7 @@ public static class SessionAutoStart
 {
     public static void DisableCurrentProcess()
     {
-        if (OperatingSystem.IsLinux()) XdgAutoStart.ForCurrentProcess().SetEnabled(false);
-        else if (OperatingSystem.IsMacOS()) LaunchAgentAutoStart.ForCurrentProcess().SetEnabled(false);
+        if (OperatingSystem.IsMacOS()) LaunchAgentAutoStart.ForCurrentProcess().SetEnabled(false);
     }
 }
 

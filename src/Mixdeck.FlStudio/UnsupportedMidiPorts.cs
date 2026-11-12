@@ -1,6 +1,6 @@
 namespace Mixdeck.FlStudio;
 
-/// <summary>Transport MIDI absent. FL Studio n'existe pas sur Linux : on n'ouvre aucun port et on ne simule pas l'application.</summary>
+/// <summary>Transport MIDI absent sur ce système. Aucun port n'est ouvert et FL Studio n'est pas simulé.</summary>
 public sealed class UnsupportedMidiPorts(string reason) : IMidiPorts, IMidiAvailability
 {
     public bool IsSupported => false;
@@ -23,6 +23,6 @@ public static class MidiPorts
     {
         if (OperatingSystem.IsWindows()) return new WinMidiPorts();
         if (OperatingSystem.IsMacOS()) return new CoreMidiPorts();
-        return new UnsupportedMidiPorts("FL Studio has no Linux build. Mixdeck does not open MIDI ports on Linux.");
+        return new UnsupportedMidiPorts("FL Studio MIDI is available on Windows and macOS. Mixdeck does not open a MIDI port here.");
     }
 }

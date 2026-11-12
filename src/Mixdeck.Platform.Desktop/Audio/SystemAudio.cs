@@ -20,8 +20,8 @@ public sealed record SystemAudioSnapshot(
 }
 
 /// <summary>
-/// Périphériques, volume et sessions du système. Linux parle à PipeWire ou PulseAudio.
-/// macOS parle à Core Audio. Quand l'API n'existe pas, <see cref="IsAvailable"/> est faux et les écritures échouent.
+/// Périphériques, volume et sessions du système sur macOS (Core Audio).
+/// Quand l'API n'existe pas, <see cref="IsAvailable"/> est faux et les écritures échouent.
 /// </summary>
 public interface ISystemAudio : IDisposable
 {

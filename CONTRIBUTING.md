@@ -1,12 +1,12 @@
 # Contributing
 
-Mixdeck runs on Windows, Linux, and macOS. The WinUI app and the Win32 services stay Windows-only. Maintainer: Anarchy ([@Anarchiejs](https://github.com/Anarchiejs)).
+Mixdeck runs on Windows and macOS. The WinUI app and the Win32 services stay Windows-only. Maintainer: Anarchy ([@Anarchiejs](https://github.com/Anarchiejs)).
 
 ## Build
 
 - .NET SDK version in `global.json` (`10.0.403`, `latestFeature` roll-forward). `dotnet` on `PATH` must be an SDK.
 - Windows: Windows 10 version 19041 or later, or Windows 11. A per-user SDK belongs in `%LOCALAPPDATA%\Microsoft\dotnet`. Voicemeeter is required to exercise the real client. Unit tests use the simulated API and do not need it.
-- Linux and macOS: test `Mixdeck.Portable.slnx`. The Windows solution does not restore there, because it needs the Windows targeting pack.
+- macOS: test `Mixdeck.Portable.slnx`. The Windows solution does not restore on a Mac, because it needs the Windows targeting pack.
 
 ```powershell
 dotnet test Mixdeck.slnx -c Release -nologo
@@ -34,6 +34,6 @@ dotnet test tests/Mixdeck.UiTests -c Release
 ## Releases
 
 1. Add `## [X.Y.Z]` to `CHANGELOG.md` with the notes that should appear on GitHub Releases.
-2. Tag `vX.Y.Z` and push it. `.github/workflows/release.yml` packs the Windows build with Velopack, then adds the Linux and macOS packages to the same release.
+2. Tag `vX.Y.Z` and push it. `.github/workflows/release.yml` packs the Windows build with Velopack, then adds the macOS package to the same release.
 
 Signing is optional and documented in `docs/SIGNATURE.md`.

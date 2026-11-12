@@ -3,7 +3,6 @@ using Mixdeck.Core.Abstractions;
 using Mixdeck.Platform.Desktop.Audio;
 using Mixdeck.Platform.Desktop.Foreground;
 using Mixdeck.Platform.Desktop.Hotkeys;
-using Mixdeck.Platform.Desktop.Native;
 using Mixdeck.Platform.Desktop.Processes;
 using Mixdeck.Platform.Desktop.Startup;
 
@@ -11,16 +10,13 @@ namespace Mixdeck.Platform.Desktop;
 
 public sealed class DesktopSurfaces : IDisposable
 {
-    private readonly X11Session? _x11;
-
     private DesktopSurfaces(
         ISystemAudio audio,
         IHotkeyService hotkeys,
         IProcessWatcher processes,
         IForegroundWatcher foreground,
         IAutoStart autoStart,
-        DesktopCapabilities capabilities,
-        X11Session? x11)
+        DesktopCapabilities capabilities)
     {
         Audio = audio;
         Hotkeys = hotkeys;
@@ -28,7 +24,6 @@ public sealed class DesktopSurfaces : IDisposable
         Foreground = foreground;
         AutoStart = autoStart;
         Capabilities = capabilities;
-        _x11 = x11;
     }
 
     public ISystemAudio Audio { get; }
@@ -41,32 +36,8 @@ public sealed class DesktopSurfaces : IDisposable
     public static DesktopSurfaces Create(ILogger? logger = null)
     {
         var processes = new PollingProcessWatcher();
-        if (OperatingSystem.IsLinux()) return Linux(processes, logger);
         if (OperatingSystem.IsMacOS()) return Mac(processes, logger);
         return Other(processes);
-    }
-
-    private static DesktopSurfaces Linux(PollingProcessWatcher processes, ILogger? logger)
-    {
-        var audio = PulseAudioBackend.Create();
-        var session = X11Session.TryOpen(out var x11Reason);
-        if (session is null) logger?.LogInformation("X11 indisponible : {Reason}", x11Reason);
-        var hotkeys = new X11HotkeyService(session, x11Reason);
-        var foreground = new X11ForegroundWatcher(session, x11Reason);
-        var capabilities = new DesktopCapabilities(
-            "Linux",
-            Voicemeeter: false,
-            SystemDevices: true,
-            PerAppVolume: true,
-            PerAppRouting: true,
-            GlobalHotkeys: session is not null,
-            ForegroundApps: session is not null,
-            FlStudio: false,
-            audio.UnavailableReason ?? "Uses pactl against PulseAudio or pipewire-pulse.",
-            x11Reason,
-            x11Reason,
-            "FL Studio has no Linux version.");
-        return new DesktopSurfaces(audio, hotkeys, processes, foreground, XdgAutoStart.ForCurrentProcess(), capabilities, session);
     }
 
     private static DesktopSurfaces Mac(PollingProcessWatcher processes, ILogger? logger)
@@ -94,14 +65,16 @@ public sealed class DesktopSurfaces : IDisposable
             hotkeyBackend?.UnavailableReason,
             null,
             "Core MIDI. Create no loopMIDI port: Mixdeck opens an IAC port of that name, or creates a virtual port.");
-        return new DesktopSurfaces(audio, hotkeys, processes, foreground, LaunchAgentAutoStart.ForCurrentProcess(), capabilities, null);
+        return new DesktopSurfaces(audio, hotkeys, processes, foreground, LaunchAgentAutoStart.ForCurrentProcess(), capabilities);
     }
 
     private static DesktopSurfaces Other(PollingProcessWatcher processes)
     {
-        const string windowsApp = "On Windows, system audio, hotkeys, and the tray live in the WinUI app.";
+        var windowsApp = OperatingSystem.IsWindows()
+            ? "On Windows, system audio, hotkeys, and the tray live in the WinUI app."
+            : "This desktop build runs on macOS.";
         var capabilities = new DesktopCapabilities(
-            OperatingSystem.IsWindows() ? "Windows" : "Unknown",
+            OperatingSystem.IsWindows() ? "Windows" : "Unsupported",
             Voicemeeter: OperatingSystem.IsWindows(),
             SystemDevices: false,
             PerAppVolume: false,
@@ -119,8 +92,7 @@ public sealed class DesktopSurfaces : IDisposable
             processes,
             new IdleForegroundWatcher(windowsApp),
             new UnsupportedAutoStart(windowsApp),
-            capabilities,
-            null);
+            capabilities);
     }
 
     public void Dispose()
@@ -129,6 +101,5 @@ public sealed class DesktopSurfaces : IDisposable
         Foreground.Dispose();
         Processes.Dispose();
         Audio.Dispose();
-        _x11?.Dispose();
     }
 }

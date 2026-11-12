@@ -438,7 +438,7 @@ public sealed class StudioPage : UserControl
         _strips.IsVisible = connected;
         _flTitle.Text = DesktopText.Get("Fl_Title");
         if (_host.Midi is IMidiAvailability { IsSupported: false })
-            _flBody.Text = DesktopText.Get("Fl_Linux");
+            _flBody.Text = DesktopText.Get("Fl_Unavailable");
         else if (OperatingSystem.IsMacOS())
             _flBody.Text = DesktopText.Get("Fl_Mac") + " " + FlState();
         else

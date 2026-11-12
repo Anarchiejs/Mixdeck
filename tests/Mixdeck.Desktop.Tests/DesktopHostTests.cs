@@ -45,9 +45,10 @@ public sealed class DesktopHostTests
             await host.StartAsync();
             if (!OperatingSystem.IsWindows())
                 host.Mixer.State.Should().Be(MixerConnectionState.NotInstalled);
-            if (OperatingSystem.IsLinux())
+            if (!OperatingSystem.IsWindows() && !OperatingSystem.IsMacOS())
             {
                 host.Surfaces.Capabilities.Voicemeeter.Should().BeFalse();
+                host.Surfaces.Capabilities.SystemDevices.Should().BeFalse();
                 host.Surfaces.Capabilities.FlStudio.Should().BeFalse();
                 host.Midi.Should().BeOfType<UnsupportedMidiPorts>();
             }

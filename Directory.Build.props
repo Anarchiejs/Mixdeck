@@ -9,7 +9,7 @@
     <Version>0.1.0</Version>
     <EnforceCodeStyleInBuild>false</EnforceCodeStyleInBuild>
     <!-- VoicemeeterRemote64.dll est 64 bits : l'appli WinUI et les services Win32 restent en x64.
-         Mixdeck.Voicemeeter et Mixdeck.FlStudio ciblent net10.0 pour que le simulateur et le protocole tournent aussi sur Linux et macOS. -->
+         Mixdeck.Voicemeeter et Mixdeck.FlStudio ciblent net10.0 pour que le simulateur et le protocole tournent aussi sur macOS. -->
     <IsWindowsProject Condition="$(MSBuildProjectName.EndsWith('.Platform')) or $(MSBuildProjectName.EndsWith('.App'))">true</IsWindowsProject>
   </PropertyGroup>
   <PropertyGroup Condition="'$(IsWindowsProject)' == 'true'">

@@ -214,7 +214,7 @@ public sealed class FlStudioDawTests
     [Fact]
     public async Task Unsupported_midi_settles_on_ports_missing_and_does_not_open_a_port()
     {
-        var ports = new UnsupportedMidiPorts("FL Studio has no Linux build.");
+        var ports = new UnsupportedMidiPorts("MIDI is not available on this operating system.");
         await using var daw = new FlStudioDaw(ports, new Settings(), NullLogger<FlStudioDaw>.Instance, new FakeTimeProvider());
         await daw.StartAsync();
         await Until(() => daw.State == DawConnectionState.PortsMissing);
