@@ -15,7 +15,7 @@
     <PackageVersion Include="Serilog.Sinks.File" Version="7.0.0" />
     <PackageVersion Include="Velopack" Version="1.2.161" />
     <PackageVersion Include="System.Management" Version="10.0.14" />
-    <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.14" />
+    <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="11.0.0" />
     <PackageVersion Include="Microsoft.Extensions.Logging" Version="10.0.14" />
     <PackageVersion Include="Avalonia" Version="12.1.6" />
     <PackageVersion Include="Avalonia.Desktop" Version="12.1.6" />
