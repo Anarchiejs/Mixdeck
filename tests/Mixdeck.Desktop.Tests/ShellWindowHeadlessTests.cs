@@ -50,7 +50,8 @@ public sealed class ShellWindowHeadlessTests
             window.IsVisible.Should().BeTrue();
 
             var nav = window.GetVisualDescendants().OfType<Button>().Where(button => button.Name?.StartsWith("nav-", StringComparison.Ordinal) == true).ToList();
-            nav.Should().HaveCount(4);
+            nav.Should().HaveCount(6);
+            nav.Select(button => button.Name).Should().Contain(new[] { "nav-profiles", "nav-rules" });
             foreach (var button in nav)
             {
                 button.IsVisible.Should().BeTrue();
@@ -76,6 +77,11 @@ public sealed class ShellWindowHeadlessTests
             window.MouseUp(point.Value, MouseButton.Left);
 
             window.GetVisualDescendants().OfType<TextBlock>().Select(block => block.Text).Should().Contain("Voicemeeter").And.Contain("FL Studio");
+            var profiles = nav.Single(button => button.Name == "nav-profiles");
+            var profilePoint = profiles.TranslatePoint(new Point(profiles.Bounds.Width / 2, profiles.Bounds.Height / 2), window);
+            window.MouseDown(profilePoint!.Value, MouseButton.Left);
+            window.MouseUp(profilePoint.Value, MouseButton.Left);
+            window.GetVisualDescendants().OfType<Button>().Select(button => button.Content?.ToString()).Should().Contain("Apply");
             window.GetVisualDescendants().OfType<TextBlock>().Should().NotContain(block => block.Name == "audio-outputs");
             var studioFrame = window.CaptureRenderedFrame();
             studioFrame.Should().NotBeNull();

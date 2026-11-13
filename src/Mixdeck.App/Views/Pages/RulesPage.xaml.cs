@@ -1,6 +1,7 @@
 using Mixdeck.App.Localization;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Mixdeck.App.Services;
 using Mixdeck.App.ViewModels.Pages;
 using Mixdeck.App.Views.Pages.Settings;
 
@@ -22,10 +23,10 @@ public sealed partial class RulesPage : Page
 
     public RulesPageViewModel ViewModel { get; }
     private void OnLoaded(object sender, RoutedEventArgs e) => ViewModel.Refresh();
-    private async void OnCreate(object sender, RoutedEventArgs e) => await EditAsync(null);
-    private async void OnEdit(object sender, RoutedEventArgs e) => await EditAsync((sender as FrameworkElement)?.DataContext as RuleCardViewModel);
-    private async void OnMoveUp(object sender, RoutedEventArgs e) => await ViewModel.MoveUpCommand.ExecuteAsync((sender as FrameworkElement)?.DataContext);
-    private async void OnMoveDown(object sender, RoutedEventArgs e) => await ViewModel.MoveDownCommand.ExecuteAsync((sender as FrameworkElement)?.DataContext);
+    private void OnCreate(object sender, RoutedEventArgs e) => UiAsync.Run(() => EditAsync(null));
+    private void OnEdit(object sender, RoutedEventArgs e) => UiAsync.Run(() => EditAsync((sender as FrameworkElement)?.DataContext as RuleCardViewModel));
+    private void OnMoveUp(object sender, RoutedEventArgs e) => UiAsync.Run(() => ViewModel.MoveUpCommand.ExecuteAsync((sender as FrameworkElement)?.DataContext));
+    private void OnMoveDown(object sender, RoutedEventArgs e) => UiAsync.Run(() => ViewModel.MoveDownCommand.ExecuteAsync((sender as FrameworkElement)?.DataContext));
 
     private async Task EditAsync(RuleCardViewModel? item)
     {

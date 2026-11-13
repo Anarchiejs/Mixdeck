@@ -7,13 +7,14 @@
     xmlns:vm="using:Mixdeck.App.ViewModels.AppVolume">
     <StackPanel>
         <TextBlock x:Uid="AppVolumeList001" Margin="4,10,0,2"  Style="{StaticResource CaptionTextBlockStyle}" />
+        <TextBox x:Uid="AppVolumeList003" Margin="4,0,4,6" Text="{x:Bind ViewModel.Query, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
         <TextBlock x:Uid="AppVolumeList002"
             Margin="8,4"
 
             Foreground="{ThemeResource TextFillColorSecondaryBrush}"
             Style="{StaticResource CaptionTextBlockStyle}"
             Visibility="{x:Bind local:AppVolumeList.ToVisibility(ViewModel.IsEmpty), Mode=OneWay}" />
-        <ItemsControl ItemsSource="{x:Bind ViewModel.Sessions, Mode=OneWay}">
+        <ItemsControl ItemsSource="{x:Bind ViewModel.VisibleSessions, Mode=OneWay}">
             <ItemsControl.ItemTemplate>
                 <DataTemplate x:DataType="vm:AppVolumeRowViewModel">
                     <local:AppVolumeRow Session="{x:Bind}" />

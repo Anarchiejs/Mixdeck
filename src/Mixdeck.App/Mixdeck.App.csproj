@@ -40,5 +40,6 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Assets\**\*" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="..\..\fl\Mixdeck\device_Mixdeck.py" Link="fl\Mixdeck\device_Mixdeck.py" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 </Project>

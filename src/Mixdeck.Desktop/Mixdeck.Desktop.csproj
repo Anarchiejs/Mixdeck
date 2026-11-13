@@ -15,6 +15,9 @@
     <PackageReference Include="Velopack" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="..\..\fl\Mixdeck\device_Mixdeck.py" Link="fl\Mixdeck\device_Mixdeck.py" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+  <ItemGroup>
     <ProjectReference Include="..\Mixdeck.Core\Mixdeck.Core.csproj" />
     <ProjectReference Include="..\Mixdeck.Voicemeeter\Mixdeck.Voicemeeter.csproj" />
     <ProjectReference Include="..\Mixdeck.FlStudio\Mixdeck.FlStudio.csproj" />

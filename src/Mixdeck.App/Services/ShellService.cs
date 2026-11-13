@@ -4,6 +4,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.UI.Xaml;
 using Mixdeck.App.Views.Flyout;
 using Mixdeck.App.Views.Shell;
+using Mixdeck.Core.Abstractions;
 using Mixdeck.Core.Settings;
 
 namespace Mixdeck.App.Services;
@@ -13,6 +14,7 @@ public sealed class ShellService(IServiceProvider services, MixdeckPaths paths, 
 {
     private MainWindow? _main;
     private FlyoutWindow? _flyout;
+    private bool _setupOffered;
 
     /// <summary>Levé quand l'utilisateur choisit « Quitter » : l'appli libère tout puis s'arrête.</summary>
     public event EventHandler? ExitRequested;
@@ -26,6 +28,18 @@ public sealed class ShellService(IServiceProvider services, MixdeckPaths paths, 
             _main.ContentReleased += OnMainContentReleased;
         }
         _main.ShowPage(page);
+        OfferSetup(_main);
+    }
+
+    private void OfferSetup(MainWindow window)
+    {
+        if (_setupOffered) return;
+        var settings = services.GetRequiredService<ISettingsStore>();
+        if (settings.Current.SetupCompleted) return;
+        _setupOffered = true;
+        var mixer = services.GetRequiredService<IMixer>();
+        var queue = Microsoft.UI.Dispatching.DispatcherQueue.GetForCurrentThread();
+        queue?.TryEnqueue(() => _ = SetupPresenter.OfferAsync(window, settings, mixer));
     }
 
     // Les pages de la console viennent d'être déchargées : on rend la mémoire tout de suite plutôt qu'au prochain

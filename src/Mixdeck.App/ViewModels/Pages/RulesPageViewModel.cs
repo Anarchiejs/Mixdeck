@@ -6,6 +6,7 @@ using Mixdeck.App.ViewModels.Shared;
 using Mixdeck.App.Views.Pages.Settings;
 using Mixdeck.Core.Abstractions;
 using Mixdeck.Core.Model;
+using Mixdeck.Core.Rules;
 
 namespace Mixdeck.App.ViewModels.Pages;
 
@@ -140,9 +141,14 @@ public sealed partial class RuleCardViewModel : ObservableObject
     public string Name => Rule.Name;
     public string ProcessName => Rule.ProcessName;
     public string TriggerText => Rule.Trigger == RuleTrigger.ProcessForeground ? Strings.Get("CS_061") : Strings.Get("CS_140");
-    public string ActionText => Rule.Action == RuleActionKind.SwitchProfile
-        ? Strings.Format("CS_RuleProfile", owner.Mixer.Profiles.FirstOrDefault(p => p.Id == Rule.ProfileId)?.Name ?? Strings.Get("CS_065"))
-        : Rule.MicMuted == true ? Strings.Get("Core_MicMuted") : Strings.Get("Core_MicOn");
+    public string ActionText => Rule.Action switch
+    {
+        RuleActionKind.SwitchProfile => Strings.Format("CS_RuleProfile", owner.Mixer.Profiles.FirstOrDefault(p => p.Id == Rule.ProfileId)?.Name ?? Strings.Get("CS_065")),
+        RuleActionKind.SetBusGain => Strings.Format("Core_BusGain", "B" + (Rule.BusIndex + 1), Rule.GainDb.ToString("0.0", Strings.Culture)),
+        RuleActionKind.SetStripMute => Strings.Format(Rule.MicMuted == false ? "Core_StripOn" : "Core_StripMuted", Rule.StripIndex + 1),
+        RuleActionKind.RouteApp => Strings.Format(string.IsNullOrEmpty(Rule.OutputEndpointId) ? "Core_RouteDefault" : "Core_Routed", Rule.ProcessName, Rule.OutputEndpointId ?? Strings.Get("Apps_DefaultRoute")),
+        _ => Rule.MicMuted == true ? Strings.Get("Core_MicMuted") : Strings.Get("Core_MicOn"),
+    };
     public string Sentence => Strings.Format("CS_RuleSentence", ProcessName, TriggerText, ActionText);
 
     [ObservableProperty]
@@ -185,8 +191,12 @@ public sealed partial class RuleEditorViewModel : ObservableObject
         Name = original.Name;
         ProcessName = original.ProcessName;
         TriggerIndex = original.Trigger == RuleTrigger.ProcessForeground ? 1 : 0;
-        ActionIndex = original.Action == RuleActionKind.SwitchProfile ? 0 : original.MicMuted == true ? 1 : 2;
+        ActionIndex = RuleDraft.ActionIndex(original);
         SelectedProfile = mixer.Profiles.FirstOrDefault(p => p.Id == original.ProfileId);
+        BusIndexText = original.BusIndex.ToString(System.Globalization.CultureInfo.InvariantCulture);
+        GainText = original.GainDb.ToString("0.##", System.Globalization.CultureInfo.InvariantCulture);
+        StripIndexText = original.StripIndex.ToString(System.Globalization.CultureInfo.InvariantCulture);
+        EndpointId = original.OutputEndpointId ?? string.Empty;
         RevertWhenInactive = original.RevertWhenInactive;
     }
 
@@ -199,8 +209,16 @@ public sealed partial class RuleEditorViewModel : ObservableObject
     [ObservableProperty]
     public partial int TriggerIndex { get; set; }
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(IsProfileAction), nameof(CanSave))]
+    [NotifyPropertyChangedFor(nameof(IsProfileAction), nameof(IsBusAction), nameof(IsStripAction), nameof(IsRouteAction), nameof(CanSave))]
     public partial int ActionIndex { get; set; }
+    [ObservableProperty]
+    public partial string BusIndexText { get; set; } = "0";
+    [ObservableProperty]
+    public partial string GainText { get; set; } = "0";
+    [ObservableProperty]
+    public partial string StripIndexText { get; set; } = "0";
+    [ObservableProperty]
+    public partial string EndpointId { get; set; } = string.Empty;
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(CanSave))]
     public partial ProfileItemViewModel? SelectedProfile { get; set; }
@@ -210,21 +228,17 @@ public sealed partial class RuleEditorViewModel : ObservableObject
     public partial bool HasError { get; set; }
 
     public bool IsProfileAction => ActionIndex == 0;
+    public bool IsBusAction => ActionIndex == 3;
+    public bool IsStripAction => ActionIndex == 4;
+    public bool IsRouteAction => ActionIndex == 5;
     public bool CanSave => !string.IsNullOrWhiteSpace(ProcessName) && (!IsProfileAction || SelectedProfile is not null);
 
-    public Rule Build()
-    {
-        var process = ProcessName.Trim();
-        if (!process.EndsWith(".exe", StringComparison.OrdinalIgnoreCase)) process += ".exe";
-        return original with
-        {
-            Name = string.IsNullOrWhiteSpace(Name) ? process : Name.Trim(),
-            ProcessName = process,
-            Trigger = TriggerIndex == 1 ? RuleTrigger.ProcessForeground : RuleTrigger.ProcessRunning,
-            Action = IsProfileAction ? RuleActionKind.SwitchProfile : RuleActionKind.SetMicMuted,
-            ProfileId = IsProfileAction ? SelectedProfile?.Id : null,
-            MicMuted = IsProfileAction ? null : ActionIndex == 1,
-            RevertWhenInactive = RevertWhenInactive,
-        };
-    }
+    public Rule Build() => RuleDraft.Build(original, Name, ProcessName, TriggerIndex, ActionIndex, SelectedProfile?.Id,
+        ParseIndex(BusIndexText), ParseGain(GainText), ParseIndex(StripIndexText), EndpointId, RevertWhenInactive, appendExe: true);
+
+    private static int ParseIndex(string text) =>
+        int.TryParse(text, System.Globalization.NumberStyles.Integer, System.Globalization.CultureInfo.InvariantCulture, out var value) ? value : 0;
+
+    private static float ParseGain(string text) =>
+        float.TryParse(text, System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out var value) ? value : 0;
 }
