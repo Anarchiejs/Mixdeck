@@ -235,7 +235,7 @@ public sealed class CoreMidiPorts : IMidiPorts, IMidiAvailability
                 {
                     pending.RequestAbort();
                     if (!pending.Wait(TimeSpan.FromMilliseconds(500)))
-                        throw new MidiPortException("Délai d'envoi MIDI dépassé (1 s).");
+                        throw new MidiPortException($"Délai d'envoi MIDI dépassé (1 s). Envois encore ouverts : {SysexSendLease.OpenCount}.");
                 }
             }
             finally

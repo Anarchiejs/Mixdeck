@@ -31,11 +31,11 @@ public sealed class WinMidiPorts : IMidiPorts
     private static readonly uint HeaderSize = (uint)Marshal.SizeOf<MidiHdr>();
     private static uint Find(List<(uint Id, string Name)> ports, string name)
     {
-        var index = ports.FindIndex(p => p.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
-        if (index < 0 && !string.IsNullOrWhiteSpace(name))
-            index = ports.FindIndex(p => p.Name.Contains(name, StringComparison.OrdinalIgnoreCase));
-        if (index < 0) throw new MidiPortException($"Port MIDI introuvable : {name}");
-        return ports[index].Id;
+        var matches = ports.Where(p => p.Name.Equals(name, StringComparison.OrdinalIgnoreCase)).ToArray();
+        if (matches.Length == 1) return matches[0].Id;
+        throw new MidiPortException(matches.Length == 0
+            ? $"Port MIDI introuvable : {name}"
+            : $"Plusieurs ports MIDI portent le nom « {name} ».");
     }
     public IMidiOutput OpenOutput(string name) => new Output(Find(Outputs(), name));
     public IMidiInput OpenInput(string name, Action<byte[]> onSysex) => new Input(Find(Inputs(), name), onSysex);
@@ -43,8 +43,9 @@ public sealed class WinMidiPorts : IMidiPorts
     private sealed class Output : IMidiOutput
     {
         private readonly object _gate = new();
+        private readonly AutoResetEvent _sent = new(false);
         private nint _handle;
-        public Output(uint port) => Check(midiOutOpen(out _handle, port, 0, 0, 0), "midiOutOpen");
+        public Output(uint port) => Check(midiOutOpen(out _handle, port, _sent.SafeWaitHandle.DangerousGetHandle(), 0, CallbackEvent), "midiOutOpen");
         public void SendSysex(byte[] message)
         {
             lock (_gate)
@@ -56,10 +57,9 @@ public sealed class WinMidiPorts : IMidiPorts
                 {
                     Check(midiOutPrepareHeader(_handle, header, HeaderSize), "midiOutPrepareHeader");
                     prepared = true;
+                    _sent.Reset();
                     Check(midiOutLongMsg(_handle, header, HeaderSize), "midiOutLongMsg");
-                    var until = Environment.TickCount64 + 1000;
-                    while ((Flags(header) & MhdrDone) == 0 && Environment.TickCount64 < until) Thread.Sleep(1);
-                    if ((Flags(header) & MhdrDone) == 0)
+                    if (!_sent.WaitOne(1000))
                     {
                         Check(midiOutReset(_handle), "midiOutReset");
                         throw new MidiPortException("Délai d'envoi MIDI dépassé (1 s).");
@@ -80,6 +80,7 @@ public sealed class WinMidiPorts : IMidiPorts
                 midiOutReset(_handle);
                 midiOutClose(_handle);
                 _handle = 0;
+                _sent.Dispose();
             }
         }
     }

@@ -82,6 +82,7 @@ internal static class ServiceRegistration
             return () => new AppAudioSessions(logger);
         });
         services.AddSingleton<IAppAudioRouter, Mixdeck.Platform.Audio.AudioPolicy.AppAudioRouter>();
+        services.AddSingleton<IAppOutputRouter, Mixdeck.Platform.Audio.ProcessAppRouter>();
         services.AddSingleton<SystemEventsWatcher>();
 
         // Interface

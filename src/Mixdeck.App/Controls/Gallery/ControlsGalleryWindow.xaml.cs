@@ -1,4 +1,5 @@
 using Mixdeck.App.Localization;
+using Mixdeck.Core.Audio;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using Microsoft.UI.Dispatching;
@@ -12,7 +13,9 @@ public sealed partial class ControlsGalleryWindow : Window
     private readonly DispatcherQueueTimer timer;
     private readonly long started = System.Diagnostics.Stopwatch.GetTimestamp();
     private readonly ObservableCollection<GalleryProfile> profiles = [new(Strings.Get("CS_008"), "\uE8A5", null), new(Strings.Get("CS_009"), "\uE716", "#3FB950"), new(Strings.Get("CS_010"), "\uE8D6", "#C586C0")];
-    private double leftPeak = -60, rightPeak = -60;
+    private readonly MeterBallistics leftBallistic = new();
+    private readonly MeterBallistics rightBallistic = new();
+    private long lastTick = System.Diagnostics.Stopwatch.GetTimestamp();
     public ControlsGalleryWindow()
     {
         InitializeComponent(); Title = Mixdeck.App.Localization.Strings.Get("ControlsGalleryWindow001.Title");
@@ -24,16 +27,20 @@ public sealed partial class ControlsGalleryWindow : Window
     }
     private void Tick(DispatcherQueueTimer sender, object args)
     {
+        var now = System.Diagnostics.Stopwatch.GetTimestamp();
+        var elapsed = System.Diagnostics.Stopwatch.GetElapsedTime(lastTick, now);
+        lastTick = now;
         double t = System.Diagnostics.Stopwatch.GetElapsedTime(started).TotalSeconds;
         double left = -60 + 70 * (.5 + .5 * Math.Sin(t * 2.3));
         double right = -60 + 70 * (.5 + .5 * Math.Sin(t * 1.7 + .8));
-        leftPeak = Math.Max(left, leftPeak - .12); rightPeak = Math.Max(right, rightPeak - .12);
+        leftBallistic.Update((float)Math.Pow(10, left / 20), elapsed);
+        rightBallistic.Update((float)Math.Pow(10, right / 20), elapsed);
         SetMeter(HorizontalMeter); SetMeter(VerticalMeter); SetMeter(MonoMeter);
         void SetMeter(VuMeter meter)
         {
-            meter.LeftDb = left; meter.RightDb = right;
-            meter.LeftPeakDb = leftPeak; meter.RightPeakDb = rightPeak;
-            meter.IsClipped = leftPeak >= 0 || rightPeak >= 0;
+            meter.LeftDb = leftBallistic.LevelDb; meter.RightDb = rightBallistic.LevelDb;
+            meter.LeftPeakDb = leftBallistic.PeakHoldDb; meter.RightPeakDb = rightBallistic.PeakHoldDb;
+            meter.IsClipped = leftBallistic.PeakHoldDb >= 0 || rightBallistic.PeakHoldDb >= 0;
         }
     }
     private void ThemeChanged(object sender, RoutedEventArgs e) => Root.RequestedTheme = ((ToggleSwitch)sender).IsOn ? ElementTheme.Dark : ElementTheme.Light;

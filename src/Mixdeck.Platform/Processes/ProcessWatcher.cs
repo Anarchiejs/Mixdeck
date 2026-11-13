@@ -22,7 +22,7 @@ public sealed class ProcessWatcher : IProcessWatcher
     public event EventHandler<ProcessEventArgs>? ProcessStarted;
     public event EventHandler<ProcessEventArgs>? ProcessExited;
 
-    public IReadOnlyCollection<string> GetRunningProcessNames() => Snapshot().Values.Distinct(StringComparer.OrdinalIgnoreCase).ToArray();
+    public IReadOnlyCollection<string> GetRunningProcessNames() => Snapshot().Values.ToArray();
 
     public void Start()
     {
@@ -135,6 +135,12 @@ public sealed class ProcessWatcher : IProcessWatcher
                     try
                     {
                         string name = process.ProcessName;
+                        try
+                        {
+                            var file = process.MainModule?.FileName;
+                            if (!string.IsNullOrWhiteSpace(file)) name = Path.GetFileName(file);
+                        }
+                        catch (Exception module) when (module is InvalidOperationException or System.ComponentModel.Win32Exception or NotSupportedException) { }
                         if (!string.IsNullOrWhiteSpace(name)) result[process.Id] = name.EndsWith(".exe", StringComparison.OrdinalIgnoreCase) ? name : name + ".exe";
                     }
                     catch (Exception ex) when (ex is InvalidOperationException or System.ComponentModel.Win32Exception or NotSupportedException) { }

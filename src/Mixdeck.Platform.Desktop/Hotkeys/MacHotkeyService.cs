@@ -42,14 +42,8 @@ public sealed class MacHotkeyService : IHotkeyService, IHotkeyBackend
 
     public void Apply(IReadOnlyList<HotkeyBinding> bindings)
     {
-        if (!_ready.Wait(TimeSpan.FromSeconds(2)))
-        {
-            Failed = bindings.ToArray();
-            return;
-        }
-        var done = new TaskCompletionSource<IReadOnlyList<HotkeyBinding>>(TaskCreationOptions.RunContinuationsAsynchronously);
-        _commands.Enqueue(() => done.TrySetResult(Register(bindings)));
-        Failed = done.Task.Wait(TimeSpan.FromSeconds(2)) ? done.Task.Result : bindings.ToArray();
+        var copy = bindings.ToArray();
+        _commands.Enqueue(() => Failed = Register(copy));
     }
 
     public void Dispose()

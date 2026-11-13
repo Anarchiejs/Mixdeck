@@ -4,6 +4,7 @@ using Mixdeck.Core.Automation;
 using Mixdeck.Core.Model;
 using Mixdeck.Core.Profiles;
 using Mixdeck.Core.Settings;
+using Mixdeck.Core.Setup;
 using Mixdeck.FlStudio;
 using Mixdeck.Platform.Desktop;
 using Mixdeck.Platform.Desktop.Audio;
@@ -81,11 +82,12 @@ public sealed class DesktopHost : IAsyncDisposable
         var daw = new FlStudioDaw(midi, settings, loggers.CreateLogger<FlStudioDaw>(), TimeProvider.System);
         var profiles = new ProfileService(mixer, settings, paths, loggers.CreateLogger<ProfileService>(), TimeProvider.System, daw);
         var osd = new StatusOsd(settings);
+        var texts = new DesktopTextProvider();
         var ducking = new DuckingController(mixer, settings, TimeProvider.System, loggers.CreateLogger<DuckingController>());
         var automation = new AutomationCoordinator(surfaces.Processes, surfaces.Foreground, profiles, mixer, settings, osd,
-            loggers.CreateLogger<AutomationCoordinator>(), ducking);
+            loggers.CreateLogger<AutomationCoordinator>(), ducking, texts);
         var actions = new ActionDispatcher(mixer, profiles, settings, osd, loggers.CreateLogger<ActionDispatcher>(),
-            automation, new DesktopTextProvider(), daw);
+            automation, texts, daw);
         var host = new DesktopHost(options, paths, loggers, settings, surfaces, mixer, midi, daw, profiles, actions, automation, ducking, new DesktopUpdates());
         osd.Bind(host.RaiseStatus);
         return host;
@@ -115,9 +117,39 @@ public sealed class DesktopHost : IAsyncDisposable
 
     public void RequestShow() => ShowRequested?.Invoke();
 
+    public async Task<bool> SaveAsync(Func<AppSettings, AppSettings> change)
+    {
+        if (await Settings.UpdateAsync(change)) return true;
+        RaiseStatus(DesktopText.Get("Status_SaveFailed"));
+        return false;
+    }
+
+    public string CopyFlScript()
+    {
+        try
+        {
+            var script = FlScriptInstall.FindBundledScript(AppContext.BaseDirectory);
+            if (script is null) return DesktopText.Get("Setup_Missing");
+            var documents = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+            FlScriptInstall.CopyToDocuments(script, documents);
+            return DesktopText.Get("Setup_Copied");
+        }
+        catch (Exception exception) when (exception is IOException or UnauthorizedAccessException)
+        {
+            Log.LogWarning(exception, "Copie du script FL Studio impossible.");
+            return DesktopText.Get("Setup_Missing");
+        }
+    }
+
+    public Task<bool> CompleteSetupAsync() => SaveAsync(settings => settings with { SetupCompleted = true });
+
     public async Task SetLanguageAsync(string? language)
     {
-        await Settings.UpdateAsync(settings => settings with { Language = language });
+        if (!await Settings.UpdateAsync(settings => settings with { Language = language }))
+        {
+            RaiseStatus(DesktopText.Get("Status_SaveFailed"));
+            return;
+        }
         DesktopText.Apply(language);
         LanguageChanged?.Invoke();
         RaiseStatus(DesktopText.Get("Status_Saved"));

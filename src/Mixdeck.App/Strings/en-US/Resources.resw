@@ -1705,4 +1705,34 @@
   <data name="L6_ReadError" xml:space="preserve"><value>Could not read Windows devices.</value></data>
   <data name="L6_SetError" xml:space="preserve"><value>Could not change the default Windows device (error {0}).</value></data>
   <data name="L6_PartialError" xml:space="preserve"><value>The change could not be applied to all Windows roles (error {0}). Check the selected device.</value></data>
+
+  <data name="Core_ProfileWithCause" xml:space="preserve"><value>Profile: {0} ({1})</value></data>
+  <data name="Core_BusGain" xml:space="preserve"><value>{0}: {1} dB</value></data>
+  <data name="Core_StripMuted" xml:space="preserve"><value>Input {0} muted</value></data>
+  <data name="Core_StripOn" xml:space="preserve"><value>Input {0} on</value></data>
+  <data name="Core_Routed" xml:space="preserve"><value>{0} sent to {1}</value></data>
+  <data name="Core_RouteDefault" xml:space="preserve"><value>{0} sent back to the default output</value></data>
+  <data name="Core_RouteUnavailable" xml:space="preserve"><value>Sending to another output is unavailable</value></data>
+  <data name="Settings_HotkeyConflict" xml:space="preserve"><value>This shortcut is already used.</value></data>
+  <data name="Apps_DefaultRoute" xml:space="preserve"><value>Default output</value></data>
+  <data name="About_NoCrash" xml:space="preserve"><value>No crash report to copy.</value></data>
+  <data name="About_CrashCopied" xml:space="preserve"><value>Redacted crash report copied.</value></data>
+  <data name="Setup_Title" xml:space="preserve"><value>First launch</value></data>
+  <data name="Setup_Body" xml:space="preserve"><value>Mixdeck can copy the FL Studio script into Documents.</value></data>
+  <data name="Setup_VoicemeeterOn" xml:space="preserve"><value>Voicemeeter is connected.</value></data>
+  <data name="Setup_VoicemeeterOff" xml:space="preserve"><value>Voicemeeter is not connected yet. Install it, then restart Mixdeck.</value></data>
+  <data name="Setup_Copy" xml:space="preserve"><value>Copy the FL Studio script</value></data>
+  <data name="Setup_Done" xml:space="preserve"><value>Finish</value></data>
+  <data name="Setup_Copied" xml:space="preserve"><value>Script copied into Documents.</value></data>
+  <data name="Setup_Missing" xml:space="preserve"><value>The bundled script was not found.</value></data>
+  <data name="Status_SaveFailed" xml:space="preserve"><value>Could not save the setting.</value></data>
+  <data name="RuleEditor017.Header" xml:space="preserve"><value>Bus index (0 = A1)</value></data>
+  <data name="RuleEditor018.Header" xml:space="preserve"><value>Gain (dB)</value></data>
+  <data name="RuleEditor019.Header" xml:space="preserve"><value>Input index</value></data>
+  <data name="RuleEditor020.Header" xml:space="preserve"><value>Output id (empty = default)</value></data>
+  <data name="RuleEditor021.Content" xml:space="preserve"><value>Set bus gain</value></data>
+  <data name="RuleEditor022.Content" xml:space="preserve"><value>Mute an input</value></data>
+  <data name="RuleEditor023.Content" xml:space="preserve"><value>Send the app to an output</value></data>
+  <data name="AppVolumeList003.PlaceholderText" xml:space="preserve"><value>Search applications</value></data>
+  <data name="AboutPage017.Content" xml:space="preserve"><value>Copy redacted crash report</value></data>
 </root>

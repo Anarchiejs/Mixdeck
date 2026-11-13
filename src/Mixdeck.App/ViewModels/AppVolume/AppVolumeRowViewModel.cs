@@ -30,6 +30,8 @@ public sealed partial class AppVolumeRowViewModel : ObservableObject, IDisposabl
 
     public int ProcessId { get; }
 
+    public string ProcessName { get; private set; } = string.Empty;
+
     /// <summary>Choix de la sortie de cette application (« Envoyer vers… ») ; null si indisponible.</summary>
     public IAppAudioRouter? Router { get; }
 
@@ -67,6 +69,7 @@ public sealed partial class AppVolumeRowViewModel : ObservableObject, IDisposabl
         try
         {
             DisplayName = LocalizeName(session);
+            ProcessName = session.ProcessName;
             OnPropertyChanged(nameof(MuteLabel));
             if (_volumeEdited is null || Environment.TickCount64 - _volumeEdited >= 400)
                 Volume = Math.Clamp(session.Volume * 100d, 0, 100);
