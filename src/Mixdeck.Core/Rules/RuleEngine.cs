@@ -1,6 +1,16 @@
 using Mixdeck.Core.Model;
 namespace Mixdeck.Core.Rules;
-public sealed record RuleDecision(string? ProfileId, bool? MicMuted, Rule? ProfileCause, Rule? MicCause);
+public sealed record RuleDecision(
+    string? ProfileId,
+    bool? MicMuted,
+    Rule? ProfileCause,
+    Rule? MicCause,
+    bool BusGainChanged = false,
+    Rule? BusGainRule = null,
+    bool StripMuteChanged = false,
+    Rule? StripMuteRule = null,
+    bool RouteChanged = false,
+    Rule? RouteRule = null);
 public sealed class RuleEngine
 {
     private Rule[] rules = [];
@@ -10,7 +20,7 @@ public sealed class RuleEngine
     private string? foreground;
     private string? baselineProfile, lastProfile;
     private bool baselineMic, lastMic;
-    private Rule? profileOwner, micOwner;
+    private Rule? profileOwner, micOwner, lastBus, lastStrip, lastRoute;
     public void SetRules(IEnumerable<Rule> value) => rules = value.ToArray();
     public void Initialize(IEnumerable<string> runningProcesses, string? foregroundProcess)
     {
@@ -63,6 +73,27 @@ public sealed class RuleEngine
         lastMic = desiredMic;
         profileOwner = profile;
         micOwner = mic;
-        return new(changeProfile, changeMic, changeProfile is null ? null : profileCause, changeMic is null ? null : micCause);
+        var bus = Track(ordered, RuleActionKind.SetBusGain, ref lastBus);
+        var strip = Track(ordered, RuleActionKind.SetStripMute, ref lastStrip);
+        var route = Track(ordered, RuleActionKind.RouteApp, ref lastRoute);
+        return new(changeProfile, changeMic, changeProfile is null ? null : profileCause, changeMic is null ? null : micCause,
+            bus.Changed, bus.Rule, strip.Changed, strip.Rule, route.Changed, route.Rule);
     }
+
+    private static (bool Changed, Rule? Rule) Track(Rule[] ordered, RuleActionKind kind, ref Rule? last)
+    {
+        var winner = ordered.FirstOrDefault(r => r.Action == kind);
+        if (SameAction(winner, last))
+        {
+            last = winner;
+            return (false, null);
+        }
+        last = winner;
+        return (true, winner);
+    }
+
+    private static bool SameAction(Rule? left, Rule? right) =>
+        left?.Id == right?.Id && left?.BusIndex == right?.BusIndex && left?.GainDb == right?.GainDb
+        && left?.StripIndex == right?.StripIndex && left?.MicMuted == right?.MicMuted
+        && left?.OutputEndpointId == right?.OutputEndpointId && left?.RevertWhenInactive == right?.RevertWhenInactive;
 }

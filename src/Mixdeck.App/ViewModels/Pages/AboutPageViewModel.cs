@@ -2,10 +2,12 @@ using Mixdeck.App.Localization;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Mixdeck.App.Services;
+using Mixdeck.Core.Diagnostics;
+using Mixdeck.Core.Settings;
 
 namespace Mixdeck.App.ViewModels.Pages;
 
-public sealed partial class AboutPageViewModel(IUpdateService updates) : ObservableObject
+public sealed partial class AboutPageViewModel(IUpdateService updates, MixdeckPaths paths) : ObservableObject
 {
     public string Version => Strings.Format("CS_Version", updates.CurrentVersion);
     public Uri RepositoryUri { get; } = new(UpdateService.RepositoryUrl);
@@ -41,6 +43,8 @@ public sealed partial class AboutPageViewModel(IUpdateService updates) : Observa
     public partial bool IsInstalling { get; set; }
 
     public bool CanCheck => IsInstalled && !IsBusy;
+
+    public string? RedactedCrashReport() => CrashReportCopy.ReadLatest(paths.LogsDirectory);
     public bool CanInstall => IsAvailable && !IsBusy;
 
     [RelayCommand]

@@ -2,24 +2,25 @@ using Mixdeck.Core.Abstractions;
 
 namespace Mixdeck.Platform.Desktop.Processes;
 
-/// <summary>Diff du tableau des processus, par interrogation de la liste des processus.</summary>
+/// <summary>Diff des processus par identifiant, avec le nom du fichier exécutable.</summary>
 public sealed class PollingProcessWatcher : IProcessWatcher
 {
     private readonly TimeSpan _interval;
     private CancellationTokenSource? _lifetime;
-    private HashSet<string> _known = new(StringComparer.OrdinalIgnoreCase);
+    private Dictionary<int, string> _known = [];
 
     public PollingProcessWatcher(TimeSpan? interval = null) => _interval = interval ?? TimeSpan.FromSeconds(1);
 
     public event EventHandler<ProcessEventArgs>? ProcessStarted;
     public event EventHandler<ProcessEventArgs>? ProcessExited;
 
-    public IReadOnlyCollection<string> GetRunningProcessNames() => ProcessNames.Snapshot();
+    public IReadOnlyCollection<string> GetRunningProcessNames() =>
+        ProcessNames.Snapshot().Select(record => record.Name).ToArray();
 
     public void Start()
     {
         if (_lifetime is not null) return;
-        _known = new HashSet<string>(GetRunningProcessNames(), StringComparer.OrdinalIgnoreCase);
+        _known = ProcessNames.Snapshot().ToDictionary(record => record.Pid, record => record.Name);
         _lifetime = new CancellationTokenSource();
         var token = _lifetime.Token;
         _ = Task.Run(async () =>
@@ -42,19 +43,19 @@ public sealed class PollingProcessWatcher : IProcessWatcher
 
     private void Diff()
     {
-        HashSet<string> current;
-        try { current = new HashSet<string>(GetRunningProcessNames(), StringComparer.OrdinalIgnoreCase); }
+        Dictionary<int, string> current;
+        try { current = ProcessNames.Snapshot().ToDictionary(record => record.Pid, record => record.Name); }
         catch (IOException) { return; }
-        foreach (var name in current)
+        foreach (var pair in current)
         {
-            if (_known.Contains(name)) continue;
-            try { ProcessStarted?.Invoke(this, new ProcessEventArgs(name, 0)); }
+            if (_known.ContainsKey(pair.Key)) continue;
+            try { ProcessStarted?.Invoke(this, new ProcessEventArgs(pair.Value, pair.Key)); }
             catch { /* Isoler l'abonné. */ }
         }
-        foreach (var name in _known)
+        foreach (var pair in _known)
         {
-            if (current.Contains(name)) continue;
-            try { ProcessExited?.Invoke(this, new ProcessEventArgs(name, 0)); }
+            if (current.ContainsKey(pair.Key)) continue;
+            try { ProcessExited?.Invoke(this, new ProcessEventArgs(pair.Value, pair.Key)); }
             catch { /* Isoler l'abonné. */ }
         }
         _known = current;

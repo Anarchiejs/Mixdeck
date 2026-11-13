@@ -3,6 +3,7 @@ using Mixdeck.FlStudio;
 
 namespace Mixdeck.FlStudio.Tests;
 
+[Collection("SysexSendLease")]
 public sealed class SysexSendLeaseTests
 {
     [Fact]
@@ -46,4 +47,17 @@ public sealed class SysexSendLeaseTests
         lease.CompleteFromCallback();
         lease.ReleaseCount.Should().Be(1);
     }
+
+    [Fact]
+    public void Open_count_returns_to_zero_after_release()
+    {
+        var before = SysexSendLease.OpenCount;
+        var lease = SysexSendLease.Allocate(4, [0xF0, 0xF7], IntPtr.Zero);
+        SysexSendLease.OpenCount.Should().Be(before + 1);
+        lease.ReleaseBecauseNotSent();
+        SysexSendLease.OpenCount.Should().Be(before);
+    }
 }
+
+[CollectionDefinition("SysexSendLease", DisableParallelization = true)]
+public sealed class SysexSendLeaseCollection;

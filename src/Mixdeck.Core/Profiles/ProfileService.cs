@@ -27,6 +27,7 @@ public sealed class ProfileService(IMixer mixer, ISettingsStore settings, Mixdec
     public async Task LoadAsync(CancellationToken cancellationToken = default)
     {
         await files.WaitAsync(cancellationToken);
+        var seeded = false;
         try
         {
             Directory.CreateDirectory(paths.ProfilesDirectory);
@@ -45,8 +46,26 @@ public sealed class ProfileService(IMixer mixer, ISettingsStore settings, Mixdec
                 catch (Exception ex) when (ex is not OperationCanceledException) { logger.LogWarning(ex, "Profil illisible : {File}", file); }
             }
             Publish(loaded);
+            seeded = loaded.Count == 0;
+            if (seeded)
+            {
+                foreach (var preset in ProfilePresets.Create(timeProvider.GetUtcNow()))
+                    loaded.Add(preset);
+                Publish(loaded);
+            }
         }
         finally { files.Release(); }
+        if (seeded)
+        {
+            foreach (var preset in Profiles.ToArray())
+            {
+                try { await SaveAsync(preset, cancellationToken); }
+                catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+                {
+                    // Les profils restent utilisables en mémoire si le disque refuse l'écriture.
+                }
+            }
+        }
         ProfilesChanged?.Invoke(this, EventArgs.Empty);
     }
     public async Task<Profile> CaptureCurrentAsync(string name, CancellationToken cancellationToken = default)

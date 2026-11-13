@@ -4,11 +4,15 @@ using Mixdeck.Core.Abstractions;
 
 namespace Mixdeck.Platform.Desktop.Foreground;
 
-/// <summary>Application au premier plan via NSWorkspace.frontmostApplication. macOS seulement.</summary>
+/// <summary>Application au premier plan via NSWorkspace, sur la boucle d'exécution qui a appelé Start.</summary>
 public sealed class MacForegroundWatcher : IForegroundWatcher, IForegroundCapability
 {
-    private CancellationTokenSource? _lifetime;
+    private const string CoreFoundation = "/System/Library/Frameworks/CoreFoundation.framework/CoreFoundation";
+    private readonly TimerCallback _tick;
+    private IntPtr _timer;
     private string? _current;
+
+    public MacForegroundWatcher() => _tick = OnTick;
 
     public bool IsSupported => OperatingSystem.IsMacOS();
     public string? UnavailableReason => IsSupported ? null : "The frontmost application is only read on macOS.";
@@ -17,36 +21,37 @@ public sealed class MacForegroundWatcher : IForegroundWatcher, IForegroundCapabi
 
     public void Start()
     {
-        if (!OperatingSystem.IsMacOS() || _lifetime is not null) return;
+        if (!OperatingSystem.IsMacOS() || _timer != 0) return;
         try { NativeLibrary.Load("/System/Library/Frameworks/AppKit.framework/AppKit"); }
-        catch (DllNotFoundException)
-        {
-            return;
-        }
-        _lifetime = new CancellationTokenSource();
-        var token = _lifetime.Token;
-        _ = Task.Run(async () =>
-        {
-            while (!token.IsCancellationRequested)
-            {
-                var name = Frontmost();
-                if (!string.Equals(name, _current, StringComparison.Ordinal))
-                {
-                    _current = name;
-                    try { ForegroundProcessChanged?.Invoke(this, name); }
-                    catch { /* Isoler l'abonné. */ }
-                }
-                try { await Task.Delay(TimeSpan.FromMilliseconds(400), token).ConfigureAwait(false); }
-                catch (OperationCanceledException) { return; }
-            }
-        }, token);
+        catch (DllNotFoundException) { return; }
+        var timer = CFRunLoopTimerCreate(0, CFAbsoluteTimeGetCurrent() + 0.4, 0.4, 0, 0, _tick, 0);
+        if (timer == 0) return;
+        CFRunLoopAddTimer(CFRunLoopGetCurrent(), timer, DefaultMode());
+        _timer = timer;
+        OnTick(timer, 0);
     }
 
     public void Dispose()
     {
-        _lifetime?.Cancel();
-        _lifetime?.Dispose();
-        _lifetime = null;
+        if (_timer == 0) return;
+        CFRunLoopTimerInvalidate(_timer);
+        CFRelease(_timer);
+        _timer = 0;
+    }
+
+    private void OnTick(IntPtr timer, IntPtr info)
+    {
+        var name = Frontmost();
+        if (string.Equals(name, _current, StringComparison.Ordinal)) return;
+        _current = name;
+        try { ForegroundProcessChanged?.Invoke(this, name); }
+        catch { /* Isoler l'abonné. */ }
+    }
+
+    private static IntPtr DefaultMode()
+    {
+        var library = NativeLibrary.Load(CoreFoundation);
+        return Marshal.ReadIntPtr(NativeLibrary.GetExport(library, "kCFRunLoopDefaultMode"));
     }
 
     private static string? Frontmost()
@@ -69,7 +74,16 @@ public sealed class MacForegroundWatcher : IForegroundWatcher, IForegroundCapabi
 
     private static IntPtr Sel(string name) => sel_registerName(name);
 
+    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+    private delegate void TimerCallback(IntPtr timer, IntPtr info);
+
     [DllImport("/usr/lib/libobjc.A.dylib")] private static extern IntPtr objc_getClass(string name);
     [DllImport("/usr/lib/libobjc.A.dylib")] private static extern IntPtr sel_registerName(string name);
     [DllImport("/usr/lib/libobjc.A.dylib", EntryPoint = "objc_msgSend")] private static extern IntPtr objc_msgSend(IntPtr receiver, IntPtr selector);
+    [DllImport(CoreFoundation)] private static extern IntPtr CFRunLoopGetCurrent();
+    [DllImport(CoreFoundation)] private static extern double CFAbsoluteTimeGetCurrent();
+    [DllImport(CoreFoundation)] private static extern IntPtr CFRunLoopTimerCreate(IntPtr allocator, double fireDate, double interval, nuint flags, nint order, TimerCallback callout, IntPtr context);
+    [DllImport(CoreFoundation)] private static extern void CFRunLoopAddTimer(IntPtr loop, IntPtr timer, IntPtr mode);
+    [DllImport(CoreFoundation)] private static extern void CFRunLoopTimerInvalidate(IntPtr timer);
+    [DllImport(CoreFoundation)] private static extern void CFRelease(IntPtr value);
 }

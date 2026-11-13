@@ -14,8 +14,13 @@
             <TextBlock x:Uid="RuleEditor009"  Style="{StaticResource BodyStrongTextBlockStyle}" />
             <ComboBox x:Uid="RuleEditor010"  SelectedIndex="{x:Bind ViewModel.ActionIndex, Mode=TwoWay}" HorizontalAlignment="Stretch">
                 <ComboBoxItem x:Uid="RuleEditor011"  /><ComboBoxItem x:Uid="RuleEditor012"  /><ComboBoxItem x:Uid="RuleEditor013"  />
+                <ComboBoxItem x:Uid="RuleEditor021"  /><ComboBoxItem x:Uid="RuleEditor022"  /><ComboBoxItem x:Uid="RuleEditor023"  />
             </ComboBox>
             <ComboBox x:Uid="RuleEditor014"   ItemsSource="{x:Bind ViewModel.Mixer.Profiles}" DisplayMemberPath="Name" SelectedItem="{x:Bind ViewModel.SelectedProfile, Mode=TwoWay}" Visibility="{x:Bind ViewModel.IsProfileAction, Mode=OneWay}" HorizontalAlignment="Stretch" />
+            <TextBox x:Uid="RuleEditor017" Text="{x:Bind ViewModel.BusIndexText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Visibility="{x:Bind ViewModel.IsBusAction, Mode=OneWay}" />
+            <TextBox x:Uid="RuleEditor018" Text="{x:Bind ViewModel.GainText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Visibility="{x:Bind ViewModel.IsBusAction, Mode=OneWay}" />
+            <TextBox x:Uid="RuleEditor019" Text="{x:Bind ViewModel.StripIndexText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Visibility="{x:Bind ViewModel.IsStripAction, Mode=OneWay}" />
+            <TextBox x:Uid="RuleEditor020" Text="{x:Bind ViewModel.EndpointId, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Visibility="{x:Bind ViewModel.IsRouteAction, Mode=OneWay}" />
             <TextBlock x:Uid="RuleEditor015"  TextWrapping="Wrap" Style="{StaticResource CaptionTextBlockStyle}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
             <CheckBox x:Uid="RuleEditor016"  IsChecked="{x:Bind ViewModel.RevertWhenInactive, Mode=TwoWay}" />
         </StackPanel>

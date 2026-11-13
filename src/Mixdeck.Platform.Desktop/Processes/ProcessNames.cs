@@ -1,5 +1,7 @@
 namespace Mixdeck.Platform.Desktop.Processes;
 
+internal readonly record struct ProcessRecord(int Pid, string Name);
+
 internal static class ProcessNames
 {
     public static string? FromPid(int pid)
@@ -17,19 +19,21 @@ internal static class ProcessNames
         }
     }
 
-    public static IReadOnlyCollection<string> Snapshot()
+    public static IReadOnlyList<ProcessRecord> Snapshot()
     {
-        var names = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        var records = new List<ProcessRecord>();
         foreach (var process in Process.GetProcesses())
         {
             try
             {
-                if (!string.IsNullOrWhiteSpace(process.ProcessName)) names.Add(process.ProcessName);
+                var file = SafeFileName(process);
+                var name = string.IsNullOrWhiteSpace(file) ? process.ProcessName : Path.GetFileName(file);
+                if (!string.IsNullOrWhiteSpace(name)) records.Add(new ProcessRecord(process.Id, name));
             }
             catch (InvalidOperationException) { }
             finally { process.Dispose(); }
         }
-        return names;
+        return records;
     }
 
     private static string? SafeFileName(Process process)

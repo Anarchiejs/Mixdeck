@@ -19,7 +19,7 @@ public sealed class CoreAudioBackend : ISystemAudio
 
     private static readonly uint Devices = FourCC("dev#");
     private static readonly uint DefaultOutput = FourCC("dOut");
-    private static readonly uint DefaultInput = FourCC("dIn");
+    private static readonly uint DefaultInput = FourCC("dIn ");
     private static readonly uint Name = FourCC("lnam");
     private static readonly uint Uid = FourCC("uid ");
     private static readonly uint Mute = FourCC("mute");
@@ -32,9 +32,13 @@ public sealed class CoreAudioBackend : ISystemAudio
 
     private readonly object _gate = new();
     private Dictionary<string, uint> _objectIds = new(StringComparer.Ordinal);
+    private readonly ListenerProc _listener;
     private CancellationTokenSource? _lifetime;
     private SystemAudioSnapshot _snapshot = SystemAudioSnapshot.Empty;
     private string? _reason;
+    private bool _listening;
+
+    public CoreAudioBackend() => _listener = OnProperty;
 
     public static ISystemAudio Create() => OperatingSystem.IsMacOS()
         ? new CoreAudioBackend()
@@ -51,6 +55,7 @@ public sealed class CoreAudioBackend : ISystemAudio
     public void Start()
     {
         if (!OperatingSystem.IsMacOS() || _lifetime is not null) return;
+        Listen();
         _lifetime = new CancellationTokenSource();
         var token = _lifetime.Token;
         _ = Task.Run(async () =>
@@ -139,9 +144,39 @@ public sealed class CoreAudioBackend : ISystemAudio
 
     public void Dispose()
     {
+        Unlisten();
         _lifetime?.Cancel();
         _lifetime?.Dispose();
         _lifetime = null;
+    }
+
+    private void Listen()
+    {
+        if (_listening) return;
+        foreach (var selector in new[] { Devices, DefaultOutput, DefaultInput })
+        {
+            var address = new AudioObjectPropertyAddress(selector, ScopeGlobal, ElementMain);
+            AudioObjectAddPropertyListener(SystemDevice, ref address, _listener, 0);
+        }
+        _listening = true;
+    }
+
+    private void Unlisten()
+    {
+        if (!_listening) return;
+        foreach (var selector in new[] { Devices, DefaultOutput, DefaultInput })
+        {
+            var address = new AudioObjectPropertyAddress(selector, ScopeGlobal, ElementMain);
+            AudioObjectRemovePropertyListener(SystemDevice, ref address, _listener, 0);
+        }
+        _listening = false;
+    }
+
+    private int OnProperty(uint objectId, uint number, IntPtr addresses, IntPtr client)
+    {
+        try { RefreshAsync(); }
+        catch (Exception) { /* Le sondage reprendra la lecture. */ }
+        return 0;
     }
 
     private bool WithDevice(string id, Func<uint, bool> action)
@@ -327,8 +362,12 @@ public sealed class CoreAudioBackend : ISystemAudio
 
     private static AudioObjectPropertyAddress Address(uint selector, uint scope, uint element) => new(selector, scope, element);
 
-    private static uint FourCC(string value) =>
-        ((uint)value[0] << 24) | ((uint)value[1] << 16) | ((uint)value[2] << 8) | value[3];
+    private static uint FourCC(string value)
+    {
+        var bytes = new byte[4];
+        for (var i = 0; i < bytes.Length; i++) bytes[i] = i < value.Length ? (byte)value[i] : (byte)' ';
+        return ((uint)bytes[0] << 24) | ((uint)bytes[1] << 16) | ((uint)bytes[2] << 8) | bytes[3];
+    }
 
     [StructLayout(LayoutKind.Sequential)]
     private readonly struct AudioObjectPropertyAddress(uint selector, uint scope, uint element)
@@ -342,6 +381,11 @@ public sealed class CoreAudioBackend : ISystemAudio
     [DllImport(AudioLibrary)] private static extern int AudioObjectGetPropertyDataSize(uint objectId, ref AudioObjectPropertyAddress address, uint qualifierSize, IntPtr qualifier, out uint dataSize);
     [DllImport(AudioLibrary)] private static extern int AudioObjectGetPropertyData(uint objectId, ref AudioObjectPropertyAddress address, uint qualifierSize, IntPtr qualifier, ref uint dataSize, IntPtr data);
     [DllImport(AudioLibrary)] private static extern int AudioObjectSetPropertyData(uint objectId, ref AudioObjectPropertyAddress address, uint qualifierSize, IntPtr qualifier, uint dataSize, IntPtr data);
+    [DllImport(AudioLibrary)] private static extern int AudioObjectAddPropertyListener(uint objectId, ref AudioObjectPropertyAddress address, ListenerProc listener, IntPtr client);
+    [DllImport(AudioLibrary)] private static extern int AudioObjectRemovePropertyListener(uint objectId, ref AudioObjectPropertyAddress address, ListenerProc listener, IntPtr client);
+
+    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+    private delegate int ListenerProc(uint objectId, uint number, IntPtr addresses, IntPtr client);
     [DllImport(CoreFoundation)] private static extern nint CFStringGetLength(IntPtr value);
     [DllImport(CoreFoundation)] private static extern bool CFStringGetCString(IntPtr value, byte[] buffer, nint capacity, uint encoding);
     [DllImport(CoreFoundation)] private static extern void CFRelease(IntPtr value);

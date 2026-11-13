@@ -43,6 +43,7 @@
                         <HyperlinkButton x:Uid="AboutPage014"  NavigateUri="{x:Bind ViewModel.LicenseUri}" />
                         <TextBlock x:Uid="AboutPage015"  TextWrapping="Wrap" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
                         <TextBlock x:Uid="AboutPage016" TextWrapping="Wrap" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                        <Button x:Uid="AboutPage017" Click="OnCopyCrash" />
                     </StackPanel>
                 </Border>
             </StackPanel>

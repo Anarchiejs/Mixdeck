@@ -69,9 +69,9 @@ internal sealed class FakeSettings : ISettingsStore
     public AppSettings Current { get; private set; } = new() { FadeMilliseconds = 0 };
     public event EventHandler<AppSettings>? Changed;
     public Task<AppSettings> LoadAsync(CancellationToken cancellationToken = default) => Task.FromResult(Current);
-    public Task SaveAsync(AppSettings settings, CancellationToken cancellationToken = default)
-    { Current = settings; Changed?.Invoke(this, settings); return Task.CompletedTask; }
-    public Task UpdateAsync(Func<AppSettings, AppSettings> change, CancellationToken cancellationToken = default) => SaveAsync(change(Current), cancellationToken);
+    public Task<bool> SaveAsync(AppSettings settings, CancellationToken cancellationToken = default)
+    { Current = settings; Changed?.Invoke(this, settings); return Task.FromResult(true); }
+    public Task<bool> UpdateAsync(Func<AppSettings, AppSettings> change, CancellationToken cancellationToken = default) => SaveAsync(change(Current), cancellationToken);
 }
 internal sealed class FakeProcesses : IProcessWatcher
 {

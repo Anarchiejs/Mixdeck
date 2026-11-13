@@ -1705,4 +1705,34 @@
   <data name="L6_ReadError" xml:space="preserve"><value>Impossible de lire les périphériques Windows.</value></data>
   <data name="L6_SetError" xml:space="preserve"><value>Impossible de changer le périphérique Windows par défaut (erreur {0}).</value></data>
   <data name="L6_PartialError" xml:space="preserve"><value>Changement incomplet pour les rôles Windows (erreur {0}). Vérifiez le périphérique sélectionné.</value></data>
+
+  <data name="Core_ProfileWithCause" xml:space="preserve"><value>Profil : {0} ({1})</value></data>
+  <data name="Core_BusGain" xml:space="preserve"><value>{0} : {1} dB</value></data>
+  <data name="Core_StripMuted" xml:space="preserve"><value>Entrée {0} coupée</value></data>
+  <data name="Core_StripOn" xml:space="preserve"><value>Entrée {0} rétablie</value></data>
+  <data name="Core_Routed" xml:space="preserve"><value>{0} envoyé vers {1}</value></data>
+  <data name="Core_RouteDefault" xml:space="preserve"><value>{0} renvoyé vers la sortie par défaut</value></data>
+  <data name="Core_RouteUnavailable" xml:space="preserve"><value>Envoi vers une autre sortie indisponible</value></data>
+  <data name="Settings_HotkeyConflict" xml:space="preserve"><value>Ce raccourci est déjà utilisé.</value></data>
+  <data name="Apps_DefaultRoute" xml:space="preserve"><value>Sortie par défaut</value></data>
+  <data name="About_NoCrash" xml:space="preserve"><value>Aucun rapport de plantage à copier.</value></data>
+  <data name="About_CrashCopied" xml:space="preserve"><value>Rapport de plantage expurgé copié.</value></data>
+  <data name="Setup_Title" xml:space="preserve"><value>Premier lancement</value></data>
+  <data name="Setup_Body" xml:space="preserve"><value>Mixdeck peut copier le script FL Studio dans Documents.</value></data>
+  <data name="Setup_VoicemeeterOn" xml:space="preserve"><value>Voicemeeter est connecté.</value></data>
+  <data name="Setup_VoicemeeterOff" xml:space="preserve"><value>Voicemeeter n'est pas encore connecté. Installez-le, puis relancez Mixdeck.</value></data>
+  <data name="Setup_Copy" xml:space="preserve"><value>Copier le script FL Studio</value></data>
+  <data name="Setup_Done" xml:space="preserve"><value>Terminer</value></data>
+  <data name="Setup_Copied" xml:space="preserve"><value>Script copié dans Documents.</value></data>
+  <data name="Setup_Missing" xml:space="preserve"><value>Le script livré est introuvable.</value></data>
+  <data name="Status_SaveFailed" xml:space="preserve"><value>Le réglage n'a pas pu être enregistré.</value></data>
+  <data name="RuleEditor017.Header" xml:space="preserve"><value>Index du bus (0 = A1)</value></data>
+  <data name="RuleEditor018.Header" xml:space="preserve"><value>Gain (dB)</value></data>
+  <data name="RuleEditor019.Header" xml:space="preserve"><value>Index de l'entrée</value></data>
+  <data name="RuleEditor020.Header" xml:space="preserve"><value>Identifiant de sortie (vide = défaut)</value></data>
+  <data name="RuleEditor021.Content" xml:space="preserve"><value>Régler le gain d'un bus</value></data>
+  <data name="RuleEditor022.Content" xml:space="preserve"><value>Couper une entrée</value></data>
+  <data name="RuleEditor023.Content" xml:space="preserve"><value>Envoyer l'application vers une sortie</value></data>
+  <data name="AppVolumeList003.PlaceholderText" xml:space="preserve"><value>Chercher une application</value></data>
+  <data name="AboutPage017.Content" xml:space="preserve"><value>Copier le rapport de plantage expurgé</value></data>
 </root>

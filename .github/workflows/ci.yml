@@ -31,6 +31,27 @@ jobs:
       - name: Test
         run: dotnet test Mixdeck.slnx -c Release -nologo --logger "console;verbosity=minimal" --logger trx --results-directory TestResults
 
+      - name: Vulnerable packages
+        shell: pwsh
+        run: |
+          $out = dotnet list Mixdeck.slnx package --vulnerable --include-transitive | Out-String
+          Write-Host $out
+          if ($out -match 'has the following vulnerable') { exit 1 }
+
+      - name: Package
+        run: powershell -NoProfile -ExecutionPolicy Bypass -File build/pack.ps1 -SkipTests -Version 0.1.0
+
+      - name: Upload installer
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: mixdeck-windows
+          path: |
+            artifacts/*Setup.exe
+            artifacts/*.nupkg
+            artifacts/RELEASES
+          if-no-files-found: warn
+
       # UI tests (FlaUI) need an interactive desktop session and do not pass on GitHub-hosted runners.
       # They stay in the tree for a local run with MIXDECK_UI_TESTS=1. They are not part of CI.
       - name: Upload test results
@@ -57,6 +78,13 @@ jobs:
         # Includes the Avalonia.Headless smoke test that opens the main window.
         run: dotnet test Mixdeck.Portable.slnx -c Release -nologo --logger "console;verbosity=minimal"
 
+      - name: Vulnerable packages
+        run: |
+          set -o pipefail
+          out="$(dotnet list Mixdeck.Portable.slnx package --vulnerable --include-transitive)"
+          printf '%s\n' "$out"
+          printf '%s\n' "$out" | grep -q 'has the following vulnerable' && exit 1 || true
+
       - name: Self-check
         run: dotnet run --project src/Mixdeck.Desktop/Mixdeck.Desktop.csproj -c Release -- --self-check
 
@@ -68,5 +96,8 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: mixdeck-macos
-          path: artifacts/*
+          path: |
+            artifacts/*.tar.gz
+            artifacts/*.nupkg
+            artifacts/RELEASES
           if-no-files-found: warn

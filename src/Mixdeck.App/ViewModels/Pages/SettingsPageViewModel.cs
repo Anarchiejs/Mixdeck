@@ -292,6 +292,11 @@ public sealed partial class SettingsPageViewModel : ObservableObject
             ReportError(Strings.Get("Settings_ChooseProfile"));
             return false;
         }
+        if (binding is not null && binding.VirtualKey != 0 && HotkeyConflicts.Find(settings.Current.Hotkeys, binding).Count > 0)
+        {
+            ReportError(Strings.Get("Settings_HotkeyConflict"));
+            return false;
+        }
         var success = await SaveAsync(s => s with
         {
             Hotkeys = s.Hotkeys.Where(h => h.Action != row.Action).Concat(binding is null ? [] : new[] { binding }).ToArray(),
@@ -300,7 +305,7 @@ public sealed partial class SettingsPageViewModel : ObservableObject
         return success;
     }
 
-    public bool Conflicts(HotkeyBinding binding) => settings.Current.Hotkeys.Any(h => h.Action != binding.Action && h.Modifiers == binding.Modifiers && h.VirtualKey == binding.VirtualKey);
+    public bool Conflicts(HotkeyBinding binding) => HotkeyConflicts.Find(settings.Current.Hotkeys, binding).Count > 0;
     public void SuspendHotkeys() => hotkeys.Apply([]);
     public void RestoreHotkeys()
     {
@@ -309,7 +314,9 @@ public sealed partial class SettingsPageViewModel : ObservableObject
     }
     public void RefreshHotkeyWarnings()
     {
-        foreach (var row in Hotkeys) row.HasConflict = hotkeys.Failed.Any(h => h.Action == row.Action);
+        var conflicts = HotkeyConflicts.Conflicting(settings.Current.Hotkeys);
+        foreach (var row in Hotkeys)
+            row.HasConflict = hotkeys.Failed.Any(h => h.Action == row.Action) || conflicts.Any(h => h.Action == row.Action);
     }
 
     [RelayCommand]

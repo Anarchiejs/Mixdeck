@@ -15,6 +15,9 @@ internal sealed class SysexSendLease
     private bool _released;
     private bool _waiterFinished;
     private int _releaseCount;
+    private static int _openCount;
+
+    public static int OpenCount => Volatile.Read(ref _openCount);
 
     private SysexSendLease(uint destination, byte[] message, IntPtr completion)
     {
@@ -28,6 +31,7 @@ internal sealed class SysexSendLease
         Marshal.WriteInt32(Request, 20, 0);
         Marshal.WriteIntPtr(Request, 24, completion);
         Marshal.WriteIntPtr(Request, 32, GCHandle.ToIntPtr(_handle));
+        Interlocked.Increment(ref _openCount);
     }
 
     public IntPtr Request { get; }
@@ -92,6 +96,7 @@ internal sealed class SysexSendLease
         if (_released) return;
         _released = true;
         _releaseCount++;
+        Interlocked.Decrement(ref _openCount);
         Marshal.FreeHGlobal(Data);
         Marshal.FreeHGlobal(Request);
         if (_handle.IsAllocated) _handle.Free();
