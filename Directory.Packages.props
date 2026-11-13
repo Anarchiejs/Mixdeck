@@ -31,6 +31,6 @@
     <!-- 7.x = dernière version sous licence Apache 2.0 (la 8.x est sous licence commerciale Xceed). -->
     <PackageVersion Include="FluentAssertions" Version="7.2.0" />
     <PackageVersion Include="FlaUI.UIA3" Version="5.0.0" />
-    <PackageVersion Include="Microsoft.Extensions.TimeProvider.Testing" Version="10.11.0" />
+    <PackageVersion Include="Microsoft.Extensions.TimeProvider.Testing" Version="11.0.0" />
   </ItemGroup>
 </Project>
