@@ -83,7 +83,11 @@ $dotnet = $candidates | Where-Object { Test-Sdk $_ } | Select-Object -First 1
 if (-not $dotnet) {
     Write-Host 'SDK .NET 10 absent : telechargement depuis Microsoft (dot.net), installation pour cet utilisateur.'
     $installer = Join-Path $env:TEMP 'dotnet-install.ps1'
+    # Empreinte du script officiel le 2026-11-13. Un fichier different n'est pas execute.
+    $expectedHash = 'E8B873E18A81E5C4CD8AB69D84DAC8FEAD291D50B3C44633CD7FDDAD709A13D6'
     Invoke-WebRequest -Uri 'https://dot.net/v1/dotnet-install.ps1' -OutFile $installer -UseBasicParsing
+    $actualHash = (Get-FileHash -LiteralPath $installer -Algorithm SHA256).Hash
+    if ($actualHash -ne $expectedHash) { Fail "Empreinte inattendue de dotnet-install.ps1 ($actualHash)." }
     & powershell -NoProfile -ExecutionPolicy Bypass -File $installer -Channel 10.0 -InstallDir $userDotNetDir -NoPath
     if ($LASTEXITCODE -ne 0) { Fail "L'installation du SDK .NET a echoue (code $LASTEXITCODE)." }
     $dotnet = Join-Path $userDotNetDir 'dotnet.exe'
@@ -127,7 +131,7 @@ if ($vmInstalled) {
 [xml]$props = Get-Content -LiteralPath (Join-Path $repoRoot 'Directory.Build.props') -Raw
 $baseVersion = "$($props.Project.PropertyGroup[0].Version)".Trim()
 if ($baseVersion -notmatch '^\d+\.\d+\.\d+$') { $baseVersion = '0.1.0' }
-$version = "$baseVersion-local.$(Get-Date -Format 'yyyyMMddHHmm')"
+$version = "$baseVersion-local.$(Get-Date -Format 'yyyyMMddHHmmss')"
 
 $outputDir = Join-Path $repoRoot 'artifacts\install'
 if (Test-Path -LiteralPath $outputDir) { Remove-Item -LiteralPath $outputDir -Recurse -Force }
@@ -247,14 +251,15 @@ try {
     }
     $loopMidiInstalled = (@($loopMidiExePaths).Count -gt 0) -or $loopMidiRegistered
 
-    # loopMIDI est requis pour FL : installe sans question s'il manque (Windows peut demander l'accord administrateur).
     $loopMidiUrl = 'https://www.tobias-erichsen.de/software/loopmidi.html'
     if ($loopMidiInstalled) {
         Write-Host 'loopMIDI est installe.'
+    } elseif ($NoPrompt -or -not (Ask-YesNo 'Installer loopMIDI ? Il cree les ports MIDI dont FL Studio a besoin.')) {
+        Write-Host "loopMIDI non installe. Installez-le ensuite : $loopMidiUrl" -ForegroundColor Yellow
     } else {
         $winget = Get-Command -Name winget -ErrorAction SilentlyContinue
         if ($null -eq $winget) {
-            Write-Host "loopMIDI absent et winget indisponible. Installez-le ici : $loopMidiUrl" -ForegroundColor Yellow
+            Write-Host "winget indisponible. Installez loopMIDI ici : $loopMidiUrl" -ForegroundColor Yellow
         } else {
             Write-Host 'Installation de loopMIDI...'
             & $winget.Source install --id TobiasErichsen.loopMIDI -e --silent --accept-source-agreements --accept-package-agreements
@@ -281,6 +286,8 @@ try {
         Write-Host 'Ports loopMIDI deja crees.'
     } elseif ($null -eq $loopMidiExe) {
         Write-Host 'loopMIDI introuvable : ports non crees. Creez "Mixdeck to FL" et "FL to Mixdeck" dans loopMIDI.' -ForegroundColor Yellow
+    } elseif ($NoPrompt -or -not (Ask-YesNo 'Creer les ports MIDI « Mixdeck to FL » et « FL to Mixdeck » ?')) {
+        Write-Host 'Ports loopMIDI non crees.' -ForegroundColor Yellow
     } else {
         Get-Process -Name loopMIDI -ErrorAction SilentlyContinue | ForEach-Object {
             $_.CloseMainWindow() | Out-Null
@@ -293,8 +300,7 @@ try {
         }
         Write-Host "Ports loopMIDI crees : $($missingPorts -join ', ')"
     }
-    if ($null -ne $loopMidiExe) {
-        # Demarrage avec Windows (meme reglage que la case de loopMIDI), puis lancement s'il ne tourne pas.
+    if ($null -ne $loopMidiExe -and -not $NoPrompt -and (Ask-YesNo 'Lancer loopMIDI a l''ouverture de session ?')) {
         $runKey = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Run'
         if ($null -eq (Get-ItemProperty -LiteralPath $runKey -Name loopMIDI -ErrorAction SilentlyContinue)) {
             New-ItemProperty -LiteralPath $runKey -Name loopMIDI -PropertyType String -Value $loopMidiExe -Force | Out-Null
@@ -311,6 +317,8 @@ try {
         Where-Object { $_.PSChildName -like 'FL Studio*' -and (Test-Path -LiteralPath (Join-Path $_.PSPath 'General')) })
     if ($flKeys.Count -eq 0) {
         Write-Host 'Reglages FL Studio introuvables (FL jamais lance ?) : configurez Options > MIDI a la main.' -ForegroundColor Yellow
+    } elseif ($NoPrompt -or -not (Ask-YesNo 'Ecrire les reglages MIDI de FL Studio (Mixdeck to FL / FL to Mixdeck) ?')) {
+        Write-Host 'Reglages MIDI de FL Studio non ecrits.' -ForegroundColor Yellow
     } else {
         while (Get-Process -Name FL64, FL -ErrorAction SilentlyContinue) {
             if ($NoPrompt) { break }

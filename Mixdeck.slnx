@@ -11,6 +11,9 @@
     <Project Path="src/Mixdeck.Desktop/Mixdeck.Desktop.csproj" />
   </Folder>
   <Folder Name="/tests/">
+    <Project Path="tests/Mixdeck.App.Tests/Mixdeck.App.Tests.csproj">
+      <Platform Project="x64" />
+    </Project>
     <Project Path="tests/Mixdeck.Core.Tests/Mixdeck.Core.Tests.csproj" />
     <Project Path="tests/Mixdeck.FlStudio.Tests/Mixdeck.FlStudio.Tests.csproj" />
     <Project Path="tests/Mixdeck.Platform.Tests/Mixdeck.Platform.Tests.csproj" />

@@ -66,6 +66,9 @@ jobs:
           Add-Content -Path $env:GITHUB_OUTPUT -Value "notes=$notesPath" -Encoding utf8NoBOM
           Write-Host "Version: $version"
 
+      - name: Test
+        run: dotnet test Mixdeck.slnx -c Release -nologo
+
       - name: Publish the application
         run: dotnet publish src/Mixdeck.App/Mixdeck.App.csproj -c Release -r win-x64 --self-contained "-p:Version=${{ steps.version.outputs.version }}" -o publish
 
@@ -121,10 +124,20 @@ jobs:
         with:
           global-json-file: global.json
 
+      - name: Test
+        run: dotnet test Mixdeck.Portable.slnx -c Release -nologo
+
       - name: Package
         run: bash build/pack.sh --skip-tests --require-vpk --version ${{ needs.velopack.outputs.version }}
 
       - name: Upload to the GitHub release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: gh release upload "v${{ needs.velopack.outputs.version }}" artifacts/* --clobber
+        run: |
+          shopt -s nullglob
+          files=(artifacts/*.tar.gz artifacts/*.nupkg artifacts/RELEASES)
+          if [[ ${#files[@]} -eq 0 ]]; then
+            echo "No release files in artifacts/." >&2
+            exit 1
+          fi
+          gh release upload "v${{ needs.velopack.outputs.version }}" "${files[@]}" --clobber

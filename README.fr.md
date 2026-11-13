@@ -53,7 +53,7 @@ Une copie lancée depuis `bin/` ne s'inscrit pas au démarrage. Les données res
 
 ## Captures d'écran
 
-Aucune capture n'est versionnée. Il faut les prendre sous Windows. Déposez-les ensuite dans [`docs/images/`](docs/images/) et citez-les ici.
+Aucune capture n'est versionnée. Il faut les prendre sous Windows (le mode démo suffit) et les déposer dans [`docs/images/`](docs/images/). Fichiers attendus : `flyout.png` (`--demo --flyout`), `mixer.png` (`--demo --page=Mixer`), `rules.png` (`--demo --page=Rules`), `settings.png` (`--demo --page=Settings`), `about.png` (`--demo --page=About`). Pas de nom d'utilisateur ni de nom de périphérique personnel.
 
 ## Prérequis
 
@@ -61,7 +61,7 @@ Toutes les plateformes : le SDK .NET 10 pour compiler. `global.json` fixe `10.0.
 
 Windows :
 
-- Windows 10 version 19041 ou plus récente, ou Windows 11. x64 seulement. Le projet WinUI cible `10.0.19041.0`.
+- Windows 10 version 19041 ou plus récente, ou Windows 11. x64 seulement. Il n'y a pas de build ARM64 : `VoicemeeterRemote64.dll` est en x64, et `Directory.Build.props` garde l'application WinUI et les services Win32 en x64. Le projet WinUI cible `10.0.19041.0`.
 - Voicemeeter Standard, Banana ou Potato, déjà installé. Mixdeck charge `VoicemeeterRemote64.dll` depuis cette installation. La DLL n'est pas livrée avec Mixdeck.
 - Facultatif : FL Studio et [loopMIDI](https://www.tobias-erichsen.de/software/loopmidi.html).
 
@@ -201,12 +201,14 @@ Les fichiers sont dans `%LOCALAPPDATA%\Mixdeck` sous Windows et dans `~/Library/
 | `src/Mixdeck.App` | Interface WinUI 3. C'est le produit Windows. |
 | `src/Mixdeck.Desktop` | Interface Avalonia pour macOS. Ce n'est pas ce que `build/pack.ps1` installe. |
 
-Mentions tierces : [NOTICE](NOTICE). Sécurité : [SECURITY.md](SECURITY.md). Contribution : [CONTRIBUTING.md](CONTRIBUTING.md).
+Mentions tierces : [NOTICE](NOTICE). Sécurité : [SECURITY.md](SECURITY.md). Contribution : [CONTRIBUTING.fr.md](CONTRIBUTING.fr.md).
 
 ## Publier
 
 1. Ajouter une section `## [X.Y.Z]` dans `CHANGELOG.md`.
 2. Pousser l'étiquette `vX.Y.Z`.
+
+Le flux de publication construit une version `win-x64` autonome, restaure `vpk`, récupère la publication précédente pour les deltas, empaquette, puis envoie le résultat sur GitHub Releases avec la section du journal. Le job macOS ajoute ensuite le paquet Mac à la même publication. Le jeton est `secrets.GITHUB_TOKEN` (`contents: write`). Aucun secret n'est écrit dans le dépôt. Les tests passent avant l'empaquetage. La signature est décrite dans [docs/SIGNATURE.md](docs/SIGNATURE.md).
 
 ## Licence
 
