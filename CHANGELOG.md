@@ -10,8 +10,14 @@ GitHub Releases are created only when a `v*` tag is pushed, and that tag needs a
 
 ## [Unreleased]
 
+## [0.1.0] - 2026-11-13
+
 ### Added
 
+- First-launch assistant, four Banana presets (Call, Game, Music, Stream), rule actions for bus gain, strip mute, and routing an application, hotkey conflict detection, application search, and a redacted crash-report copy. The on-screen display follows the UI language. Meter peak hold stays 1.5 seconds, including the control gallery.
+- macOS pages for profiles, rules, and hotkey capture. A failed settings write is reported instead of shown as saved.
+- The Windows installer asks before installing loopMIDI, creating MIDI ports, registering loopMIDI at login, or writing FL Studio's MIDI settings. A local package version includes the seconds. `dotnet-install.ps1` is checked against a pinned SHA-256 before it runs.
+- CI runs the tests before packaging, lists vulnerable NuGet packages, and uploads an explicit file list. `build/notarize.sh` signs and notarizes the macOS app only when Apple credentials are set.
 - macOS app (`Mixdeck.Desktop`, Avalonia) beside the Windows WinUI app. System devices, the default device, volume, and mute use Core Audio. Per-app volume and routing stay unavailable. Global hotkeys use Carbon, and the foreground app uses `NSWorkspace`. FL Studio uses Core MIDI. Voicemeeter stays Windows-only; `--demo` still runs the simulator. Login items are a LaunchAgent for installed builds. `build/pack.sh`, `build/install.sh`, and the macOS CI job package the app. `Mixdeck.Portable.slnx` is the solution that job builds.
 - Voicemeeter client for Standard, Banana, and Potato: a dedicated thread, a merged command queue, change-driven reads, 60 Hz meters only while a meter is visible, automatic reconnect, and a simulated engine (`--demo`, `--demo=standard`, `--demo=potato`).
 - Core: atomic JSON settings with a backup copy, profiles with gain fades, per-application rules, and meter ballistics.
@@ -55,3 +61,4 @@ GitHub Releases are created only when a `v*` tag is pushed, and that tag needs a
 - Per-app session labels follow the UI language. The list is sorted with the active culture.
 
 [Unreleased]: https://github.com/Anarchiejs/Mixdeck/commits/main
+[0.1.0]: https://github.com/Anarchiejs/Mixdeck/releases/tag/v0.1.0

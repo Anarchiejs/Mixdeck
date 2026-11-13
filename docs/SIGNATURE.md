@@ -22,3 +22,16 @@ Do not commit those values. On the next `v*` tag, `vpk pack --azureTrustedSignFi
 
 Right-click `Mixdeck-win-Setup.exe` > Properties > **Digital Signatures**: the validated name must appear.
 SmartScreen can still warn for a few days while the certificate builds reputation.
+
+## macOS (Developer ID and notarization)
+
+The macOS package is unsigned unless the release environment has Apple credentials. `build/notarize.sh` is called at the end of `build/pack.sh`. With no identity it prints that the package is unsigned and exits 0. It does not invent a signature.
+
+Set these environment variables on the Mac that packages the app:
+
+- `APPLE_SIGNING_IDENTITY`: the Developer ID Application identity, for example `Developer ID Application: Name (TEAMID)`.
+- `APPLE_NOTARY_KEY`: path to an App Store Connect API key (`.p8`).
+- `APPLE_NOTARY_KEY_ID`: the key id.
+- `APPLE_NOTARY_ISSUER`: the issuer id.
+
+`codesign` then signs `artifacts/Mixdeck.app`. When the three notary variables are set, `notarytool` submits a zip and `stapler` attaches the ticket. Do not commit the `.p8` key or the identity. This repository has no Apple certificate, so a build from here stays unsigned.

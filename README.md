@@ -53,7 +53,7 @@ A copy launched from `bin/` does not register itself for login. Data stays on th
 
 ## Screenshots
 
-Screenshots are not in the repository yet. They have to be captured on Windows. When they exist, put them in [`docs/images/`](docs/images/) and link them from this section.
+Screenshots are not in the repository yet. Capture them on Windows (demo mode is enough) and put them in [`docs/images/`](docs/images/). Expected files: `flyout.png` (`--demo --flyout`), `mixer.png` (`--demo --page=Mixer`), `rules.png` (`--demo --page=Rules`), `settings.png` (`--demo --page=Settings`), `about.png` (`--demo --page=About`). Do not include a user name or a personal device name.
 
 ## Requirements
 
@@ -61,7 +61,7 @@ All platforms: the .NET 10 SDK to build. `global.json` pins `10.0.403` with `lat
 
 Windows:
 
-- Windows 10 version 19041 or later, or Windows 11. x64 only. The WinUI project targets `10.0.19041.0`.
+- Windows 10 version 19041 or later, or Windows 11. x64 only. There is no ARM64 build: `VoicemeeterRemote64.dll` is x64, and `Directory.Build.props` keeps the WinUI app and the Win32 services on x64. The WinUI project targets `10.0.19041.0`.
 - Voicemeeter Standard, Banana, or Potato, already installed. Mixdeck loads VB-Audio's remote library (`VoicemeeterRemote64.dll`) from that install. The DLL is not shipped with Mixdeck.
 - Optional: FL Studio, plus [loopMIDI](https://www.tobias-erichsen.de/software/loopmidi.html).
 

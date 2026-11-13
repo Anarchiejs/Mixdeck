@@ -111,12 +111,8 @@ if [[ "$skip_pack" -eq 1 ]]; then
 fi
 
 fail_vpk() {
-  if [[ "$require_vpk" -eq 1 ]]; then
-    echo "Velopack packaging failed." >&2
-    exit 1
-  fi
-  echo "Velopack packaging was skipped: $1"
-  exit 0
+  echo "Velopack packaging failed: $1" >&2
+  exit 1
 }
 
 if ! dotnet tool restore; then
@@ -147,4 +143,8 @@ dotnet tool run vpk -- '[osx]' pack \
   --outputDir artifacts \
   || fail_vpk "vpk [osx] pack failed"
 
+if [[ "$require_vpk" -eq 1 ]]; then
+  echo "Velopack packaging was required and finished."
+fi
+bash build/notarize.sh artifacts/Mixdeck.app
 echo "Velopack packages are in artifacts/"
