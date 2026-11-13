@@ -43,7 +43,7 @@ jobs:
 
       - name: Upload installer
         if: ${{ !cancelled() }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: mixdeck-windows
           path: |
@@ -56,7 +56,7 @@ jobs:
       # They stay in the tree for a local run with MIXDECK_UI_TESTS=1. They are not part of CI.
       - name: Upload test results
         if: ${{ !cancelled() }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: test-results-windows
           path: "**/TestResults/**/*.trx"
@@ -93,7 +93,7 @@ jobs:
 
       - name: Upload packages
         if: ${{ !cancelled() }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: mixdeck-macos
           path: |
