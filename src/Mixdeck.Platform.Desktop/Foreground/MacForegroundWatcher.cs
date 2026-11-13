@@ -82,7 +82,7 @@ public sealed class MacForegroundWatcher : IForegroundWatcher, IForegroundCapabi
     [DllImport("/usr/lib/libobjc.A.dylib", EntryPoint = "objc_msgSend")] private static extern IntPtr objc_msgSend(IntPtr receiver, IntPtr selector);
     [DllImport(CoreFoundation)] private static extern IntPtr CFRunLoopGetCurrent();
     [DllImport(CoreFoundation)] private static extern double CFAbsoluteTimeGetCurrent();
-    [DllImport(CoreFoundation)] private static extern IntPtr CFRunLoopTimerCreate(IntPtr allocator, double fireDate, double interval, uint flags, int order, TimerCallback callout, IntPtr context);
+    [DllImport(CoreFoundation)] private static extern IntPtr CFRunLoopTimerCreate(IntPtr allocator, double fireDate, double interval, nuint flags, nint order, TimerCallback callout, IntPtr context);
     [DllImport(CoreFoundation)] private static extern void CFRunLoopAddTimer(IntPtr loop, IntPtr timer, IntPtr mode);
     [DllImport(CoreFoundation)] private static extern void CFRunLoopTimerInvalidate(IntPtr timer);
     [DllImport(CoreFoundation)] private static extern void CFRelease(IntPtr value);

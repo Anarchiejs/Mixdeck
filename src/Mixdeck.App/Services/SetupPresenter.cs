@@ -2,6 +2,7 @@ using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Mixdeck.App.Localization;
 using Mixdeck.Core.Abstractions;
+using Mixdeck.Core.Model;
 using Mixdeck.Core.Settings;
 using Mixdeck.Core.Setup;
 

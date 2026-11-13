@@ -19,7 +19,7 @@ public sealed class CoreAudioBackend : ISystemAudio
 
     private static readonly uint Devices = FourCC("dev#");
     private static readonly uint DefaultOutput = FourCC("dOut");
-    private static readonly uint DefaultInput = FourCC("dIn");
+    private static readonly uint DefaultInput = FourCC("dIn ");
     private static readonly uint Name = FourCC("lnam");
     private static readonly uint Uid = FourCC("uid ");
     private static readonly uint Mute = FourCC("mute");
@@ -362,8 +362,12 @@ public sealed class CoreAudioBackend : ISystemAudio
 
     private static AudioObjectPropertyAddress Address(uint selector, uint scope, uint element) => new(selector, scope, element);
 
-    private static uint FourCC(string value) =>
-        ((uint)value[0] << 24) | ((uint)value[1] << 16) | ((uint)value[2] << 8) | value[3];
+    private static uint FourCC(string value)
+    {
+        var bytes = new byte[4];
+        for (var i = 0; i < bytes.Length; i++) bytes[i] = i < value.Length ? (byte)value[i] : (byte)' ';
+        return ((uint)bytes[0] << 24) | ((uint)bytes[1] << 16) | ((uint)bytes[2] << 8) | bytes[3];
+    }
 
     [StructLayout(LayoutKind.Sequential)]
     private readonly struct AudioObjectPropertyAddress(uint selector, uint scope, uint element)
