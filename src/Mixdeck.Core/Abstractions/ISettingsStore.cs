@@ -14,8 +14,9 @@ public interface ISettingsStore
 
     Task<AppSettings> LoadAsync(CancellationToken cancellationToken = default);
 
-    Task SaveAsync(AppSettings settings, CancellationToken cancellationToken = default);
+    /// <summary>false si l'écriture a échoué. L'état en mémoire n'est alors pas modifié.</summary>
+    Task<bool> SaveAsync(AppSettings settings, CancellationToken cancellationToken = default);
 
-    /// <summary>Applique une modification et enregistre : <c>await store.UpdateAsync(s => s with { ShowOsd = false })</c>.</summary>
-    Task UpdateAsync(Func<AppSettings, AppSettings> change, CancellationToken cancellationToken = default);
+    /// <summary>Applique une modification et enregistre. false si l'écriture a échoué.</summary>
+    Task<bool> UpdateAsync(Func<AppSettings, AppSettings> change, CancellationToken cancellationToken = default);
 }

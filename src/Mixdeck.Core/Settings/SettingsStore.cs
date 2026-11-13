@@ -60,8 +60,8 @@ public sealed class SettingsStore(MixdeckPaths paths, ILogger<SettingsStore> log
         },
         _ => throw new JsonException("Version de réglages non prise en charge")
     };
-    public Task SaveAsync(AppSettings settings, CancellationToken cancellationToken = default) => UpdateAsync(_ => settings, cancellationToken);
-    public async Task UpdateAsync(Func<AppSettings, AppSettings> change, CancellationToken cancellationToken = default)
+    public Task<bool> SaveAsync(AppSettings settings, CancellationToken cancellationToken = default) => UpdateAsync(_ => settings, cancellationToken);
+    public async Task<bool> UpdateAsync(Func<AppSettings, AppSettings> change, CancellationToken cancellationToken = default)
     {
         AppSettings? saved = null;
         await gate.WaitAsync(cancellationToken);
@@ -71,8 +71,13 @@ public sealed class SettingsStore(MixdeckPaths paths, ILogger<SettingsStore> log
             await AtomicJson.WriteAsync(paths.SettingsFile, next, MixdeckJsonContext.Default.AppSettings, cancellationToken);
             Current = saved = next;
         }
-        catch (Exception ex) when (ex is not OperationCanceledException) { logger.LogError(ex, "Impossible d'enregistrer les réglages"); }
+        catch (Exception ex) when (ex is not OperationCanceledException)
+        {
+            logger.LogError(ex, "Impossible d'enregistrer les réglages");
+            return false;
+        }
         finally { gate.Release(); }
         if (saved is not null) Changed?.Invoke(this, saved);
+        return saved is not null;
     }
 }

@@ -14,6 +14,12 @@ public enum RuleActionKind
     SwitchProfile,
     /// <summary>Couper (true) ou activer (false) le micro : <see cref="Rule.MicMuted"/>.</summary>
     SetMicMuted,
+    /// <summary>Fixer le gain d'un bus : <see cref="Rule.BusIndex"/> et <see cref="Rule.GainDb"/>.</summary>
+    SetBusGain,
+    /// <summary>Couper ou rétablir une entrée : <see cref="Rule.StripIndex"/> et <see cref="Rule.MicMuted"/>.</summary>
+    SetStripMute,
+    /// <summary>Envoyer le processus vers une sortie : <see cref="Rule.OutputEndpointId"/> (null = sortie par défaut).</summary>
+    RouteApp,
 }
 
 /// <summary>« Quand &lt;processus&gt; &lt;démarre | est au premier plan&gt; → &lt;action&gt; ».</summary>
@@ -34,6 +40,18 @@ public sealed record Rule
     public RuleActionKind Action { get; init; } = RuleActionKind.SwitchProfile;
     public string? ProfileId { get; init; }
     public bool? MicMuted { get; init; }
+
+    /// <summary>Bus visé par <see cref="RuleActionKind.SetBusGain"/> (0 = A1).</summary>
+    public int BusIndex { get; init; }
+
+    /// <summary>Gain en dB pour <see cref="RuleActionKind.SetBusGain"/>.</summary>
+    public float GainDb { get; init; }
+
+    /// <summary>Entrée visée par <see cref="RuleActionKind.SetStripMute"/>.</summary>
+    public int StripIndex { get; init; }
+
+    /// <summary>Identifiant de sortie pour <see cref="RuleActionKind.RouteApp"/>. null = sortie par défaut.</summary>
+    public string? OutputEndpointId { get; init; }
 
     /// <summary>Quand la règle devient inactive, revenir à l'état d'avant.</summary>
     public bool RevertWhenInactive { get; init; } = true;
