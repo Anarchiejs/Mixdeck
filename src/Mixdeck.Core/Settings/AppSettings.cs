@@ -123,6 +123,9 @@ public sealed record AppSettings
     /// <summary>Langue de l'interface ("fr-FR", "en-US") ; null = langue de Windows.</summary>
     public string? Language { get; init; }
 
+    /// <summary>L'assistant de premier lancement a été terminé ou ignoré.</summary>
+    public bool SetupCompleted { get; init; }
+
     public static IReadOnlyList<HotkeyBinding> DefaultHotkeys { get; } =
     [
         // Ctrl+Alt+M : couper / activer le micro

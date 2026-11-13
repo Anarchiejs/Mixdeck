@@ -273,11 +273,11 @@ public sealed class FlStudioDawTests
         public AppSettings Current { get => Volatile.Read(ref _current); set => Volatile.Write(ref _current, value); }
         public event EventHandler<AppSettings>? Changed;
         public Task<AppSettings> LoadAsync(CancellationToken cancellationToken = default) => Task.FromResult(Current);
-        public Task SaveAsync(AppSettings settings, CancellationToken cancellationToken = default)
+        public Task<bool> SaveAsync(AppSettings settings, CancellationToken cancellationToken = default)
         {
-            Current = settings; Changed?.Invoke(this, settings); return Task.CompletedTask;
+            Current = settings; Changed?.Invoke(this, settings); return Task.FromResult(true);
         }
-        public Task UpdateAsync(Func<AppSettings, AppSettings> change, CancellationToken cancellationToken = default) => SaveAsync(change(Current), cancellationToken);
+        public Task<bool> UpdateAsync(Func<AppSettings, AppSettings> change, CancellationToken cancellationToken = default) => SaveAsync(change(Current), cancellationToken);
     }
     private sealed class TestLogger : ILogger<FlStudioDaw>
     {

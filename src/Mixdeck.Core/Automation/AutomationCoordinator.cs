@@ -7,8 +7,10 @@ using Mixdeck.Core.Settings;
 namespace Mixdeck.Core.Automation;
 public sealed class AutomationCoordinator(IProcessWatcher processes, IForegroundWatcher foreground,
     IProfileService profiles, IMixer mixer, ISettingsStore settings, IOsdService osd,
-    ILogger<AutomationCoordinator> logger, DuckingController? ducking = null) : IDisposable
+    ILogger<AutomationCoordinator> logger, DuckingController? ducking = null, ITextProvider? texts = null,
+    IAppOutputRouter? appRouter = null) : IDisposable
 {
+    private readonly ITextProvider text = texts ?? FrenchTextProvider.Instance;
     private readonly Channel<Func<Task>> queue = Channel.CreateUnbounded<Func<Task>>(new UnboundedChannelOptions { SingleReader = true });
     private readonly RuleEngine engine = new();
     private readonly CancellationTokenSource lifetime = new();
@@ -22,6 +24,11 @@ public sealed class AutomationCoordinator(IProcessWatcher processes, IForeground
     private string? pendingProfile;
     private Rule? pendingProfileCause;
     private bool? pendingMic;
+    private bool pendingBusChanged, pendingStripChanged, pendingRouteChanged;
+    private Rule? pendingBus, pendingStrip, pendingRoute;
+    private Rule? activeBus, activeStrip, activeRoute;
+    private readonly Dictionary<string, float> busBaseline = new(StringComparer.Ordinal);
+    private readonly Dictionary<string, bool> stripBaseline = new(StringComparer.Ordinal);
     private int micGeneration;
     private bool micMuted;
     public void Start()
@@ -97,7 +104,7 @@ public sealed class AutomationCoordinator(IProcessWatcher processes, IForeground
             {
                 await ApplyProfileWithDuckingAsync(id);
                 if (settings.Current.ShowOsd && profiles.Active is { } active)
-                    osd.Show("Profil : " + active.Name, active.Icon);
+                    osd.Show(string.Format(text.Culture, text.Get("Core_Profile"), active.Name), active.Icon);
             }
         }
         catch (OperationCanceledException) when (lifetime.IsCancellationRequested) { }
@@ -112,9 +119,12 @@ public sealed class AutomationCoordinator(IProcessWatcher processes, IForeground
     }
     private void Reconcile()
     {
-        if (mixer.State != MixerConnectionState.Connected || (pendingProfile is null && pendingMic is null)) return;
-        var decision = new RuleDecision(pendingProfile, pendingMic, pendingProfileCause, null);
+        if (mixer.State != MixerConnectionState.Connected || (pendingProfile is null && pendingMic is null
+            && !pendingBusChanged && !pendingStripChanged && !pendingRouteChanged)) return;
+        var decision = new RuleDecision(pendingProfile, pendingMic, pendingProfileCause, null,
+            pendingBusChanged, pendingBus, pendingStripChanged, pendingStrip, pendingRouteChanged, pendingRoute);
         (pendingProfile, pendingProfileCause, pendingMic) = (null, null, null);
+        (pendingBusChanged, pendingStripChanged, pendingRouteChanged) = (false, false, false);
         Apply(decision);
     }
     // N'attend pas la fin des fondus : la file reste libre pour les décisions suivantes, et un nouveau profil
@@ -126,8 +136,12 @@ public sealed class AutomationCoordinator(IProcessWatcher processes, IForeground
         {
             if (decision.ProfileId is not null) (pendingProfile, pendingProfileCause) = (decision.ProfileId, decision.ProfileCause);
             if (decision.MicMuted is not null) pendingMic = decision.MicMuted;
+            Hold(decision);
             return;
         }
+        ApplyBus(decision);
+        ApplyStrip(decision);
+        ApplyRoute(decision);
         Task? fade = null;
         if (decision.ProfileId is { } id)
         {
@@ -148,7 +162,7 @@ public sealed class AutomationCoordinator(IProcessWatcher processes, IForeground
         micGeneration++;
         micMuted = muted;
         mixer.SetFloat(VmParam.StripMute(index), VmParam.FromBool(muted));
-        if (settings.Current.ShowOsd) osd.Show(muted ? "Micro coupé" : "Micro activé", muted ? "" : "", muted);
+        if (settings.Current.ShowOsd) osd.Show(text.Get(muted ? "Core_MicMuted" : "Core_MicOn"), muted ? "\uF781" : "\uE720", muted);
     }
     private async Task CompleteProfileAsync(Task fade, string id, Rule? cause, int? micAfter)
     {
@@ -165,7 +179,9 @@ public sealed class AutomationCoordinator(IProcessWatcher processes, IForeground
                 mixer.SetFloat(VmParam.StripMute(index), VmParam.FromBool(micMuted));
         });
         if (settings.Current.ShowOsd && profiles.Active is { } active)
-            osd.Show("Profil : " + active.Name + (cause is null ? "" : " (" + cause.ProcessName + ")"), active.Icon);
+            osd.Show(cause is null
+                ? string.Format(text.Culture, text.Get("Core_Profile"), active.Name)
+                : string.Format(text.Culture, text.Get("Core_ProfileWithCause"), active.Name, cause.ProcessName), active.Icon);
     }
     public Task ApplyManualProfileAsync(string profileId)
     {
@@ -180,7 +196,8 @@ public sealed class AutomationCoordinator(IProcessWatcher processes, IForeground
                 if (fade.IsFaulted) await fade;
                 (pendingProfile, pendingProfileCause) = mixer.State == MixerConnectionState.Connected ? (null, null) : (profileId, (Rule?)null);
                 engine.SetBaselineProfile(profileId);
-                await settings.UpdateAsync(s => s with { LastProfileId = profileId }, lifetime.Token);
+                if (!await settings.UpdateAsync(s => s with { LastProfileId = profileId }, lifetime.Token))
+                    logger.LogWarning("Le dernier profil n'a pas pu être enregistré.");
                 started.TrySetResult(fade);
             }
             catch (Exception ex) { started.TrySetException(ex); }
@@ -188,6 +205,103 @@ public sealed class AutomationCoordinator(IProcessWatcher processes, IForeground
         return WaitManualAsync(started.Task);
     }
     private async Task WaitManualAsync(Task<Task> started) => await (await started.WaitAsync(lifetime.Token)).WaitAsync(lifetime.Token);
+    private void Hold(RuleDecision decision)
+    {
+        if (decision.BusGainChanged) (pendingBusChanged, pendingBus) = (true, decision.BusGainRule);
+        if (decision.StripMuteChanged) (pendingStripChanged, pendingStrip) = (true, decision.StripMuteRule);
+        if (decision.RouteChanged) (pendingRouteChanged, pendingRoute) = (true, decision.RouteRule);
+    }
+
+    private void ApplyBus(RuleDecision decision)
+    {
+        if (!decision.BusGainChanged) return;
+        var rule = decision.BusGainRule;
+        var previous = activeBus;
+        activeBus = rule;
+        if (rule is null)
+        {
+            RestoreBus(previous);
+            return;
+        }
+        var index = rule.BusIndex;
+        if (index < 0 || index >= mixer.Layout.BusCount) return;
+        var key = rule.Id;
+        if (!busBaseline.ContainsKey(key))
+            busBaseline[key] = index < mixer.Snapshot.Buses.Count ? mixer.Snapshot.Buses[index].Gain : 0f;
+        var gain = Math.Clamp(rule.GainDb, MixerLayout.MinGainDb, MixerLayout.MaxGainDb);
+        mixer.SetFloat(VmParam.BusGain(index), gain);
+        if (settings.Current.ShowOsd)
+            osd.Show(string.Format(text.Culture, text.Get("Core_BusGain"), mixer.Layout.BusNames[index], gain.ToString("0.0", text.Culture)), "\uE767");
+    }
+
+    private void RestoreBus(Rule? previous)
+    {
+        if (previous is null || !previous.RevertWhenInactive) return;
+        if (!busBaseline.Remove(previous.Id, out var gain)) return;
+        if (previous.BusIndex < 0 || previous.BusIndex >= mixer.Layout.BusCount) return;
+        mixer.SetFloat(VmParam.BusGain(previous.BusIndex), gain);
+    }
+
+    private void ApplyStrip(RuleDecision decision)
+    {
+        if (!decision.StripMuteChanged) return;
+        var rule = decision.StripMuteRule;
+        var previous = activeStrip;
+        activeStrip = rule;
+        if (rule is null)
+        {
+            RestoreStrip(previous);
+            return;
+        }
+        var index = rule.StripIndex;
+        if (index < 0 || index >= mixer.Layout.StripCount) return;
+        var key = rule.Id;
+        if (!stripBaseline.ContainsKey(key))
+            stripBaseline[key] = index < mixer.Snapshot.Strips.Count && mixer.Snapshot.Strips[index].Mute;
+        var muted = rule.MicMuted ?? true;
+        mixer.SetFloat(VmParam.StripMute(index), VmParam.FromBool(muted));
+        if (settings.Current.ShowOsd)
+            osd.Show(string.Format(text.Culture, text.Get(muted ? "Core_StripMuted" : "Core_StripOn"), index + 1), muted ? "\uE74F" : "\uE767");
+    }
+
+    private void RestoreStrip(Rule? previous)
+    {
+        if (previous is null || !previous.RevertWhenInactive) return;
+        if (!stripBaseline.Remove(previous.Id, out var muted)) return;
+        if (previous.StripIndex < 0 || previous.StripIndex >= mixer.Layout.StripCount) return;
+        mixer.SetFloat(VmParam.StripMute(previous.StripIndex), VmParam.FromBool(muted));
+    }
+
+    private void ApplyRoute(RuleDecision decision)
+    {
+        if (!decision.RouteChanged) return;
+        var rule = decision.RouteRule;
+        var previous = activeRoute;
+        activeRoute = rule;
+        if (rule is null)
+        {
+            if (previous?.RevertWhenInactive == true)
+                Route(previous.ProcessName, null);
+            return;
+        }
+        Route(rule.ProcessName, rule.OutputEndpointId);
+    }
+
+    private void Route(string processName, string? endpointId)
+    {
+        if (appRouter is null || !appRouter.CanRoute)
+        {
+            if (settings.Current.ShowOsd) osd.Show(text.Get("Core_RouteUnavailable"), "\uE7F4");
+            return;
+        }
+        var ok = appRouter.RouteProcess(processName, endpointId);
+        if (!settings.Current.ShowOsd) return;
+        var message = endpointId is null
+            ? string.Format(text.Culture, text.Get("Core_RouteDefault"), processName)
+            : string.Format(text.Culture, text.Get("Core_Routed"), processName, endpointId);
+        osd.Show(ok ? message : text.Get("Core_RouteUnavailable"), "\uE7F4");
+    }
+
     public void Dispose()
     {
         lock (lifecycle)
