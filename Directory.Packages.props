@@ -27,7 +27,7 @@
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="18.11.0" />
     <PackageVersion Include="xunit" Version="2.9.3" />
     <PackageVersion Include="xunit.runner.visualstudio" Version="3.1.4" />
-    <PackageVersion Include="coverlet.collector" Version="6.0.4" />
+    <PackageVersion Include="coverlet.collector" Version="10.1.0" />
     <!-- 7.x = dernière version sous licence Apache 2.0 (la 8.x est sous licence commerciale Xceed). -->
     <PackageVersion Include="FluentAssertions" Version="7.2.0" />
     <PackageVersion Include="FlaUI.UIA3" Version="5.0.0" />
