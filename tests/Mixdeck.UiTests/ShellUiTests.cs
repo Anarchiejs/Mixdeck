@@ -7,7 +7,7 @@ using FlaUI.UIA3;
 
 namespace Mixdeck.UiTests;
 
-/// <summary>N'est lancé que si MIXDECK_UI_TESTS=1 : il faut une session de bureau (la CI GitHub Windows en a une).</summary>
+/// <summary>N'est lancé que si MIXDECK_UI_TESTS=1. La CI ne lance pas ces tests : il faut un bureau interactif.</summary>
 public sealed class UiFactAttribute : FactAttribute
 {
     public UiFactAttribute()

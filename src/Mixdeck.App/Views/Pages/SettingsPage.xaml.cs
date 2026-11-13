@@ -45,7 +45,7 @@ public sealed partial class SettingsPage : Page
         if (e.PropertyName == nameof(MixerViewModel.Layout)) ViewModel.Refresh();
     }
     private void OnSettingsChanged(object? sender, AppSettings settings) => DispatcherQueue.TryEnqueue(ViewModel.RefreshHotkeyWarnings);
-    private async void OnWindowsAccent(object sender, RoutedEventArgs e) => await ViewModel.SetAccentAsync(null);
+    private void OnWindowsAccent(object sender, RoutedEventArgs e) => UiAsync.Run(() => ViewModel.SetAccentAsync(null));
     private async void OnCustomAccent(object sender, RoutedEventArgs e)
     {
         if (dialogOpen) return;
@@ -141,9 +141,10 @@ public sealed partial class SettingsPage : Page
         catch (Exception) { ViewModel.ReportError(Strings.Get("Settings_HotkeyOpenError")); }
         finally { dialogOpen = false; }
     }
-    private async void OnClearHotkey(object sender, RoutedEventArgs e)
+    private void OnClearHotkey(object sender, RoutedEventArgs e)
     {
-        if ((sender as FrameworkElement)?.DataContext is HotkeyRowViewModel row) await ViewModel.SaveHotkeyAsync(row, null);
+        if ((sender as FrameworkElement)?.DataContext is HotkeyRowViewModel row)
+            UiAsync.Run(() => ViewModel.SaveHotkeyAsync(row, null));
     }
     private async void OnVisibilityToggled(object sender, RoutedEventArgs e)
     {
